@@ -1,7 +1,8 @@
 import streamlit as st
+import textwrap
 
 # ============================================================
-# PAGE CONFIG
+# PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
@@ -11,34 +12,65 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
+# ============================================================
+# SAFE HTML RENDERER
+# ============================================================
+
+def html(content):
+    """
+    Safely render custom HTML without Markdown indentation
+    turning it into a code block.
+    """
+    st.markdown(
+        textwrap.dedent(content).strip(),
+        unsafe_allow_html=True
+    )
+
+
 # ============================================================
 # SESSION STATE
 # ============================================================
 
-if "role" not in st.session_state:
-    st.session_state.role = "Job Seeker"
+if "workspace" not in st.session_state:
+    st.session_state.workspace = "Job Seeker"
+
+if "job_seeker_page" not in st.session_state:
+    st.session_state.job_seeker_page = "Dashboard"
+
+if "recruiter_page" not in st.session_state:
+    st.session_state.recruiter_page = "Dashboard"
+
 
 # ============================================================
 # CUSTOM CSS
 # ============================================================
 
-st.markdown(
-    """
-    <style>
+html("""
+<style>
 
-    /* ---------- MAIN APP ---------- */
+    /* ========================================================
+       GLOBAL
+       ======================================================== */
 
     .stApp {
         background: #080d18;
+        color: #ffffff;
     }
 
     .main .block-container {
-        max-width: 1400px;
+        max-width: 1450px;
         padding-top: 2rem;
         padding-bottom: 4rem;
     }
 
-    /* ---------- SIDEBAR ---------- */
+    [data-testid="stHeader"] {
+        background: transparent;
+    }
+
+    /* ========================================================
+       SIDEBAR
+       ======================================================== */
 
     section[data-testid="stSidebar"] {
         background: #0b1220;
@@ -46,25 +78,31 @@ st.markdown(
     }
 
     section[data-testid="stSidebar"] .block-container {
-        padding-top: 2rem;
+        padding-top: 1.5rem;
+        padding-left: 1.2rem;
+        padding-right: 1.2rem;
     }
 
-    /* ---------- BRAND ---------- */
+    /* ========================================================
+       BRAND
+       ======================================================== */
 
     .brand-box {
         text-align: center;
-        padding: 10px 0 25px 0;
+        padding: 8px 0 22px 0;
     }
 
     .brand-icon {
         font-size: 42px;
-        margin-bottom: 5px;
+        line-height: 1;
+        margin-bottom: 10px;
     }
 
     .brand-name {
-        font-size: 25px;
-        font-weight: 800;
         color: #ffffff;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
     }
 
     .brand-name span {
@@ -72,71 +110,102 @@ st.markdown(
     }
 
     .brand-subtitle {
-        font-size: 12px;
         color: #7f8ba3;
-        margin-top: 5px;
+        font-size: 11px;
+        margin-top: 6px;
     }
 
-    /* ---------- HERO ---------- */
+    /* ========================================================
+       SIDEBAR LABELS
+       ======================================================== */
+
+    .sidebar-label {
+        color: #7f8ba3;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* ========================================================
+       HERO
+       ======================================================== */
 
     .hero-box {
-        background: linear-gradient(
-            135deg,
-            #121c31 0%,
-            #0d1627 100%
-        );
+        position: relative;
+        overflow: hidden;
+
+        background:
+            radial-gradient(
+                circle at 85% 15%,
+                rgba(139,124,255,0.16),
+                transparent 35%
+            ),
+            linear-gradient(
+                135deg,
+                #121c31 0%,
+                #0d1627 100%
+            );
 
         border: 1px solid #263550;
         border-radius: 24px;
 
-        padding: 45px;
+        padding: 48px;
 
         margin-bottom: 35px;
 
-        box-shadow: 0 15px 45px rgba(0,0,0,0.25);
+        box-shadow:
+            0 20px 60px rgba(0,0,0,0.28);
     }
 
     .hero-small {
-        color: #8b7cff;
-        font-size: 14px;
-        font-weight: 700;
+        color: #9b8cff;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
+        margin-bottom: 13px;
     }
 
     .hero-title {
         color: #ffffff;
         font-size: 48px;
-        font-weight: 800;
-        line-height: 1.15;
+        font-weight: 850;
+        line-height: 1.12;
+        letter-spacing: -1.5px;
     }
 
     .hero-gradient {
         background: linear-gradient(
             90deg,
-            #8b7cff,
+            #9b8cff,
             #38bdf8
         );
 
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .hero-text {
         color: #9aa7bd;
-        font-size: 17px;
+        font-size: 16px;
         line-height: 1.7;
         max-width: 850px;
         margin-top: 18px;
     }
 
-    /* ---------- SECTION ---------- */
+    /* ========================================================
+       SECTION TITLES
+       ======================================================== */
 
     .section-title {
         color: #ffffff;
         font-size: 27px;
-        font-weight: 750;
+        font-weight: 800;
+        letter-spacing: -0.5px;
         margin-top: 25px;
     }
 
@@ -147,67 +216,116 @@ st.markdown(
         margin-bottom: 22px;
     }
 
-    /* ---------- CARDS ---------- */
-
-    .feature-card {
-        background: #101929;
-        border: 1px solid #243149;
-        border-radius: 18px;
-
-        padding: 24px;
-
-        min-height: 155px;
-
-        margin-bottom: 18px;
-
-        transition: 0.2s;
-    }
-
-    .feature-icon {
-        font-size: 30px;
-        margin-bottom: 10px;
-    }
-
-    .feature-title {
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 7px;
-    }
-
-    .feature-description {
-        color: #8d9ab0;
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
-    /* ---------- METRIC CARDS ---------- */
+    /* ========================================================
+       METRIC CARDS
+       ======================================================== */
 
     .metric-card {
         background: #101929;
+
         border: 1px solid #243149;
         border-radius: 18px;
 
         padding: 22px;
 
-        text-align: center;
+        min-height: 115px;
 
-        margin-bottom: 20px;
+        text-align: left;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,0.12);
     }
 
     .metric-title {
         color: #8996ac;
         font-size: 13px;
+        font-weight: 600;
     }
 
     .metric-number {
         color: #ffffff;
-        font-size: 30px;
-        font-weight: 800;
+        font-size: 31px;
+        font-weight: 850;
+        margin-top: 6px;
+    }
+
+    .metric-change {
+        color: #6ee7b7;
+        font-size: 11px;
         margin-top: 5px;
     }
 
-    /* ---------- STATUS ---------- */
+    /* ========================================================
+       FEATURE CARDS
+       ======================================================== */
+
+    .feature-card {
+        background:
+            linear-gradient(
+                145deg,
+                #111c2d,
+                #0e1726
+            );
+
+        border: 1px solid #243149;
+        border-radius: 18px;
+
+        padding: 24px;
+
+        min-height: 175px;
+
+        margin-bottom: 18px;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .feature-icon {
+        font-size: 29px;
+        margin-bottom: 12px;
+    }
+
+    .feature-title {
+        color: #ffffff;
+        font-size: 17px;
+        font-weight: 750;
+        margin-bottom: 8px;
+    }
+
+    .feature-description {
+        color: #8d9ab0;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    /* ========================================================
+       INFO CARDS
+       ======================================================== */
+
+    .info-card {
+        background: #101929;
+        border: 1px solid #243149;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+
+    .info-title {
+        color: #ffffff;
+        font-size: 19px;
+        font-weight: 750;
+        margin-bottom: 8px;
+    }
+
+    .info-text {
+        color: #8996ac;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* ========================================================
+       STATUS
+       ======================================================== */
 
     .status-box {
         background: #0d2a20;
@@ -216,32 +334,83 @@ st.markdown(
         padding: 10px;
         text-align: center;
         color: #6ee7b7;
-        font-size: 13px;
+        font-size: 12px;
+        font-weight: 600;
     }
 
-    /* ---------- FOOTER ---------- */
+    /* ========================================================
+       BADGES
+       ======================================================== */
+
+    .badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #1b2740;
+        color: #aeb9cc;
+        margin-right: 5px;
+    }
+
+    /* ========================================================
+       FOOTER
+       ======================================================== */
 
     .footer {
         border-top: 1px solid #202c42;
-        margin-top: 50px;
+        margin-top: 55px;
         padding-top: 25px;
+        padding-bottom: 20px;
+
         text-align: center;
+
         color: #66738a;
-        font-size: 13px;
+        font-size: 12px;
+        line-height: 1.8;
     }
 
-    /* ---------- BUTTON ---------- */
+    /* ========================================================
+       BUTTONS
+       ======================================================== */
 
     .stButton > button {
         border-radius: 10px;
         min-height: 42px;
-        font-weight: 650;
+        font-weight: 700;
     }
 
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    /* ========================================================
+       FILE UPLOADER
+       ======================================================== */
+
+    [data-testid="stFileUploader"] {
+        background: #0e1726;
+        border-radius: 14px;
+    }
+
+    /* ========================================================
+       MOBILE
+       ======================================================== */
+
+    @media (max-width: 768px) {
+
+        .hero-box {
+            padding: 30px;
+        }
+
+        .hero-title {
+            font-size: 34px;
+        }
+
+        .hero-text {
+            font-size: 14px;
+        }
+    }
+
+</style>
+""")
+
 
 # ============================================================
 # SIDEBAR
@@ -249,311 +418,397 @@ st.markdown(
 
 with st.sidebar:
 
-    st.markdown(
-        """
-        <div class="brand-box">
-            <div class="brand-icon">🎯</div>
+    html("""
+    <div class="brand-box">
+        <div class="brand-icon">🎯</div>
 
-            <div class="brand-name">
-                Career<span>Lens</span> AI
-            </div>
-
-            <div class="brand-subtitle">
-                Career Intelligence Platform
-            </div>
+        <div class="brand-name">
+            Career<span>Lens</span> AI
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="brand-subtitle">
+            Career Intelligence Platform
+        </div>
+    </div>
+    """)
 
     st.divider()
 
-    st.caption("WORKSPACE")
+    html("""
+    <div class="sidebar-label">
+        Workspace
+    </div>
+    """)
 
-    role = st.radio(
-        "Choose workspace",
+    workspace = st.radio(
+        "Workspace",
         ["Job Seeker", "Recruiter"],
-        index=0 if st.session_state.role == "Job Seeker" else 1,
+        index=(
+            0
+            if st.session_state.workspace == "Job Seeker"
+            else 1
+        ),
         label_visibility="collapsed"
     )
 
-    st.session_state.role = role
+    st.session_state.workspace = workspace
 
     st.divider()
 
-    if role == "Job Seeker":
+    # --------------------------------------------------------
+    # JOB SEEKER NAVIGATION
+    # --------------------------------------------------------
 
-        st.markdown("### 👨‍💻 Job Seeker")
+    if workspace == "Job Seeker":
 
-        page = st.radio(
+        html("""
+        <div class="sidebar-label">
+            👨‍💻 Job Seeker
+        </div>
+        """)
+
+        job_seeker_pages = [
+            "Dashboard",
+            "Resume Analyzer",
+            "Job Analyzer",
+            "Job Fraud Detection",
+            "Job Matching",
+            "Skill Gap Analysis",
+            "Career Roadmap",
+            "Application Tracker",
+            "AI Career Assistant"
+        ]
+
+        job_seeker_page = st.radio(
             "Job Seeker Navigation",
-            [
-                "Dashboard",
-                "Resume Analyzer",
-                "Job Analyzer",
-                "Job Fraud Detection",
-                "Job Matching",
-                "Skill Gap Analysis",
-                "Career Roadmap",
-                "Application Tracker",
-                "AI Career Assistant"
-            ],
+            job_seeker_pages,
+            index=job_seeker_pages.index(
+                st.session_state.job_seeker_page
+            ),
             label_visibility="collapsed"
         )
+
+        st.session_state.job_seeker_page = job_seeker_page
+
+        current_page = job_seeker_page
+
+    # --------------------------------------------------------
+    # RECRUITER NAVIGATION
+    # --------------------------------------------------------
 
     else:
 
-        st.markdown("### 🧑‍💼 Recruiter")
+        html("""
+        <div class="sidebar-label">
+            🧑‍💼 Recruiter
+        </div>
+        """)
 
-        page = st.radio(
+        recruiter_pages = [
+            "Dashboard",
+            "Create Job",
+            "Bulk Resume Upload",
+            "Candidate Ranking",
+            "Candidate Comparison",
+            "Shortlist",
+            "Recruitment Pipeline",
+            "Hiring Analytics",
+            "AI Recruiter Assistant"
+        ]
+
+        recruiter_page = st.radio(
             "Recruiter Navigation",
-            [
-                "Dashboard",
-                "Create Job",
-                "Bulk Resume Upload",
-                "Candidate Ranking",
-                "Candidate Comparison",
-                "Shortlist",
-                "Recruitment Pipeline",
-                "Hiring Analytics",
-                "AI Recruiter Assistant"
-            ],
+            recruiter_pages,
+            index=recruiter_pages.index(
+                st.session_state.recruiter_page
+            ),
             label_visibility="collapsed"
         )
 
+        st.session_state.recruiter_page = recruiter_page
+
+        current_page = recruiter_page
+
     st.divider()
 
-    st.markdown(
-        """
-        <div class="status-box">
-            ● System Online
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="status-box">
+        ● System Online
+    </div>
+    """)
 
     st.write("")
-    st.caption("CareerLens AI")
-    st.caption("AI • ML • NLP")
+
+    html("""
+    <div style="text-align:center;">
+        <div style="color:#8996ac;font-size:12px;">
+            CareerLens AI
+        </div>
+
+        <div style="color:#5f6c82;font-size:10px;margin-top:4px;">
+            AI • ML • NLP
+        </div>
+    </div>
+    """)
+
 
 # ============================================================
 # JOB SEEKER DASHBOARD
 # ============================================================
 
-if role == "Job Seeker" and page == "Dashboard":
+if workspace == "Job Seeker" and current_page == "Dashboard":
 
-    st.markdown(
-        """
-        <div class="hero-box">
+    html("""
+    <div class="hero-box">
 
-            <div class="hero-small">
-                AI Career Intelligence
-            </div>
-
-            <div class="hero-title">
-                Understand Your Career.
-                <br>
-                <span class="hero-gradient">
-                    Build Your Future.
-                </span>
-            </div>
-
-            <div class="hero-text">
-                CareerLens AI analyzes your resume, evaluates
-                opportunities, detects potential job risks,
-                identifies skill gaps and helps you build a
-                personalized career roadmap.
-            </div>
-
+        <div class="hero-small">
+            AI Career Intelligence
         </div>
-        """,
-        unsafe_allow_html=True
-    )
 
-    st.markdown(
-        '<div class="section-title">Career Overview</div>',
-        unsafe_allow_html=True
-    )
+        <div class="hero-title">
+            Understand Your Career.
+            <br>
+            <span class="hero-gradient">
+                Build Your Future.
+            </span>
+        </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Your career intelligence at a glance.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+        <div class="hero-text">
+            CareerLens AI analyzes your resume, evaluates
+            job opportunities, detects potential job risks,
+            identifies skill gaps and helps you build a
+            personalized career roadmap.
+        </div>
+
+    </div>
+    """)
+
+    html("""
+    <div class="section-title">
+        Career Overview
+    </div>
+
+    <div class="section-subtitle">
+        Your career intelligence at a glance.
+    </div>
+    """)
 
     c1, c2, c3, c4 = st.columns(4)
 
-    metrics = [
-        ("Resume Score", "—"),
-        ("Career Readiness", "—"),
-        ("Job Matches", "0"),
-        ("Applications", "0")
+    metric_data = [
+        ("Resume Score", "—", "Upload a resume"),
+        ("Career Readiness", "—", "Complete your profile"),
+        ("Job Matches", "0", "No matches yet"),
+        ("Applications", "0", "Start applying")
     ]
 
-    for col, (title, value) in zip(
+    for col, (title, number, change) in zip(
         [c1, c2, c3, c4],
-        metrics
+        metric_data
     ):
 
         with col:
 
-            st.markdown(
-                f"""
-                <div class="metric-card">
+            html(f"""
+            <div class="metric-card">
 
-                    <div class="metric-title">
-                        {title}
-                    </div>
-
-                    <div class="metric-number">
-                        {value}
-                    </div>
-
+                <div class="metric-title">
+                    {title}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
 
-    st.markdown(
-        '<div class="section-title">Career Intelligence</div>',
-        unsafe_allow_html=True
-    )
+                <div class="metric-number">
+                    {number}
+                </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'AI-powered tools designed to help you make better career decisions.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+                <div class="metric-change">
+                    {change}
+                </div>
+
+            </div>
+            """)
+
+    html("""
+    <div class="section-title">
+        Career Intelligence
+    </div>
+
+    <div class="section-subtitle">
+        AI-powered tools designed to help you make better
+        career decisions.
+    </div>
+    """)
 
     features = [
         (
             "📄",
             "Resume Intelligence",
-            "Analyze your resume and extract skills, education, projects and experience."
+            "Analyze your resume and extract skills, education, "
+            "projects and experience."
         ),
         (
             "🔎",
             "Job Intelligence",
-            "Understand job descriptions and identify important requirements."
+            "Understand job descriptions and identify important "
+            "requirements."
         ),
         (
             "🛡️",
             "Job Fraud Detection",
-            "Identify suspicious signals and potential risks in job postings."
+            "Identify suspicious signals and potential risks "
+            "in job postings."
         ),
         (
             "🎯",
             "AI Job Matching",
-            "Measure how closely your profile matches a specific opportunity."
+            "Measure how closely your profile matches a "
+            "specific opportunity."
         ),
         (
             "🧩",
             "Skill Gap Analysis",
-            "Discover the skills you need for your target career."
+            "Discover the skills you need for your target "
+            "career."
         ),
         (
             "🗺️",
             "Career Roadmap",
-            "Create a personalized learning and career development path."
+            "Create a personalized learning and career "
+            "development path."
         )
     ]
 
     cols = st.columns(3)
 
-    for i, (icon, title, description) in enumerate(features):
+    for index, (icon, title, description) in enumerate(features):
 
-        with cols[i % 3]:
+        with cols[index % 3]:
 
-            st.markdown(
-                f"""
-                <div class="feature-card">
+            html(f"""
+            <div class="feature-card">
 
-                    <div class="feature-icon">
-                        {icon}
-                    </div>
-
-                    <div class="feature-title">
-                        {title}
-                    </div>
-
-                    <div class="feature-description">
-                        {description}
-                    </div>
-
+                <div class="feature-icon">
+                    {icon}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
+
+                <div class="feature-title">
+                    {title}
+                </div>
+
+                <div class="feature-description">
+                    {description}
+                </div>
+
+            </div>
+            """)
+
 
 # ============================================================
 # RESUME ANALYZER
 # ============================================================
 
-elif role == "Job Seeker" and page == "Resume Analyzer":
+elif workspace == "Job Seeker" and current_page == "Resume Analyzer":
 
-    st.markdown(
-        '<div class="section-title">📄 Resume Analyzer</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        📄 Resume Analyzer
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Upload your resume and let CareerLens AI analyze it.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Upload your resume and let CareerLens AI analyze
+        your professional profile.
+    </div>
+    """)
 
     resume = st.file_uploader(
-        "Upload Resume",
-        type=["pdf", "docx"]
+        "Upload your resume",
+        type=["pdf", "docx"],
+        help="Supported formats: PDF and DOCX"
     )
 
     if resume:
 
-        st.success(f"Resume uploaded: {resume.name}")
+        st.success(
+            f"Resume uploaded successfully: {resume.name}"
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            html("""
+            <div class="info-card">
+
+                <div class="info-title">
+                    Resume Intelligence
+                </div>
+
+                <div class="info-text">
+                    The AI engine will extract your skills,
+                    education, projects, experience and
+                    other important information.
+                </div>
+
+            </div>
+            """)
+
+        with col2:
+
+            html("""
+            <div class="info-card">
+
+                <div class="info-title">
+                    Career Score
+                </div>
+
+                <div class="info-text">
+                    Your resume will receive an AI-powered
+                    score based on structure, skills,
+                    relevance and completeness.
+                </div>
+
+            </div>
+            """)
 
         if st.button(
-            "Analyze Resume",
+            "🚀 Analyze Resume",
             use_container_width=True
         ):
 
             st.info(
-                "Resume parsing and AI scoring will be connected next."
+                "Resume AI engine will be connected in the "
+                "next development phase."
             )
+
 
 # ============================================================
 # JOB ANALYZER
 # ============================================================
 
-elif role == "Job Seeker" and page == "Job Analyzer":
+elif workspace == "Job Seeker" and current_page == "Job Analyzer":
 
-    st.markdown(
-        '<div class="section-title">🔎 Job Analyzer</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🔎 Job Analyzer
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Analyze a job opportunity before applying.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Analyze a job opportunity before applying.
+    </div>
+    """)
 
     job_url = st.text_input(
         "Job URL",
-        placeholder="Paste job URL here..."
+        placeholder="https://example.com/job"
     )
 
     job_description = st.text_area(
         "Job Description",
-        height=250,
+        height=260,
         placeholder="Paste the complete job description here..."
     )
 
     if st.button(
-        "Analyze Job",
+        "🔍 Analyze Job",
         use_container_width=True
     ):
 
@@ -566,148 +821,156 @@ elif role == "Job Seeker" and page == "Job Analyzer":
         else:
 
             st.info(
-                "Job analysis engine will be connected next."
+                "Job intelligence engine will be connected "
+                "in the next development phase."
             )
 
+
 # ============================================================
-# FRAUD DETECTION
+# JOB FRAUD DETECTION
 # ============================================================
 
-elif role == "Job Seeker" and page == "Job Fraud Detection":
+elif workspace == "Job Seeker" and current_page == "Job Fraud Detection":
 
-    st.markdown(
-        '<div class="section-title">🛡️ Job Fraud Detection</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🛡️ Job Fraud Detection
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Check a job posting for suspicious characteristics.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Check a job posting for suspicious characteristics
+        before you apply.
+    </div>
+    """)
 
-    text = st.text_area(
+    job_text = st.text_area(
         "Job Posting",
-        height=280,
-        placeholder="Paste job posting here..."
+        height=300,
+        placeholder="Paste the job posting here..."
     )
 
     if st.button(
-        "Check Job Safety",
+        "🛡️ Check Job Safety",
         use_container_width=True
     ):
 
-        if not text.strip():
+        if not job_text.strip():
 
-            st.warning("Please enter a job posting.")
+            st.warning(
+                "Please paste a job posting first."
+            )
 
         else:
 
             st.info(
-                "Fraud detection model will be connected next."
+                "Fraud detection ML model will be connected "
+                "in the next development phase."
             )
+
 
 # ============================================================
 # JOB MATCHING
 # ============================================================
 
-elif role == "Job Seeker" and page == "Job Matching":
+elif workspace == "Job Seeker" and current_page == "Job Matching":
 
-    st.markdown(
-        '<div class="section-title">🎯 AI Job Matching</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🎯 AI Job Matching
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Compare your profile with a job opportunity.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Compare your resume and skills against a job
+        opportunity.
+    </div>
+    """)
 
-    job = st.text_area(
+    job_description = st.text_area(
         "Job Description",
-        height=280
+        height=300,
+        placeholder="Paste job requirements here..."
     )
 
     if st.button(
-        "Calculate Match",
+        "🎯 Calculate Match",
         use_container_width=True
     ):
 
-        if not job.strip():
+        if not job_description.strip():
 
-            st.warning("Please enter a job description.")
+            st.warning(
+                "Please enter a job description."
+            )
 
         else:
 
             st.info(
-                "Semantic matching model will be connected next."
+                "Semantic job matching model will be "
+                "connected in the next development phase."
             )
 
+
 # ============================================================
-# SKILL GAP
+# SKILL GAP ANALYSIS
 # ============================================================
 
-elif role == "Job Seeker" and page == "Skill Gap Analysis":
+elif workspace == "Job Seeker" and current_page == "Skill Gap Analysis":
 
-    st.markdown(
-        '<div class="section-title">🧩 Skill Gap Analysis</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🧩 Skill Gap Analysis
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Understand what skills you need to reach your target role.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Discover what skills you need to reach your target role.
+    </div>
+    """)
 
-    current = st.text_area(
+    current_skills = st.text_area(
         "Your Current Skills",
         placeholder="Python, SQL, HTML, Machine Learning..."
     )
 
-    target = st.text_area(
+    target_skills = st.text_area(
         "Target Job Requirements",
-        placeholder="Python, SQL, NLP, Docker..."
+        placeholder="Python, SQL, NLP, Docker, AWS..."
     )
 
     if st.button(
-        "Analyze Skill Gap",
+        "🧩 Analyze Skill Gap",
         use_container_width=True
     ):
 
-        if not current or not target:
+        if not current_skills or not target_skills:
 
             st.warning(
-                "Enter both your current skills and target requirements."
+                "Please enter both current skills and target "
+                "requirements."
             )
 
         else:
 
             st.info(
-                "Skill gap engine will be connected next."
+                "Skill gap analysis model will be connected "
+                "in the next development phase."
             )
+
 
 # ============================================================
 # CAREER ROADMAP
 # ============================================================
 
-elif role == "Job Seeker" and page == "Career Roadmap":
+elif workspace == "Job Seeker" and current_page == "Career Roadmap":
 
-    st.markdown(
-        '<div class="section-title">🗺️ Career Roadmap</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🗺️ Career Roadmap
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Your personalized path toward your target career.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Build a personalized path toward your target career.
+    </div>
+    """)
 
     target_role = st.text_input(
         "Target Career",
@@ -715,76 +978,123 @@ elif role == "Job Seeker" and page == "Career Roadmap":
     )
 
     if st.button(
-        "Generate Roadmap",
+        "🗺️ Generate Roadmap",
         use_container_width=True
     ):
 
         if not target_role:
 
-            st.warning("Enter a target career.")
+            st.warning(
+                "Please enter your target career."
+            )
 
         else:
 
             steps = [
-                "Build foundational knowledge",
-                "Develop required technical skills",
-                "Complete practical projects",
-                "Build your portfolio",
-                "Prepare for technical interviews",
-                "Apply for relevant positions"
+                (
+                    "01",
+                    "Build Foundations",
+                    "Strengthen programming, mathematics and "
+                    "computer science fundamentals."
+                ),
+                (
+                    "02",
+                    "Develop Technical Skills",
+                    "Learn the technologies and frameworks "
+                    "required for your target role."
+                ),
+                (
+                    "03",
+                    "Build Projects",
+                    "Create real-world projects that demonstrate "
+                    "your practical abilities."
+                ),
+                (
+                    "04",
+                    "Build Your Portfolio",
+                    "Publish projects and organize your GitHub "
+                    "and professional profile."
+                ),
+                (
+                    "05",
+                    "Prepare for Interviews",
+                    "Practice technical, behavioral and "
+                    "role-specific interviews."
+                ),
+                (
+                    "06",
+                    "Apply Strategically",
+                    "Target relevant opportunities based on "
+                    "your skills and career goals."
+                )
             ]
 
-            for i, step in enumerate(steps, 1):
+            for number, title, description in steps:
 
-                st.markdown(
-                    f"""
-                    <div class="feature-card">
+                html(f"""
+                <div class="feature-card">
 
-                        <div class="feature-title">
-                            Step {i}
-                        </div>
-
-                        <div class="feature-description">
-                            {step}
-                        </div>
-
+                    <div class="feature-title">
+                        {number} • {title}
                     </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+
+                    <div class="feature-description">
+                        {description}
+                    </div>
+
+                </div>
+                """)
+
 
 # ============================================================
 # APPLICATION TRACKER
 # ============================================================
 
-elif role == "Job Seeker" and page == "Application Tracker":
+elif workspace == "Job Seeker" and current_page == "Application Tracker":
 
-    st.markdown(
-        '<div class="section-title">📋 Application Tracker</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        📋 Application Tracker
+    </div>
 
-    st.info(
-        "Your job applications will appear here once the database is connected."
-    )
+    <div class="section-subtitle">
+        Track your job applications from application to offer.
+    </div>
+    """)
+
+    html("""
+    <div class="info-card">
+
+        <div class="info-title">
+            No Applications Yet
+        </div>
+
+        <div class="info-text">
+            Once you start applying to jobs, your applications,
+            interview status and application history will appear
+            here.
+        </div>
+
+    </div>
+    """)
+
 
 # ============================================================
-# CAREER ASSISTANT
+# AI CAREER ASSISTANT
 # ============================================================
 
-elif role == "Job Seeker" and page == "AI Career Assistant":
+elif workspace == "Job Seeker" and current_page == "AI Career Assistant":
 
-    st.markdown(
-        '<div class="section-title">🤖 AI Career Assistant</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🤖 AI Career Assistant
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Ask questions about your career, skills and job search.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Ask questions about careers, skills, resumes and
+        job searching.
+    </div>
+    """)
 
     question = st.chat_input(
         "Ask CareerLens AI..."
@@ -797,160 +1107,167 @@ elif role == "Job Seeker" and page == "AI Career Assistant":
 
         with st.chat_message("assistant"):
             st.write(
-                "The AI career assistant will be connected to "
-                "the language model in the next phase."
+                "The AI Career Assistant will be connected "
+                "to the language model in the AI integration "
+                "phase."
             )
+
 
 # ============================================================
 # RECRUITER DASHBOARD
 # ============================================================
 
-elif role == "Recruiter" and page == "Dashboard":
+elif workspace == "Recruiter" and current_page == "Dashboard":
 
-    st.markdown(
-        """
-        <div class="hero-box">
+    html("""
+    <div class="hero-box">
 
-            <div class="hero-small">
-                AI Recruitment Intelligence
-            </div>
-
-            <div class="hero-title">
-                Recruit Smarter.
-                <br>
-                <span class="hero-gradient">
-                    Hire Better.
-                </span>
-            </div>
-
-            <div class="hero-text">
-                Upload hundreds of resumes, let CareerLens AI
-                analyze candidate profiles, compare skills and
-                experience, and create an intelligent shortlist.
-            </div>
-
+        <div class="hero-small">
+            AI Recruitment Intelligence
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="hero-title">
+            Recruit Smarter.
+            <br>
+            <span class="hero-gradient">
+                Hire Better.
+            </span>
+        </div>
+
+        <div class="hero-text">
+            Upload hundreds of resumes, analyze candidate
+            profiles, compare skills and experience, and
+            create an intelligent shortlist using AI.
+        </div>
+
+    </div>
+    """)
 
     c1, c2, c3, c4 = st.columns(4)
 
-    metrics = [
-        ("Active Jobs", "0"),
-        ("Candidates", "0"),
-        ("Shortlisted", "0"),
-        ("Interviews", "0")
+    recruiter_metrics = [
+        ("Active Jobs", "0", "Create your first job"),
+        ("Candidates", "0", "Upload resumes"),
+        ("Shortlisted", "0", "AI ranking pending"),
+        ("Interviews", "0", "No interviews yet")
     ]
 
-    for col, (title, value) in zip(
+    for col, (title, number, change) in zip(
         [c1, c2, c3, c4],
-        metrics
+        recruiter_metrics
     ):
 
         with col:
 
-            st.markdown(
-                f"""
-                <div class="metric-card">
+            html(f"""
+            <div class="metric-card">
 
-                    <div class="metric-title">
-                        {title}
-                    </div>
-
-                    <div class="metric-number">
-                        {value}
-                    </div>
-
+                <div class="metric-title">
+                    {title}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
 
-    st.markdown(
-        '<div class="section-title">Recruitment Intelligence</div>',
-        unsafe_allow_html=True
-    )
+                <div class="metric-number">
+                    {number}
+                </div>
+
+                <div class="metric-change">
+                    {change}
+                </div>
+
+            </div>
+            """)
+
+    html("""
+    <div class="section-title">
+        Recruitment Intelligence
+    </div>
+
+    <div class="section-subtitle">
+        Powerful tools for modern AI-assisted recruitment.
+    </div>
+    """)
 
     recruiter_features = [
         (
             "📋",
             "Create Job",
-            "Define skills, experience and hiring requirements."
+            "Define the role, skills, experience and hiring "
+            "requirements."
         ),
         (
             "📂",
             "Bulk Resume Upload",
-            "Upload 100 or more resumes at once."
+            "Upload 100 or even hundreds of candidate resumes "
+            "at once."
         ),
         (
             "🧠",
             "AI Candidate Ranking",
-            "Rank candidates according to the selected job."
+            "Automatically score candidates against the "
+            "selected job."
         ),
         (
             "🔍",
-            "Smart Filters",
-            "Filter candidates by skills and experience."
+            "Smart Filtering",
+            "Filter candidates according to skills, "
+            "experience and match score."
         ),
         (
             "⚖️",
             "Candidate Comparison",
-            "Compare shortlisted candidates side by side."
+            "Compare selected candidates side by side."
         ),
         (
             "📊",
             "Hiring Analytics",
-            "Track your recruitment pipeline and performance."
+            "Understand recruitment performance through "
+            "data and visual analytics."
         )
     ]
 
     cols = st.columns(3)
 
-    for i, (icon, title, description) in enumerate(
+    for index, (icon, title, description) in enumerate(
         recruiter_features
     ):
 
-        with cols[i % 3]:
+        with cols[index % 3]:
 
-            st.markdown(
-                f"""
-                <div class="feature-card">
+            html(f"""
+            <div class="feature-card">
 
-                    <div class="feature-icon">
-                        {icon}
-                    </div>
-
-                    <div class="feature-title">
-                        {title}
-                    </div>
-
-                    <div class="feature-description">
-                        {description}
-                    </div>
-
+                <div class="feature-icon">
+                    {icon}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
+
+                <div class="feature-title">
+                    {title}
+                </div>
+
+                <div class="feature-description">
+                    {description}
+                </div>
+
+            </div>
+            """)
+
 
 # ============================================================
 # CREATE JOB
 # ============================================================
 
-elif role == "Recruiter" and page == "Create Job":
+elif workspace == "Recruiter" and current_page == "Create Job":
 
-    st.markdown(
-        '<div class="section-title">📋 Create Job</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        📋 Create Job
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Define the job requirements used by the AI ranking engine.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Define the requirements that the AI candidate ranking
+        engine will use.
+    </div>
+    """)
 
     job_title = st.text_input(
         "Job Title",
@@ -958,10 +1275,11 @@ elif role == "Recruiter" and page == "Create Job":
     )
 
     company = st.text_input(
-        "Company"
+        "Company",
+        placeholder="Company name"
     )
 
-    skills = st.text_area(
+    required_skills = st.text_area(
         "Required Skills",
         placeholder="Python, SQL, Machine Learning, NLP..."
     )
@@ -973,19 +1291,21 @@ elif role == "Recruiter" and page == "Create Job":
         value=0
     )
 
-    description = st.text_area(
+    job_description = st.text_area(
         "Job Description",
         height=250
     )
 
     if st.button(
-        "Create Job",
+        "📋 Create Job",
         use_container_width=True
     ):
 
         if not job_title:
 
-            st.warning("Job title is required.")
+            st.warning(
+                "Job title is required."
+            )
 
         else:
 
@@ -993,23 +1313,23 @@ elif role == "Recruiter" and page == "Create Job":
                 f"Job '{job_title}' created successfully."
             )
 
+
 # ============================================================
 # BULK RESUME UPLOAD
 # ============================================================
 
-elif role == "Recruiter" and page == "Bulk Resume Upload":
+elif workspace == "Recruiter" and current_page == "Bulk Resume Upload":
 
-    st.markdown(
-        '<div class="section-title">📂 Bulk Resume Upload</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        📂 Bulk Resume Upload
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Upload multiple candidate resumes for AI analysis.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Upload multiple candidate resumes for AI-powered
+        processing.
+    </div>
+    """)
 
     resumes = st.file_uploader(
         "Candidate Resumes",
@@ -1020,38 +1340,39 @@ elif role == "Recruiter" and page == "Bulk Resume Upload":
     if resumes:
 
         st.success(
-            f"{len(resumes)} resume(s) uploaded."
+            f"{len(resumes)} resume(s) uploaded successfully."
         )
 
         if st.button(
-            "Analyze Candidates",
+            "🧠 Analyze All Candidates",
             use_container_width=True
         ):
 
             st.info(
-                "Resume parsing engine will be connected next."
+                "Bulk resume parsing and candidate analysis "
+                "will be connected in the next phase."
             )
+
 
 # ============================================================
 # CANDIDATE RANKING
 # ============================================================
 
-elif role == "Recruiter" and page == "Candidate Ranking":
+elif workspace == "Recruiter" and current_page == "Candidate Ranking":
 
-    st.markdown(
-        '<div class="section-title">🧠 AI Candidate Ranking</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🧠 AI Candidate Ranking
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Choose exactly how many top candidates you want to review.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Recruiter-controlled ranking — choose exactly how
+        many candidates you want to shortlist.
+    </div>
+    """)
 
     top_n = st.selectbox(
-        "Show Top Candidates",
+        "How many candidates do you want?",
         [
             5,
             10,
@@ -1059,134 +1380,227 @@ elif role == "Recruiter" and page == "Candidate Ranking":
             30,
             50,
             100
-        ]
+        ],
+        index=2
     )
 
     min_score = st.slider(
-        "Minimum Match Score",
-        0,
-        100,
-        60
+        "Minimum AI Match Score",
+        min_value=0,
+        max_value=100,
+        value=60
     )
 
-    st.info(
-        f"Configuration: Top {top_n} candidates • "
-        f"Minimum score {min_score}%"
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        html(f"""
+        <div class="info-card">
+
+            <div class="info-title">
+                Selection
+            </div>
+
+            <div class="info-text">
+                Top <b>{top_n}</b> candidates
+                will be displayed.
+            </div>
+
+        </div>
+        """)
+
+    with col2:
+
+        html(f"""
+        <div class="info-card">
+
+            <div class="info-title">
+                Match Threshold
+            </div>
+
+            <div class="info-text">
+                Candidates below <b>{min_score}%</b>
+                can be excluded.
+            </div>
+
+        </div>
+        """)
 
     if st.button(
-        "Rank Candidates",
+        "🚀 Rank Candidates",
         use_container_width=True
     ):
 
         st.info(
-            "AI ranking engine will be connected after "
-            "the resume parser and matching model."
+            f"AI will rank the candidate pool and return "
+            f"the Top {top_n} candidates."
         )
+
 
 # ============================================================
 # CANDIDATE COMPARISON
 # ============================================================
 
-elif role == "Recruiter" and page == "Candidate Comparison":
+elif workspace == "Recruiter" and current_page == "Candidate Comparison":
 
-    st.markdown(
-        '<div class="section-title">⚖️ Candidate Comparison</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        ⚖️ Candidate Comparison
+    </div>
 
-    st.info(
-        "Select candidates from the ranking results to compare them here."
-    )
+    <div class="section-subtitle">
+        Compare shortlisted candidates before making a
+        recruitment decision.
+    </div>
+    """)
+
+    html("""
+    <div class="info-card">
+
+        <div class="info-title">
+            Candidate Comparison
+        </div>
+
+        <div class="info-text">
+            AI-ranked candidates will appear here with their
+            skills, experience, education, match score and
+            strengths.
+        </div>
+
+    </div>
+    """)
+
 
 # ============================================================
 # SHORTLIST
 # ============================================================
 
-elif role == "Recruiter" and page == "Shortlist":
+elif workspace == "Recruiter" and current_page == "Shortlist":
 
-    st.markdown(
-        '<div class="section-title">⭐ Shortlisted Candidates</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        ⭐ Shortlisted Candidates
+    </div>
 
-    st.info(
-        "Recruiter-selected candidates will appear here."
-    )
+    <div class="section-subtitle">
+        Manage candidates selected for the next stage.
+    </div>
+    """)
+
+    html("""
+    <div class="info-card">
+
+        <div class="info-title">
+            Shortlist
+        </div>
+
+        <div class="info-text">
+            Candidates selected from the AI ranking system
+            will appear here.
+        </div>
+
+    </div>
+    """)
+
 
 # ============================================================
-# PIPELINE
+# RECRUITMENT PIPELINE
 # ============================================================
 
-elif role == "Recruiter" and page == "Recruitment Pipeline":
+elif workspace == "Recruiter" and current_page == "Recruitment Pipeline":
 
-    st.markdown(
-        '<div class="section-title">📊 Recruitment Pipeline</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        📊 Recruitment Pipeline
+    </div>
 
-    columns = st.columns(4)
+    <div class="section-subtitle">
+        Track candidates through the recruitment process.
+    </div>
+    """)
+
+    pipeline = st.columns(4)
 
     stages = [
-        ("Applied", 0),
-        ("Shortlisted", 0),
-        ("Interview", 0),
-        ("Selected", 0)
+        ("Applied", "0"),
+        ("Shortlisted", "0"),
+        ("Interview", "0"),
+        ("Selected", "0")
     ]
 
-    for col, (stage, count) in zip(columns, stages):
+    for col, (stage, count) in zip(
+        pipeline,
+        stages
+    ):
 
         with col:
 
-            st.markdown(
-                f"""
-                <div class="metric-card">
+            html(f"""
+            <div class="metric-card">
 
-                    <div class="metric-title">
-                        {stage}
-                    </div>
-
-                    <div class="metric-number">
-                        {count}
-                    </div>
-
+                <div class="metric-title">
+                    {stage}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
+
+                <div class="metric-number">
+                    {count}
+                </div>
+
+            </div>
+            """)
+
 
 # ============================================================
-# ANALYTICS
+# HIRING ANALYTICS
 # ============================================================
 
-elif role == "Recruiter" and page == "Hiring Analytics":
+elif workspace == "Recruiter" and current_page == "Hiring Analytics":
 
-    st.markdown(
-        '<div class="section-title">📈 Hiring Analytics</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        📈 Hiring Analytics
+    </div>
 
-    st.info(
-        "Analytics will be populated from the recruitment database."
-    )
+    <div class="section-subtitle">
+        Recruitment insights and performance metrics.
+    </div>
+    """)
+
+    html("""
+    <div class="info-card">
+
+        <div class="info-title">
+            Analytics Dashboard
+        </div>
+
+        <div class="info-text">
+            Once candidate and recruitment data is connected,
+            this dashboard will display hiring trends,
+            candidate quality, shortlist rates and
+            recruitment performance.
+        </div>
+
+    </div>
+    """)
+
 
 # ============================================================
-# RECRUITER AI
+# AI RECRUITER ASSISTANT
 # ============================================================
 
-elif role == "Recruiter" and page == "AI Recruiter Assistant":
+elif workspace == "Recruiter" and current_page == "AI Recruiter Assistant":
 
-    st.markdown(
-        '<div class="section-title">🤖 AI Recruiter Assistant</div>',
-        unsafe_allow_html=True
-    )
+    html("""
+    <div class="section-title">
+        🤖 AI Recruiter Assistant
+    </div>
 
-    st.markdown(
-        '<div class="section-subtitle">'
-        'Ask questions about your candidate pool.'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    <div class="section-subtitle">
+        Ask questions about your candidate pool and
+        recruitment process.
+    </div>
+    """)
 
     question = st.chat_input(
         "Example: Show me the strongest Python candidates..."
@@ -1199,25 +1613,25 @@ elif role == "Recruiter" and page == "AI Recruiter Assistant":
 
         with st.chat_message("assistant"):
             st.write(
-                "The AI recruiter assistant will be connected "
+                "The AI Recruiter Assistant will be connected "
                 "to the candidate database and ranking engine."
             )
+
 
 # ============================================================
 # FOOTER
 # ============================================================
 
-st.markdown(
-    """
-    <div class="footer">
+html("""
+<div class="footer">
 
-        🎯 <b>CareerLens AI</b>
-        <br><br>
-        AI-Powered Career Intelligence & Recruitment Platform
-        <br>
-        Final Year Project • AI • ML • NLP
+    🎯 <b>CareerLens AI</b>
+    <br><br>
 
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    AI-Powered Career Intelligence & Recruitment Platform
+    <br>
+
+    Final Year Project • AI • ML • NLP
+
+</div>
+""")
