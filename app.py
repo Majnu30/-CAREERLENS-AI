@@ -1,415 +1,1345 @@
+import io
+import re
+import html as html_lib
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 import streamlit as st
-import textwrap
+import plotly.express as px
+
+from pypdf import PdfReader
+from docx import Document
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 # ============================================================
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # ============================================================
 
 st.set_page_config(
     page_title="CareerLens AI",
     page_icon="🎯",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
-
-
-# ============================================================
-# SAFE HTML RENDERER
-# ============================================================
-
-def html(content):
-    """
-    Safely render custom HTML without Markdown indentation
-    turning it into a code block.
-    """
-    st.markdown(
-        textwrap.dedent(content).strip(),
-        unsafe_allow_html=True
-    )
 
 
 # ============================================================
 # SESSION STATE
 # ============================================================
 
-if "workspace" not in st.session_state:
-    st.session_state.workspace = "Job Seeker"
+DEFAULTS = {
+    "workspace": "Job Seeker",
+    "seeker_page": "Dashboard",
+    "recruiter_page": "Dashboard",
+    "resume_profile": None,
+    "job_analysis": None,
+    "job_text": "",
+    "job_title": "",
+    "candidate_df": None,
+    "shortlisted": [],
+    "applications": [],
+    "created_jobs": [],
+    "selected_candidates": [],
+}
 
-if "job_seeker_page" not in st.session_state:
-    st.session_state.job_seeker_page = "Dashboard"
-
-if "recruiter_page" not in st.session_state:
-    st.session_state.recruiter_page = "Dashboard"
+for key, value in DEFAULTS.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 
 # ============================================================
-# CUSTOM CSS
+# SAFE HTML HELPER
 # ============================================================
 
-html("""
+def render_html(content: str):
+    """
+    Prevents Streamlit from treating indented HTML as Markdown
+    code blocks.
+    """
+    st.markdown(
+        content.strip(),
+        unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# SVG LOGO
+# ============================================================
+
+def logo_svg(size=48):
+    return f"""
+    <svg width="{size}" height="{size}" viewBox="0 0 100 100"
+         xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8B7CFF"/>
+                <stop offset="100%" stop-color="#38BDF8"/>
+            </linearGradient>
+        </defs>
+
+        <rect x="4" y="4" width="92" height="92" rx="26"
+              fill="#111C30"
+              stroke="#293B5C"
+              stroke-width="3"/>
+
+        <circle cx="50" cy="50" r="27"
+                fill="none"
+                stroke="url(#cg)"
+                stroke-width="7"/>
+
+        <path d="M50 24 L50 76"
+              stroke="url(#cg)"
+              stroke-width="6"
+              stroke-linecap="round"/>
+
+        <path d="M24 50 L76 50"
+              stroke="url(#cg)"
+              stroke-width="6"
+              stroke-linecap="round"/>
+
+        <circle cx="50" cy="50" r="7"
+                fill="#FFFFFF"/>
+    </svg>
+    """
+
+
+# ============================================================
+# GLOBAL CSS
+# ============================================================
+
+render_html("""
 <style>
 
-    /* ========================================================
-       GLOBAL
-       ======================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    .stApp {
-        background: #080d18;
-        color: #ffffff;
-    }
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
 
-    .main .block-container {
-        max-width: 1450px;
-        padding-top: 2rem;
-        padding-bottom: 4rem;
-    }
+.stApp {
+    background:
+        radial-gradient(
+            circle at 80% 0%,
+            rgba(99, 102, 241, 0.08),
+            transparent 30%
+        ),
+        #070B14;
+    color: #F8FAFC;
+}
 
-    [data-testid="stHeader"] {
-        background: transparent;
-    }
+.main .block-container {
+    max-width: 1500px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+}
 
-    /* ========================================================
-       SIDEBAR
-       ======================================================== */
+[data-testid="stHeader"] {
+    background: transparent;
+}
 
-    section[data-testid="stSidebar"] {
-        background: #0b1220;
-        border-right: 1px solid #202c42;
-    }
+section[data-testid="stSidebar"] {
+    background:
+        linear-gradient(
+            180deg,
+            #0B1220 0%,
+            #080E19 100%
+        );
+    border-right: 1px solid #1D2A40;
+}
 
-    section[data-testid="stSidebar"] .block-container {
-        padding-top: 1.5rem;
-        padding-left: 1.2rem;
-        padding-right: 1.2rem;
-    }
+section[data-testid="stSidebar"] .block-container {
+    padding: 1.5rem 1.1rem;
+}
 
-    /* ========================================================
-       BRAND
-       ======================================================== */
+hr {
+    border-color: #1D2A40 !important;
+}
 
-    .brand-box {
-        text-align: center;
-        padding: 8px 0 22px 0;
-    }
+.brand {
+    text-align: center;
+    padding: 8px 0 20px;
+}
 
-    .brand-icon {
-        font-size: 42px;
-        line-height: 1;
-        margin-bottom: 10px;
-    }
+.brand-logo {
+    margin-bottom: 12px;
+}
 
-    .brand-name {
-        color: #ffffff;
-        font-size: 24px;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-    }
+.brand-name {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+}
 
-    .brand-name span {
-        color: #8b7cff;
-    }
+.brand-name span {
+    background:
+        linear-gradient(
+            90deg,
+            #9B8CFF,
+            #38BDF8
+        );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-    .brand-subtitle {
-        color: #7f8ba3;
-        font-size: 11px;
-        margin-top: 6px;
-    }
+.brand-subtitle {
+    color: #75839B;
+    font-size: 10px;
+    margin-top: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
 
-    /* ========================================================
-       SIDEBAR LABELS
-       ======================================================== */
+.sidebar-heading {
+    color: #64748B;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    margin: 12px 0 8px;
+}
 
-    .sidebar-label {
-        color: #7f8ba3;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }
+.hero {
+    position: relative;
+    overflow: hidden;
 
-    /* ========================================================
-       HERO
-       ======================================================== */
+    background:
+        radial-gradient(
+            circle at 90% 15%,
+            rgba(139,124,255,.18),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 70% 100%,
+            rgba(56,189,248,.08),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #111C30,
+            #0B1322
+        );
 
-    .hero-box {
-        position: relative;
-        overflow: hidden;
+    border: 1px solid #253652;
+    border-radius: 26px;
 
-        background:
-            radial-gradient(
-                circle at 85% 15%,
-                rgba(139,124,255,0.16),
-                transparent 35%
-            ),
-            linear-gradient(
-                135deg,
-                #121c31 0%,
-                #0d1627 100%
-            );
+    padding: 50px;
 
-        border: 1px solid #263550;
-        border-radius: 24px;
+    margin-bottom: 30px;
 
-        padding: 48px;
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.28);
+}
 
-        margin-bottom: 35px;
+.hero-kicker {
+    color: #A79BFF;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 13px;
+}
 
-        box-shadow:
-            0 20px 60px rgba(0,0,0,0.28);
-    }
+.hero-title {
+    font-size: 48px;
+    line-height: 1.08;
+    font-weight: 850;
+    letter-spacing: -2px;
+}
 
-    .hero-small {
-        color: #9b8cff;
-        font-size: 13px;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        margin-bottom: 13px;
+.gradient {
+    background:
+        linear-gradient(
+            90deg,
+            #A99BFF,
+            #38BDF8
+        );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-description {
+    color: #94A3B8;
+    max-width: 850px;
+    font-size: 15px;
+    line-height: 1.8;
+    margin-top: 20px;
+}
+
+.section-title {
+    color: #F8FAFC;
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -.6px;
+    margin-top: 25px;
+}
+
+.section-subtitle {
+    color: #718096;
+    font-size: 13px;
+    margin: 5px 0 20px;
+}
+
+.metric {
+    background:
+        linear-gradient(
+            145deg,
+            #111C2D,
+            #0D1625
+        );
+
+    border: 1px solid #23334D;
+    border-radius: 18px;
+
+    padding: 22px;
+
+    min-height: 125px;
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.16);
+}
+
+.metric-label {
+    color: #7E8CA4;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.metric-value {
+    color: #F8FAFC;
+    font-size: 31px;
+    font-weight: 850;
+    margin-top: 8px;
+}
+
+.metric-note {
+    color: #5EE7B7;
+    font-size: 10px;
+    margin-top: 6px;
+}
+
+.card {
+    background:
+        linear-gradient(
+            145deg,
+            #101A2B,
+            #0D1625
+        );
+
+    border: 1px solid #22324B;
+    border-radius: 18px;
+
+    padding: 23px;
+
+    margin-bottom: 18px;
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.12);
+}
+
+.card-title {
+    color: #F8FAFC;
+    font-size: 17px;
+    font-weight: 750;
+    margin-bottom: 7px;
+}
+
+.card-text {
+    color: #8C9AB0;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.feature {
+    background:
+        linear-gradient(
+            145deg,
+            #101A2B,
+            #0C1422
+        );
+
+    border: 1px solid #22324B;
+    border-radius: 18px;
+
+    padding: 24px;
+
+    min-height: 180px;
+
+    margin-bottom: 18px;
+
+    transition: all .2s ease;
+}
+
+.feature:hover {
+    border-color: #52658B;
+    transform: translateY(-2px);
+}
+
+.feature-icon {
+    font-size: 30px;
+    margin-bottom: 13px;
+}
+
+.feature-title {
+    font-size: 16px;
+    font-weight: 750;
+    color: #F8FAFC;
+    margin-bottom: 8px;
+}
+
+.feature-text {
+    color: #8491A7;
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 99px;
+    background: #19253A;
+    color: #AAB7CA;
+    font-size: 10px;
+    font-weight: 700;
+    margin: 3px;
+}
+
+.badge-good {
+    background: #0D3024;
+    color: #5EE7B7;
+}
+
+.badge-warn {
+    background: #332A0D;
+    color: #FACC15;
+}
+
+.badge-danger {
+    background: #35151A;
+    color: #FB7185;
+}
+
+.status-online {
+    text-align: center;
+    color: #5EE7B7;
+    background: #0B261D;
+    border: 1px solid #194F3C;
+    border-radius: 10px;
+    padding: 9px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.score-circle {
+    text-align: center;
+    background:
+        radial-gradient(
+            circle,
+            #18253B,
+            #0E1727
+        );
+    border: 1px solid #314563;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    padding-top: 38px;
+    margin: auto;
+}
+
+.score-number {
+    color: #F8FAFC;
+    font-size: 38px;
+    font-weight: 850;
+}
+
+.score-label {
+    color: #8290A5;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.warning-box {
+    background: #281F0A;
+    border: 1px solid #625019;
+    border-radius: 14px;
+    padding: 17px;
+    color: #FDE68A;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.success-box {
+    background: #09241B;
+    border: 1px solid #1A5841;
+    border-radius: 14px;
+    padding: 17px;
+    color: #6EE7B7;
+    font-size: 13px;
+}
+
+.danger-box {
+    background: #2A1015;
+    border: 1px solid #692530;
+    border-radius: 14px;
+    padding: 17px;
+    color: #FDA4AF;
+    font-size: 13px;
+}
+
+.info-box {
+    background: #101C30;
+    border: 1px solid #243A5B;
+    border-radius: 14px;
+    padding: 17px;
+    color: #93C5FD;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.footer {
+    border-top: 1px solid #1C293D;
+    margin-top: 60px;
+    padding: 25px 0;
+    text-align: center;
+    color: #59677D;
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+.stButton > button {
+    border-radius: 11px;
+    min-height: 43px;
+    font-weight: 700;
+    border: 1px solid #2A3B59;
+    background: #111C2E;
+    color: #F8FAFC;
+}
+
+.stButton > button:hover {
+    border-color: #8B7CFF;
+    color: #FFFFFF;
+}
+
+[data-testid="stFileUploader"] {
+    background: #0D1727;
+    border: 1px dashed #314563;
+    border-radius: 14px;
+}
+
+input, textarea {
+    border-radius: 10px !important;
+}
+
+@media (max-width: 800px) {
+    .hero {
+        padding: 30px;
     }
 
     .hero-title {
-        color: #ffffff;
-        font-size: 48px;
-        font-weight: 850;
-        line-height: 1.12;
-        letter-spacing: -1.5px;
+        font-size: 34px;
     }
-
-    .hero-gradient {
-        background: linear-gradient(
-            90deg,
-            #9b8cff,
-            #38bdf8
-        );
-
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .hero-text {
-        color: #9aa7bd;
-        font-size: 16px;
-        line-height: 1.7;
-        max-width: 850px;
-        margin-top: 18px;
-    }
-
-    /* ========================================================
-       SECTION TITLES
-       ======================================================== */
-
-    .section-title {
-        color: #ffffff;
-        font-size: 27px;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-        margin-top: 25px;
-    }
-
-    .section-subtitle {
-        color: #8996ac;
-        font-size: 14px;
-        margin-top: 5px;
-        margin-bottom: 22px;
-    }
-
-    /* ========================================================
-       METRIC CARDS
-       ======================================================== */
-
-    .metric-card {
-        background: #101929;
-
-        border: 1px solid #243149;
-        border-radius: 18px;
-
-        padding: 22px;
-
-        min-height: 115px;
-
-        text-align: left;
-
-        box-shadow:
-            0 10px 30px rgba(0,0,0,0.12);
-    }
-
-    .metric-title {
-        color: #8996ac;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .metric-number {
-        color: #ffffff;
-        font-size: 31px;
-        font-weight: 850;
-        margin-top: 6px;
-    }
-
-    .metric-change {
-        color: #6ee7b7;
-        font-size: 11px;
-        margin-top: 5px;
-    }
-
-    /* ========================================================
-       FEATURE CARDS
-       ======================================================== */
-
-    .feature-card {
-        background:
-            linear-gradient(
-                145deg,
-                #111c2d,
-                #0e1726
-            );
-
-        border: 1px solid #243149;
-        border-radius: 18px;
-
-        padding: 24px;
-
-        min-height: 175px;
-
-        margin-bottom: 18px;
-
-        box-shadow:
-            0 10px 30px rgba(0,0,0,0.12);
-    }
-
-    .feature-icon {
-        font-size: 29px;
-        margin-bottom: 12px;
-    }
-
-    .feature-title {
-        color: #ffffff;
-        font-size: 17px;
-        font-weight: 750;
-        margin-bottom: 8px;
-    }
-
-    .feature-description {
-        color: #8d9ab0;
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-    /* ========================================================
-       INFO CARDS
-       ======================================================== */
-
-    .info-card {
-        background: #101929;
-        border: 1px solid #243149;
-        border-radius: 18px;
-        padding: 25px;
-        margin-bottom: 20px;
-    }
-
-    .info-title {
-        color: #ffffff;
-        font-size: 19px;
-        font-weight: 750;
-        margin-bottom: 8px;
-    }
-
-    .info-text {
-        color: #8996ac;
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-    /* ========================================================
-       STATUS
-       ======================================================== */
-
-    .status-box {
-        background: #0d2a20;
-        border: 1px solid #1c5943;
-        border-radius: 10px;
-        padding: 10px;
-        text-align: center;
-        color: #6ee7b7;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    /* ========================================================
-       BADGES
-       ======================================================== */
-
-    .badge {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        background: #1b2740;
-        color: #aeb9cc;
-        margin-right: 5px;
-    }
-
-    /* ========================================================
-       FOOTER
-       ======================================================== */
-
-    .footer {
-        border-top: 1px solid #202c42;
-        margin-top: 55px;
-        padding-top: 25px;
-        padding-bottom: 20px;
-
-        text-align: center;
-
-        color: #66738a;
-        font-size: 12px;
-        line-height: 1.8;
-    }
-
-    /* ========================================================
-       BUTTONS
-       ======================================================== */
-
-    .stButton > button {
-        border-radius: 10px;
-        min-height: 42px;
-        font-weight: 700;
-    }
-
-    /* ========================================================
-       FILE UPLOADER
-       ======================================================== */
-
-    [data-testid="stFileUploader"] {
-        background: #0e1726;
-        border-radius: 14px;
-    }
-
-    /* ========================================================
-       MOBILE
-       ======================================================== */
-
-    @media (max-width: 768px) {
-
-        .hero-box {
-            padding: 30px;
-        }
-
-        .hero-title {
-            font-size: 34px;
-        }
-
-        .hero-text {
-            font-size: 14px;
-        }
-    }
+}
 
 </style>
 """)
+
+
+# ============================================================
+# DATA / NLP ENGINE
+# ============================================================
+
+SKILL_LIBRARY = {
+    "Python": ["python"],
+    "Java": ["java"],
+    "C": [r"\bc\b"],
+    "C++": ["c++", "cpp"],
+    "JavaScript": ["javascript", "js"],
+    "TypeScript": ["typescript"],
+    "HTML": ["html"],
+    "CSS": ["css"],
+    "React": ["react", "reactjs"],
+    "Node.js": ["node.js", "nodejs"],
+    "SQL": ["sql", "mysql", "postgresql", "postgres"],
+    "MongoDB": ["mongodb", "mongo db"],
+    "Git": ["git", "github", "gitlab"],
+    "Docker": ["docker", "containerization"],
+    "Kubernetes": ["kubernetes", "k8s"],
+    "AWS": ["aws", "amazon web services"],
+    "Azure": ["azure"],
+    "GCP": ["google cloud", "gcp"],
+    "Machine Learning": [
+        "machine learning",
+        "machine-learning"
+    ],
+    "Deep Learning": [
+        "deep learning",
+        "deep-learning"
+    ],
+    "Artificial Intelligence": [
+        "artificial intelligence",
+        "artificial intelligence"
+    ],
+    "NLP": [
+        "natural language processing",
+        "nlp"
+    ],
+    "Computer Vision": [
+        "computer vision",
+        "opencv"
+    ],
+    "TensorFlow": ["tensorflow"],
+    "PyTorch": ["pytorch"],
+    "Scikit-learn": [
+        "scikit-learn",
+        "sklearn"
+    ],
+    "Pandas": ["pandas"],
+    "NumPy": ["numpy"],
+    "Power BI": ["power bi"],
+    "Tableau": ["tableau"],
+    "Excel": ["excel", "microsoft excel"],
+    "Figma": ["figma"],
+    "UI/UX": ["ui/ux", "user experience"],
+    "REST API": [
+        "rest api",
+        "restful api"
+    ],
+    "FastAPI": ["fastapi"],
+    "Flask": ["flask"],
+    "Django": ["django"],
+    "Spring Boot": ["spring boot"],
+    "Data Analysis": [
+        "data analysis",
+        "data analytics"
+    ],
+    "Data Science": ["data science"],
+    "Statistics": [
+        "statistics",
+        "statistical analysis"
+    ],
+    "Agile": ["agile", "scrum"],
+    "Communication": ["communication"],
+    "Leadership": ["leadership"],
+    "Problem Solving": [
+        "problem solving",
+        "problem-solving"
+    ],
+}
+
+
+def normalize_text(text):
+    if not text:
+        return ""
+
+    text = text.replace("\x00", " ")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def extract_pdf_text(file_bytes):
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes))
+        pages = []
+
+        for page in reader.pages:
+            text = page.extract_text() or ""
+            pages.append(text)
+
+        return normalize_text("\n".join(pages))
+
+    except Exception as exc:
+        return f"[PDF extraction error: {exc}]"
+
+
+def extract_docx_text(file_bytes):
+    try:
+        document = Document(io.BytesIO(file_bytes))
+
+        parts = []
+
+        for paragraph in document.paragraphs:
+            if paragraph.text:
+                parts.append(paragraph.text)
+
+        for table in document.tables:
+            for row in table.rows:
+                parts.append(
+                    " ".join(
+                        cell.text
+                        for cell in row.cells
+                    )
+                )
+
+        return normalize_text("\n".join(parts))
+
+    except Exception as exc:
+        return f"[DOCX extraction error: {exc}]"
+
+
+def extract_text_from_file(uploaded_file):
+    if uploaded_file is None:
+        return ""
+
+    suffix = Path(uploaded_file.name).suffix.lower()
+    data = uploaded_file.getvalue()
+
+    if suffix == ".pdf":
+        return extract_pdf_text(data)
+
+    if suffix == ".docx":
+        return extract_docx_text(data)
+
+    if suffix == ".txt":
+        try:
+            return normalize_text(
+                data.decode(
+                    "utf-8",
+                    errors="ignore"
+                )
+            )
+        except Exception:
+            return ""
+
+    return ""
+
+
+def extract_skills(text):
+    text_lower = text.lower()
+    found = []
+
+    for skill, patterns in SKILL_LIBRARY.items():
+
+        for pattern in patterns:
+
+            try:
+                if re.search(
+                    pattern,
+                    text_lower,
+                    flags=re.IGNORECASE
+                ):
+                    found.append(skill)
+                    break
+
+            except re.error:
+                if pattern.lower() in text_lower:
+                    found.append(skill)
+                    break
+
+    return sorted(
+        set(found),
+        key=lambda x: x.lower()
+    )
+
+
+def extract_email(text):
+    match = re.search(
+        r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+        text
+    )
+
+    return match.group(0) if match else ""
+
+
+def extract_phone(text):
+    match = re.search(
+        r"(?:\+?\d[\d\s().-]{7,}\d)",
+        text
+    )
+
+    return match.group(0).strip() if match else ""
+
+
+def extract_experience_years(text):
+    patterns = [
+        r"(\d+(?:\.\d+)?)\+?\s*(?:years|year)\s+(?:of\s+)?experience",
+        r"experience\s*[:\-]?\s*(\d+(?:\.\d+)?)\+?\s*(?:years|year)",
+    ]
+
+    values = []
+
+    for pattern in patterns:
+        matches = re.findall(
+            pattern,
+            text,
+            flags=re.IGNORECASE
+        )
+
+        for value in matches:
+            try:
+                values.append(float(value))
+            except ValueError:
+                pass
+
+    return max(values) if values else 0.0
+
+
+def extract_education(text):
+    education_keywords = [
+        "b.tech",
+        "btech",
+        "b.e.",
+        "be ",
+        "bachelor",
+        "m.tech",
+        "mtech",
+        "master",
+        "mca",
+        "mba",
+        "phd",
+        "computer science",
+        "information technology",
+        "engineering",
+    ]
+
+    lower = text.lower()
+
+    return [
+        keyword
+        for keyword in education_keywords
+        if keyword in lower
+    ]
+
+
+def section_presence(text):
+    lower = text.lower()
+
+    sections = {
+        "summary": [
+            "summary",
+            "profile",
+            "objective"
+        ],
+        "experience": [
+            "experience",
+            "employment",
+            "work history"
+        ],
+        "education": [
+            "education",
+            "academic"
+        ],
+        "skills": [
+            "skills",
+            "technical skills",
+            "technologies"
+        ],
+        "projects": [
+            "projects",
+            "project experience"
+        ],
+        "certifications": [
+            "certification",
+            "certifications"
+        ],
+    }
+
+    result = {}
+
+    for name, keywords in sections.items():
+        result[name] = any(
+            keyword in lower
+            for keyword in keywords
+        )
+
+    return result
+
+
+def calculate_resume_score(text, skills):
+    if not text:
+        return 0
+
+    sections = section_presence(text)
+
+    score = 0
+
+    # Contact information
+    if extract_email(text):
+        score += 10
+
+    if extract_phone(text):
+        score += 5
+
+    # Skills
+    score += min(
+        len(skills) * 2,
+        25
+    )
+
+    # Sections
+    for value in sections.values():
+        if value:
+            score += 5
+
+    # Experience
+    if extract_experience_years(text) > 0:
+        score += 5
+
+    # Reasonable content length
+    word_count = len(text.split())
+
+    if word_count >= 250:
+        score += 5
+
+    if word_count >= 500:
+        score += 5
+
+    return int(
+        min(score, 100)
+    )
+
+
+def analyze_resume(file_name, text):
+    skills = extract_skills(text)
+
+    sections = section_presence(text)
+
+    score = calculate_resume_score(
+        text,
+        skills
+    )
+
+    return {
+        "name": Path(file_name).stem.replace(
+            "_",
+            " "
+        ),
+        "file_name": file_name,
+        "text": text,
+        "skills": skills,
+        "email": extract_email(text),
+        "phone": extract_phone(text),
+        "experience_years": extract_experience_years(text),
+        "education": extract_education(text),
+        "sections": sections,
+        "score": score,
+        "word_count": len(text.split()),
+    }
+
+
+# ============================================================
+# JOB MATCHING ENGINE
+# ============================================================
+
+def calculate_text_similarity(text_a, text_b):
+
+    if not text_a.strip() or not text_b.strip():
+        return 0.0
+
+    try:
+
+        vectorizer = TfidfVectorizer(
+            stop_words="english",
+            ngram_range=(1, 2),
+            max_features=7000,
+        )
+
+        matrix = vectorizer.fit_transform(
+            [text_a, text_b]
+        )
+
+        similarity = cosine_similarity(
+            matrix[0:1],
+            matrix[1:2]
+        )[0][0]
+
+        return float(
+            max(
+                0,
+                min(
+                    similarity * 100,
+                    100
+                )
+            )
+        )
+
+    except Exception:
+        return 0.0
+
+
+def skill_match(resume_skills, job_text):
+
+    job_skills = extract_skills(
+        job_text
+    )
+
+    resume_set = set(
+        skill.lower()
+        for skill in resume_skills
+    )
+
+    job_set = set(
+        skill.lower()
+        for skill in job_skills
+    )
+
+    if not job_set:
+        return 0.0, [], []
+
+    matched = sorted(
+        resume_set.intersection(job_set)
+    )
+
+    missing = sorted(
+        job_set.difference(resume_set)
+    )
+
+    percentage = (
+        len(matched) /
+        len(job_set)
+    ) * 100
+
+    return (
+        percentage,
+        matched,
+        missing
+    )
+
+
+def calculate_match(resume_text, job_text):
+
+    resume_skills = extract_skills(
+        resume_text
+    )
+
+    text_score = calculate_text_similarity(
+        resume_text,
+        job_text
+    )
+
+    skill_score, matched, missing = skill_match(
+        resume_skills,
+        job_text
+    )
+
+    # Weighted NLP score
+    final_score = (
+        text_score * 0.55
+        +
+        skill_score * 0.45
+    )
+
+    return {
+        "match_score": round(
+            final_score,
+            1
+        ),
+        "text_similarity": round(
+            text_score,
+            1
+        ),
+        "skill_match": round(
+            skill_score,
+            1
+        ),
+        "matched_skills": matched,
+        "missing_skills": missing,
+    }
+
+
+# ============================================================
+# FRAUD DETECTION ENGINE
+# ============================================================
+
+FRAUD_RULES = [
+    (
+        "payment",
+        [
+            "pay a fee",
+            "registration fee",
+            "processing fee",
+            "pay money",
+            "deposit money",
+            "security deposit",
+            "training fee",
+        ],
+        25,
+        "The posting asks the applicant for money."
+    ),
+    (
+        "financial",
+        [
+            "bank account",
+            "bank details",
+            "credit card",
+            "debit card",
+            "otp",
+            "one time password",
+        ],
+        20,
+        "The posting requests sensitive financial information."
+    ),
+    (
+        "crypto",
+        [
+            "bitcoin",
+            "cryptocurrency",
+            "crypto payment",
+            "usdt",
+            "ethereum",
+        ],
+        20,
+        "The posting contains cryptocurrency-related payment signals."
+    ),
+    (
+        "gift_card",
+        [
+            "gift card",
+            "gift cards",
+            "itunes card",
+            "google play card",
+        ],
+        20,
+        "The posting mentions gift-card transactions."
+    ),
+    (
+        "urgency",
+        [
+            "act immediately",
+            "urgent hiring",
+            "limited slots",
+            "apply immediately",
+            "respond immediately",
+        ],
+        10,
+        "The posting uses strong urgency language."
+    ),
+    (
+        "messaging",
+        [
+            "telegram",
+            "whatsapp",
+            "signal app",
+            "contact me on",
+        ],
+        10,
+        "The recruitment process relies heavily on external messaging."
+    ),
+    (
+        "unrealistic",
+        [
+            "earn $5000 per week",
+            "earn 10000 per week",
+            "guaranteed income",
+            "guaranteed salary",
+            "no experience needed",
+            "easy money",
+        ],
+        15,
+        "The posting contains potentially unrealistic employment claims."
+    ),
+]
+
+
+def fraud_detection(text):
+
+    lower = text.lower()
+
+    score = 0
+    signals = []
+
+    for (
+        category,
+        keywords,
+        points,
+        reason
+    ) in FRAUD_RULES:
+
+        matched = [
+            keyword
+            for keyword in keywords
+            if keyword in lower
+        ]
+
+        if matched:
+
+            score += points
+
+            signals.append({
+                "category": category,
+                "matched": matched,
+                "reason": reason,
+                "points": points,
+            })
+
+    # Generic email warning
+    emails = re.findall(
+        r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+        text
+    )
+
+    for email in emails:
+
+        free_domains = [
+            "gmail.com",
+            "yahoo.com",
+            "hotmail.com",
+            "outlook.com",
+        ]
+
+        if any(
+            domain in email.lower()
+            for domain in free_domains
+        ):
+
+            score += 8
+
+            signals.append({
+                "category": "email",
+                "matched": [email],
+                "reason": (
+                    "The recruiter appears to use a free email "
+                    "domain rather than a company domain."
+                ),
+                "points": 8,
+            })
+
+            break
+
+    score = min(
+        score,
+        100
+    )
+
+    if score >= 60:
+        level = "HIGH RISK"
+
+    elif score >= 30:
+        level = "MEDIUM RISK"
+
+    else:
+        level = "LOW RISK"
+
+    return {
+        "score": score,
+        "level": level,
+        "signals": signals,
+    }
+
+
+# ============================================================
+# CANDIDATE RANKING
+# ============================================================
+
+def rank_candidates(
+    candidate_profiles,
+    job_text,
+    top_n
+):
+
+    rows = []
+
+    for candidate in candidate_profiles:
+
+        match = calculate_match(
+            candidate["text"],
+            job_text
+        )
+
+        final_score = (
+            match["match_score"] * 0.65
+            +
+            candidate["score"] * 0.20
+            +
+            min(
+                candidate["experience_years"] * 3,
+                15
+            )
+        )
+
+        rows.append({
+            "Candidate": candidate["name"],
+            "Resume Score": candidate["score"],
+            "Match Score": match["match_score"],
+            "Skill Match": match["skill_match"],
+            "Experience": candidate["experience_years"],
+            "Skills": ", ".join(
+                candidate["skills"]
+            ),
+            "Matched Skills": ", ".join(
+                match["matched_skills"]
+            ),
+            "Missing Skills": ", ".join(
+                match["missing_skills"]
+            ),
+            "Final Score": round(
+                final_score,
+                1
+            ),
+            "Email": candidate["email"],
+            "File": candidate["file_name"],
+        })
+
+    dataframe = pd.DataFrame(rows)
+
+    if dataframe.empty:
+        return dataframe
+
+    dataframe = dataframe.sort_values(
+        "Final Score",
+        ascending=False
+    ).reset_index(
+        drop=True
+    )
+
+    dataframe.insert(
+        0,
+        "Rank",
+        range(
+            1,
+            len(dataframe) + 1
+        )
+    )
+
+    dataframe["Decision"] = np.where(
+        dataframe["Rank"] <= top_n,
+        "SHORTLIST",
+        "REVIEW"
+    )
+
+    return dataframe
+
+
+# ============================================================
+# HELPER UI FUNCTIONS
+# ============================================================
+
+def metric_card(label, value, note=""):
+    return f"""
+    <div class="metric">
+        <div class="metric-label">{label}</div>
+        <div class="metric-value">{value}</div>
+        <div class="metric-note">{note}</div>
+    </div>
+    """
+
+
+def feature_card(icon, title, description):
+    return f"""
+    <div class="feature">
+        <div class="feature-icon">{icon}</div>
+        <div class="feature-title">{title}</div>
+        <div class="feature-text">{description}</div>
+    </div>
+    """
+
+
+def badge(text, style=""):
+    safe = html_lib.escape(str(text))
+    return (
+        f'<span class="badge {style}">{safe}</span>'
+    )
+
+
+def score_color_class(score):
+    if score >= 75:
+        return "good"
+    if score >= 50:
+        return "warn"
+    return "danger"
 
 
 # ============================================================
@@ -418,56 +1348,56 @@ html("""
 
 with st.sidebar:
 
-    html("""
-    <div class="brand-box">
-        <div class="brand-icon">🎯</div>
+    render_html(
+        f"""
+        <div class="brand">
+            <div class="brand-logo">
+                {logo_svg(54)}
+            </div>
 
-        <div class="brand-name">
-            Career<span>Lens</span> AI
-        </div>
+            <div class="brand-name">
+                Career<span>Lens</span> AI
+            </div>
 
-        <div class="brand-subtitle">
-            Career Intelligence Platform
+            <div class="brand-subtitle">
+                Career Intelligence Platform
+            </div>
         </div>
-    </div>
-    """)
+        """
+    )
 
     st.divider()
 
-    html("""
-    <div class="sidebar-label">
-        Workspace
-    </div>
-    """)
+    render_html(
+        '<div class="sidebar-heading">Workspace</div>'
+    )
 
     workspace = st.radio(
         "Workspace",
-        ["Job Seeker", "Recruiter"],
+        [
+            "Job Seeker",
+            "Recruiter"
+        ],
         index=(
             0
-            if st.session_state.workspace == "Job Seeker"
+            if st.session_state.workspace
+            == "Job Seeker"
             else 1
         ),
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
     st.session_state.workspace = workspace
 
     st.divider()
 
-    # --------------------------------------------------------
-    # JOB SEEKER NAVIGATION
-    # --------------------------------------------------------
-
     if workspace == "Job Seeker":
 
-        html("""
-        <div class="sidebar-label">
-            👨‍💻 Job Seeker
-        </div>
-        """)
+        render_html(
+            '<div class="sidebar-heading">👨‍💻 Job Seeker</div>'
+        )
 
-        job_seeker_pages = [
+        pages = [
             "Dashboard",
             "Resume Analyzer",
             "Job Analyzer",
@@ -476,35 +1406,27 @@ with st.sidebar:
             "Skill Gap Analysis",
             "Career Roadmap",
             "Application Tracker",
-            "AI Career Assistant"
+            "AI Career Assistant",
         ]
 
-        job_seeker_page = st.radio(
-            "Job Seeker Navigation",
-            job_seeker_pages,
-            index=job_seeker_pages.index(
-                st.session_state.job_seeker_page
+        page = st.radio(
+            "Navigation",
+            pages,
+            index=pages.index(
+                st.session_state.seeker_page
             ),
-            label_visibility="collapsed"
+            label_visibility="collapsed",
         )
 
-        st.session_state.job_seeker_page = job_seeker_page
-
-        current_page = job_seeker_page
-
-    # --------------------------------------------------------
-    # RECRUITER NAVIGATION
-    # --------------------------------------------------------
+        st.session_state.seeker_page = page
 
     else:
 
-        html("""
-        <div class="sidebar-label">
-            🧑‍💼 Recruiter
-        </div>
-        """)
+        render_html(
+            '<div class="sidebar-heading">🧑‍💼 Recruiter</div>'
+        )
 
-        recruiter_pages = [
+        pages = [
             "Dashboard",
             "Create Job",
             "Bulk Resume Upload",
@@ -513,298 +1435,446 @@ with st.sidebar:
             "Shortlist",
             "Recruitment Pipeline",
             "Hiring Analytics",
-            "AI Recruiter Assistant"
+            "AI Recruiter Assistant",
         ]
 
-        recruiter_page = st.radio(
-            "Recruiter Navigation",
-            recruiter_pages,
-            index=recruiter_pages.index(
+        page = st.radio(
+            "Navigation",
+            pages,
+            index=pages.index(
                 st.session_state.recruiter_page
             ),
-            label_visibility="collapsed"
+            label_visibility="collapsed",
         )
 
-        st.session_state.recruiter_page = recruiter_page
-
-        current_page = recruiter_page
+        st.session_state.recruiter_page = page
 
     st.divider()
 
-    html("""
-    <div class="status-box">
-        ● System Online
-    </div>
-    """)
-
-    st.write("")
-
-    html("""
-    <div style="text-align:center;">
-        <div style="color:#8996ac;font-size:12px;">
-            CareerLens AI
+    render_html(
+        """
+        <div class="status-online">
+            ● AI ENGINE ONLINE
         </div>
-
-        <div style="color:#5f6c82;font-size:10px;margin-top:4px;">
-            AI • ML • NLP
-        </div>
-    </div>
-    """)
+        """
+    )
 
 
 # ============================================================
-# JOB SEEKER DASHBOARD
+# JOB SEEKER — DASHBOARD
 # ============================================================
 
-if workspace == "Job Seeker" and current_page == "Dashboard":
+if workspace == "Job Seeker" and page == "Dashboard":
 
-    html("""
-    <div class="hero-box">
+    render_html(
+        """
+        <div class="hero">
 
-        <div class="hero-small">
-            AI Career Intelligence
+            <div class="hero-kicker">
+                AI Career Intelligence
+            </div>
+
+            <div class="hero-title">
+                Understand Your Career.
+                <br>
+                <span class="gradient">
+                    Build Your Future.
+                </span>
+            </div>
+
+            <div class="hero-description">
+                CareerLens AI analyzes your resume, evaluates
+                opportunities, detects job-risk signals,
+                identifies skill gaps and helps you build a
+                personalized career roadmap.
+            </div>
+
+        </div>
+        """
+    )
+
+    profile = st.session_state.resume_profile
+
+    resume_score = (
+        profile["score"]
+        if profile
+        else "—"
+    )
+
+    skill_count = (
+        len(profile["skills"])
+        if profile
+        else 0
+    )
+
+    render_html(
+        """
+        <div class="section-title">
+            Career Overview
         </div>
 
-        <div class="hero-title">
-            Understand Your Career.
-            <br>
-            <span class="hero-gradient">
-                Build Your Future.
-            </span>
+        <div class="section-subtitle">
+            Your career intelligence at a glance.
         </div>
-
-        <div class="hero-text">
-            CareerLens AI analyzes your resume, evaluates
-            job opportunities, detects potential job risks,
-            identifies skill gaps and helps you build a
-            personalized career roadmap.
-        </div>
-
-    </div>
-    """)
-
-    html("""
-    <div class="section-title">
-        Career Overview
-    </div>
-
-    <div class="section-subtitle">
-        Your career intelligence at a glance.
-    </div>
-    """)
+        """
+    )
 
     c1, c2, c3, c4 = st.columns(4)
 
-    metric_data = [
-        ("Resume Score", "—", "Upload a resume"),
-        ("Career Readiness", "—", "Complete your profile"),
-        ("Job Matches", "0", "No matches yet"),
-        ("Applications", "0", "Start applying")
-    ]
+    with c1:
+        render_html(
+            metric_card(
+                "Resume Score",
+                resume_score,
+                "AI resume analysis"
+            )
+        )
 
-    for col, (title, number, change) in zip(
-        [c1, c2, c3, c4],
-        metric_data
-    ):
+    with c2:
+        readiness = (
+            min(
+                100,
+                resume_score
+            )
+            if isinstance(
+                resume_score,
+                int
+            )
+            else "—"
+        )
 
-        with col:
+        render_html(
+            metric_card(
+                "Career Readiness",
+                readiness,
+                "Based on current profile"
+            )
+        )
 
-            html(f"""
-            <div class="metric-card">
+    with c3:
+        render_html(
+            metric_card(
+                "Skills Detected",
+                skill_count,
+                "Extracted from resume"
+            )
+        )
 
-                <div class="metric-title">
-                    {title}
-                </div>
+    with c4:
+        render_html(
+            metric_card(
+                "Applications",
+                len(
+                    st.session_state.applications
+                ),
+                "Tracked applications"
+            )
+        )
 
-                <div class="metric-number">
-                    {number}
-                </div>
+    render_html(
+        """
+        <div class="section-title">
+            Career Intelligence
+        </div>
 
-                <div class="metric-change">
-                    {change}
-                </div>
-
-            </div>
-            """)
-
-    html("""
-    <div class="section-title">
-        Career Intelligence
-    </div>
-
-    <div class="section-subtitle">
-        AI-powered tools designed to help you make better
-        career decisions.
-    </div>
-    """)
+        <div class="section-subtitle">
+            AI-powered tools for smarter career decisions.
+        </div>
+        """
+    )
 
     features = [
         (
             "📄",
             "Resume Intelligence",
-            "Analyze your resume and extract skills, education, "
-            "projects and experience."
-        ),
-        (
-            "🔎",
-            "Job Intelligence",
-            "Understand job descriptions and identify important "
-            "requirements."
-        ),
-        (
-            "🛡️",
-            "Job Fraud Detection",
-            "Identify suspicious signals and potential risks "
-            "in job postings."
+            "Extract skills, experience, education, projects "
+            "and contact information from your resume."
         ),
         (
             "🎯",
             "AI Job Matching",
-            "Measure how closely your profile matches a "
-            "specific opportunity."
+            "Compare your profile with job descriptions using "
+            "NLP similarity and skill matching."
+        ),
+        (
+            "🔎",
+            "Job Intelligence",
+            "Analyze job requirements and understand which "
+            "skills are important."
+        ),
+        (
+            "🛡️",
+            "Job Fraud Detection",
+            "Detect suspicious payment, financial, urgency and "
+            "communication signals."
         ),
         (
             "🧩",
             "Skill Gap Analysis",
-            "Discover the skills you need for your target "
-            "career."
+            "Find missing skills between your profile and "
+            "your target job."
         ),
         (
             "🗺️",
             "Career Roadmap",
-            "Create a personalized learning and career "
-            "development path."
-        )
+            "Generate a structured path toward your target "
+            "career."
+        ),
     ]
 
     cols = st.columns(3)
 
-    for index, (icon, title, description) in enumerate(features):
+    for i, feature in enumerate(features):
 
-        with cols[index % 3]:
-
-            html(f"""
-            <div class="feature-card">
-
-                <div class="feature-icon">
-                    {icon}
-                </div>
-
-                <div class="feature-title">
-                    {title}
-                </div>
-
-                <div class="feature-description">
-                    {description}
-                </div>
-
-            </div>
-            """)
-
-
-# ============================================================
-# RESUME ANALYZER
-# ============================================================
-
-elif workspace == "Job Seeker" and current_page == "Resume Analyzer":
-
-    html("""
-    <div class="section-title">
-        📄 Resume Analyzer
-    </div>
-
-    <div class="section-subtitle">
-        Upload your resume and let CareerLens AI analyze
-        your professional profile.
-    </div>
-    """)
-
-    resume = st.file_uploader(
-        "Upload your resume",
-        type=["pdf", "docx"],
-        help="Supported formats: PDF and DOCX"
-    )
-
-    if resume:
-
-        st.success(
-            f"Resume uploaded successfully: {resume.name}"
-        )
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-
-            html("""
-            <div class="info-card">
-
-                <div class="info-title">
-                    Resume Intelligence
-                </div>
-
-                <div class="info-text">
-                    The AI engine will extract your skills,
-                    education, projects, experience and
-                    other important information.
-                </div>
-
-            </div>
-            """)
-
-        with col2:
-
-            html("""
-            <div class="info-card">
-
-                <div class="info-title">
-                    Career Score
-                </div>
-
-                <div class="info-text">
-                    Your resume will receive an AI-powered
-                    score based on structure, skills,
-                    relevance and completeness.
-                </div>
-
-            </div>
-            """)
-
-        if st.button(
-            "🚀 Analyze Resume",
-            use_container_width=True
-        ):
-
-            st.info(
-                "Resume AI engine will be connected in the "
-                "next development phase."
+        with cols[i % 3]:
+            render_html(
+                feature_card(*feature)
             )
 
 
 # ============================================================
-# JOB ANALYZER
+# JOB SEEKER — RESUME ANALYZER
 # ============================================================
 
-elif workspace == "Job Seeker" and current_page == "Job Analyzer":
+elif workspace == "Job Seeker" and page == "Resume Analyzer":
 
-    html("""
-    <div class="section-title">
-        🔎 Job Analyzer
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            📄 Resume Intelligence
+        </div>
 
-    <div class="section-subtitle">
-        Analyze a job opportunity before applying.
-    </div>
-    """)
-
-    job_url = st.text_input(
-        "Job URL",
-        placeholder="https://example.com/job"
+        <div class="section-subtitle">
+            Upload your resume and let the NLP engine build
+            your professional profile.
+        </div>
+        """
     )
 
-    job_description = st.text_area(
+    uploaded = st.file_uploader(
+        "Upload Resume",
+        type=[
+            "pdf",
+            "docx",
+            "txt"
+        ],
+        help="PDF, DOCX and TXT are supported."
+    )
+
+    if uploaded:
+
+        with st.spinner(
+            "CareerLens AI is reading your resume..."
+        ):
+
+            text = extract_text_from_file(
+                uploaded
+            )
+
+            profile = analyze_resume(
+                uploaded.name,
+                text
+            )
+
+            st.session_state.resume_profile = profile
+
+        if text.startswith("["):
+
+            st.error(text)
+
+        elif len(text) < 50:
+
+            st.warning(
+                "Very little text could be extracted. "
+                "If this is a scanned PDF, OCR will be needed "
+                "for a future version."
+            )
+
+        else:
+
+            st.success(
+                "Resume successfully analyzed."
+            )
+
+            c1, c2, c3 = st.columns(3)
+
+            with c1:
+                render_html(
+                    metric_card(
+                        "Resume Score",
+                        f"{profile['score']}/100",
+                        "Overall profile quality"
+                    )
+                )
+
+            with c2:
+                render_html(
+                    metric_card(
+                        "Skills",
+                        len(profile["skills"]),
+                        "Detected skills"
+                    )
+                )
+
+            with c3:
+                render_html(
+                    metric_card(
+                        "Experience",
+                        f"{profile['experience_years']:.1f} yrs",
+                        "Detected experience"
+                    )
+                )
+
+            st.write("")
+
+            left, right = st.columns(
+                [1, 1]
+            )
+
+            with left:
+
+                render_html(
+                    """
+                    <div class="card">
+                        <div class="card-title">
+                            🧠 Detected Skills
+                        </div>
+                    </div>
+                    """
+                )
+
+                if profile["skills"]:
+
+                    skill_html = "".join(
+                        badge(
+                            skill,
+                            "badge-good"
+                        )
+                        for skill in profile["skills"]
+                    )
+
+                    render_html(
+                        f'<div>{skill_html}</div>'
+                    )
+
+                else:
+
+                    st.info(
+                        "No skills were detected from the "
+                        "current skill library."
+                    )
+
+            with right:
+
+                render_html(
+                    """
+                    <div class="card">
+                        <div class="card-title">
+                            👤 Profile Information
+                        </div>
+                    </div>
+                    """
+                )
+
+                st.write(
+                    f"**Name:** {profile['name']}"
+                )
+
+                st.write(
+                    f"**Email:** {profile['email'] or 'Not detected'}"
+                )
+
+                st.write(
+                    f"**Phone:** {profile['phone'] or 'Not detected'}"
+                )
+
+                st.write(
+                    f"**Words:** {profile['word_count']}"
+                )
+
+            render_html(
+                """
+                <div class="section-title">
+                    Resume Structure
+                </div>
+                """
+            )
+
+            structure = profile["sections"]
+
+            structure_df = pd.DataFrame({
+                "Section": [
+                    name.title()
+                    for name in structure
+                ],
+                "Detected": [
+                    "Yes"
+                    if value
+                    else "No"
+                    for value in structure.values()
+                ],
+            })
+
+            st.dataframe(
+                structure_df,
+                use_container_width=True,
+                hide_index=True,
+            )
+
+            render_html(
+                """
+                <div class="section-title">
+                    Extracted Education Signals
+                </div>
+                """
+            )
+
+            if profile["education"]:
+
+                for item in profile["education"]:
+                    render_html(
+                        badge(
+                            item.upper(),
+                            "badge-good"
+                        )
+                    )
+
+            else:
+
+                st.info(
+                    "No education keywords were detected."
+                )
+
+
+# ============================================================
+# JOB SEEKER — JOB ANALYZER
+# ============================================================
+
+elif workspace == "Job Seeker" and page == "Job Analyzer":
+
+    render_html(
+        """
+        <div class="section-title">
+            🔎 Job Intelligence
+        </div>
+
+        <div class="section-subtitle">
+            Understand the requirements of a job before applying.
+        </div>
+        """
+    )
+
+    job_title = st.text_input(
+        "Job Title",
+        placeholder="Machine Learning Engineer"
+    )
+
+    job_text = st.text_area(
         "Job Description",
-        height=260,
-        placeholder="Paste the complete job description here..."
+        height=300,
+        placeholder=(
+            "Paste the complete job description here..."
+        )
     )
 
     if st.button(
@@ -812,128 +1882,454 @@ elif workspace == "Job Seeker" and current_page == "Job Analyzer":
         use_container_width=True
     ):
 
-        if not job_url and not job_description:
+        if len(job_text.strip()) < 30:
 
             st.warning(
-                "Please provide a job URL or job description."
+                "Please provide a more complete job description."
             )
 
         else:
 
-            st.info(
-                "Job intelligence engine will be connected "
-                "in the next development phase."
+            skills = extract_skills(
+                job_text
             )
 
+            fraud = fraud_detection(
+                job_text
+            )
+
+            st.session_state.job_text = job_text
+            st.session_state.job_title = job_title
+            st.session_state.job_analysis = {
+                "skills": skills,
+                "fraud": fraud,
+            }
+
+            c1, c2, c3 = st.columns(3)
+
+            with c1:
+                render_html(
+                    metric_card(
+                        "Skills Required",
+                        len(skills),
+                        "Detected by NLP"
+                    )
+                )
+
+            with c2:
+                render_html(
+                    metric_card(
+                        "Risk Score",
+                        fraud["score"],
+                        fraud["level"]
+                    )
+                )
+
+            with c3:
+                render_html(
+                    metric_card(
+                        "Text Length",
+                        len(job_text.split()),
+                        "Words analyzed"
+                    )
+                )
+
+            render_html(
+                """
+                <div class="section-title">
+                    Required Skills
+                </div>
+                """
+            )
+
+            if skills:
+
+                render_html(
+                    "".join(
+                        badge(
+                            skill,
+                            "badge-good"
+                        )
+                        for skill in skills
+                    )
+                )
+
+            else:
+
+                st.info(
+                    "No known skills were detected."
+                )
+
+            render_html(
+                """
+                <div class="section-title">
+                    Job Risk Assessment
+                </div>
+                """
+            )
+
+            fraud = fraud["score"]
+
+            if fraud >= 60:
+
+                render_html(
+                    """
+                    <div class="danger-box">
+                        🚨 High-risk signals detected.
+                        Review the posting carefully before
+                        sharing personal information or making
+                        payments.
+                    </div>
+                    """
+                )
+
+            elif fraud >= 30:
+
+                render_html(
+                    """
+                    <div class="warning-box">
+                        ⚠️ Some suspicious signals were detected.
+                        Perform additional verification before
+                        applying.
+                    </div>
+                    """
+                )
+
+            else:
+
+                render_html(
+                    """
+                    <div class="success-box">
+                        ✓ No major predefined fraud signals
+                        were detected by the current engine.
+                    </div>
+                    """
+                )
+
 
 # ============================================================
-# JOB FRAUD DETECTION
+# JOB SEEKER — FRAUD DETECTION
 # ============================================================
 
-elif workspace == "Job Seeker" and current_page == "Job Fraud Detection":
+elif workspace == "Job Seeker" and page == "Job Fraud Detection":
 
-    html("""
-    <div class="section-title">
-        🛡️ Job Fraud Detection
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            🛡️ Job Fraud Detection
+        </div>
 
-    <div class="section-subtitle">
-        Check a job posting for suspicious characteristics
-        before you apply.
-    </div>
-    """)
+        <div class="section-subtitle">
+            Analyze suspicious signals in a job posting.
+        </div>
+        """
+    )
 
-    job_text = st.text_area(
-        "Job Posting",
-        height=300,
-        placeholder="Paste the job posting here..."
+    fraud_text = st.text_area(
+        "Paste Job Posting",
+        height=320,
+        placeholder="Paste the complete job posting here..."
     )
 
     if st.button(
-        "🛡️ Check Job Safety",
+        "🛡️ Scan For Fraud Signals",
         use_container_width=True
     ):
 
-        if not job_text.strip():
+        if len(fraud_text.strip()) < 30:
 
             st.warning(
-                "Please paste a job posting first."
+                "Please provide the job posting."
             )
 
         else:
 
-            st.info(
-                "Fraud detection ML model will be connected "
-                "in the next development phase."
+            result = fraud_detection(
+                fraud_text
+            )
+
+            c1, c2 = st.columns(2)
+
+            with c1:
+
+                render_html(
+                    f"""
+                    <div class="score-circle">
+                        <div class="score-number">
+                            {result['score']}
+                        </div>
+                        <div class="score-label">
+                            Risk Score
+                        </div>
+                    </div>
+                    """
+                )
+
+            with c2:
+
+                if result["level"] == "HIGH RISK":
+
+                    render_html(
+                        """
+                        <div class="danger-box">
+                            <b>HIGH RISK</b><br><br>
+                            Multiple suspicious indicators
+                            were detected.
+                        </div>
+                        """
+                    )
+
+                elif result["level"] == "MEDIUM RISK":
+
+                    render_html(
+                        """
+                        <div class="warning-box">
+                            <b>MEDIUM RISK</b><br><br>
+                            Some suspicious indicators
+                            were detected.
+                        </div>
+                        """
+                    )
+
+                else:
+
+                    render_html(
+                        """
+                        <div class="success-box">
+                            <b>LOW RISK</b><br><br>
+                            No major predefined suspicious
+                            indicators were detected.
+                        </div>
+                        """
+                    )
+
+            render_html(
+                """
+                <div class="section-title">
+                    🔍 Detection Explanation
+                </div>
+                """
+            )
+
+            if not result["signals"]:
+
+                st.success(
+                    "No predefined suspicious signals detected."
+                )
+
+            else:
+
+                for signal in result["signals"]:
+
+                    render_html(
+                        f"""
+                        <div class="card">
+                            <div class="card-title">
+                                {html_lib.escape(
+                                    signal["category"].upper()
+                                )}
+                            </div>
+
+                            <div class="card-text">
+                                {html_lib.escape(
+                                    signal["reason"]
+                                )}
+                                <br><br>
+                                <b>Matched:</b>
+                                {html_lib.escape(
+                                    ", ".join(
+                                        signal["matched"]
+                                    )
+                                )}
+                            </div>
+                        </div>
+                        """
+                    )
+
+            st.caption(
+                "This is a risk-screening system, not a guarantee "
+                "that a job is legitimate or fraudulent."
             )
 
 
 # ============================================================
-# JOB MATCHING
+# JOB SEEKER — JOB MATCHING
 # ============================================================
 
-elif workspace == "Job Seeker" and current_page == "Job Matching":
+elif workspace == "Job Seeker" and page == "Job Matching":
 
-    html("""
-    <div class="section-title">
-        🎯 AI Job Matching
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            🎯 AI Job Matching
+        </div>
 
-    <div class="section-subtitle">
-        Compare your resume and skills against a job
-        opportunity.
-    </div>
-    """)
-
-    job_description = st.text_area(
-        "Job Description",
-        height=300,
-        placeholder="Paste job requirements here..."
+        <div class="section-subtitle">
+            Compare your resume against a target opportunity.
+        </div>
+        """
     )
 
-    if st.button(
-        "🎯 Calculate Match",
-        use_container_width=True
-    ):
+    profile = st.session_state.resume_profile
 
-        if not job_description.strip():
+    if not profile:
 
-            st.warning(
-                "Please enter a job description."
-            )
+        st.warning(
+            "Upload and analyze your resume first."
+        )
 
-        else:
+    else:
 
-            st.info(
-                "Semantic job matching model will be "
-                "connected in the next development phase."
-            )
+        job = st.text_area(
+            "Target Job Description",
+            height=320,
+            placeholder="Paste the target job description..."
+        )
+
+        if st.button(
+            "🎯 Calculate AI Match",
+            use_container_width=True
+        ):
+
+            if len(job.strip()) < 30:
+
+                st.warning(
+                    "Please provide a job description."
+                )
+
+            else:
+
+                result = calculate_match(
+                    profile["text"],
+                    job
+                )
+
+                st.session_state.job_text = job
+
+                c1, c2, c3 = st.columns(3)
+
+                with c1:
+                    render_html(
+                        metric_card(
+                            "Overall Match",
+                            f"{result['match_score']}%",
+                            "Weighted NLP score"
+                        )
+                    )
+
+                with c2:
+                    render_html(
+                        metric_card(
+                            "Skill Match",
+                            f"{result['skill_match']}%",
+                            "Required skills"
+                        )
+                    )
+
+                with c3:
+                    render_html(
+                        metric_card(
+                            "Text Similarity",
+                            f"{result['text_similarity']}%",
+                            "TF-IDF similarity"
+                        )
+                    )
+
+                render_html(
+                    """
+                    <div class="section-title">
+                        Matching Skills
+                    </div>
+                    """
+                )
+
+                if result["matched_skills"]:
+
+                    render_html(
+                        "".join(
+                            badge(
+                                skill,
+                                "badge-good"
+                            )
+                            for skill
+                            in result["matched_skills"]
+                        )
+                    )
+
+                else:
+
+                    st.info(
+                        "No direct skill matches detected."
+                    )
+
+                render_html(
+                    """
+                    <div class="section-title">
+                        🧩 Skill Gaps
+                    </div>
+                    """
+                )
+
+                if result["missing_skills"]:
+
+                    render_html(
+                        "".join(
+                            badge(
+                                skill,
+                                "badge-warn"
+                            )
+                            for skill
+                            in result["missing_skills"]
+                        )
+                    )
+
+                else:
+
+                    st.success(
+                        "No missing skills were detected from "
+                        "the current skill library."
+                    )
 
 
 # ============================================================
-# SKILL GAP ANALYSIS
+# JOB SEEKER — SKILL GAP
 # ============================================================
 
-elif workspace == "Job Seeker" and current_page == "Skill Gap Analysis":
+elif workspace == "Job Seeker" and page == "Skill Gap Analysis":
 
-    html("""
-    <div class="section-title">
-        🧩 Skill Gap Analysis
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            🧩 Skill Gap Analysis
+        </div>
 
-    <div class="section-subtitle">
-        Discover what skills you need to reach your target role.
-    </div>
-    """)
+        <div class="section-subtitle">
+            Discover what you need to learn for your target role.
+        </div>
+        """
+    )
+
+    profile = st.session_state.resume_profile
+
+    current = ""
+
+    if profile:
+        current = ", ".join(
+            profile["skills"]
+        )
 
     current_skills = st.text_area(
-        "Your Current Skills",
-        placeholder="Python, SQL, HTML, Machine Learning..."
+        "Current Skills",
+        value=current,
+        height=150
     )
 
     target_skills = st.text_area(
-        "Target Job Requirements",
-        placeholder="Python, SQL, NLP, Docker, AWS..."
+        "Target Job / Required Skills",
+        height=220,
+        placeholder=(
+            "Python, Machine Learning, NLP, SQL, Docker..."
+        )
     )
 
     if st.button(
@@ -941,51 +2337,150 @@ elif workspace == "Job Seeker" and current_page == "Skill Gap Analysis":
         use_container_width=True
     ):
 
-        if not current_skills or not target_skills:
+        if not target_skills:
 
             st.warning(
-                "Please enter both current skills and target "
-                "requirements."
+                "Please enter target requirements."
             )
 
         else:
 
-            st.info(
-                "Skill gap analysis model will be connected "
-                "in the next development phase."
+            current_set = set(
+                extract_skills(
+                    current_skills
+                )
             )
 
+            target_set = set(
+                extract_skills(
+                    target_skills
+                )
+            )
+
+            matched = sorted(
+                current_set.intersection(
+                    target_set
+                )
+            )
+
+            missing = sorted(
+                target_set.difference(
+                    current_set
+                )
+            )
+
+            coverage = (
+                len(matched) /
+                len(target_set) *
+                100
+            ) if target_set else 0
+
+            render_html(
+                metric_card(
+                    "Skill Coverage",
+                    f"{coverage:.1f}%",
+                    "Target skill coverage"
+                )
+            )
+
+            render_html(
+                """
+                <div class="section-title">
+                    Already Have
+                </div>
+                """
+            )
+
+            if matched:
+
+                render_html(
+                    "".join(
+                        badge(
+                            skill,
+                            "badge-good"
+                        )
+                        for skill in matched
+                    )
+                )
+
+            else:
+
+                st.info(
+                    "No matching skills detected."
+                )
+
+            render_html(
+                """
+                <div class="section-title">
+                    Skills To Develop
+                </div>
+                """
+            )
+
+            if missing:
+
+                render_html(
+                    "".join(
+                        badge(
+                            skill,
+                            "badge-warn"
+                        )
+                        for skill in missing
+                    )
+                )
+
+            else:
+
+                st.success(
+                    "Excellent — no skill gaps detected."
+                )
+
 
 # ============================================================
-# CAREER ROADMAP
+# JOB SEEKER — CAREER ROADMAP
 # ============================================================
 
-elif workspace == "Job Seeker" and current_page == "Career Roadmap":
+elif workspace == "Job Seeker" and page == "Career Roadmap":
 
-    html("""
-    <div class="section-title">
-        🗺️ Career Roadmap
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            🗺️ Career Roadmap
+        </div>
 
-    <div class="section-subtitle">
-        Build a personalized path toward your target career.
-    </div>
-    """)
-
-    target_role = st.text_input(
-        "Target Career",
-        placeholder="Machine Learning Engineer"
+        <div class="section-subtitle">
+            Build a practical roadmap for your target career.
+        </div>
+        """
     )
+
+    target = st.text_input(
+        "Target Career",
+        placeholder="AI Engineer"
+    )
+
+    profile = st.session_state.resume_profile
+
+    if profile:
+        render_html(
+            f"""
+            <div class="info-box">
+                Current profile contains
+                <b>{len(profile['skills'])}</b>
+                detected skills.
+            </div>
+            """
+        )
 
     if st.button(
         "🗺️ Generate Roadmap",
         use_container_width=True
     ):
 
-        if not target_role:
+        if not target:
 
             st.warning(
-                "Please enter your target career."
+                "Enter a target career."
             )
 
         else:
@@ -993,645 +2488,1166 @@ elif workspace == "Job Seeker" and current_page == "Career Roadmap":
             steps = [
                 (
                     "01",
-                    "Build Foundations",
-                    "Strengthen programming, mathematics and "
-                    "computer science fundamentals."
+                    "Foundation",
+                    "Strengthen programming, computer science, "
+                    "mathematics and communication fundamentals."
                 ),
                 (
                     "02",
-                    "Develop Technical Skills",
-                    "Learn the technologies and frameworks "
-                    "required for your target role."
+                    "Core Technology",
+                    f"Learn the core tools and technologies "
+                    f"used in {target}."
                 ),
                 (
                     "03",
-                    "Build Projects",
-                    "Create real-world projects that demonstrate "
-                    "your practical abilities."
+                    "Practical Projects",
+                    "Build 2–4 meaningful projects that solve "
+                    "real problems."
                 ),
                 (
                     "04",
-                    "Build Your Portfolio",
-                    "Publish projects and organize your GitHub "
-                    "and professional profile."
+                    "Portfolio",
+                    "Publish your work on GitHub and create "
+                    "a professional portfolio."
                 ),
                 (
                     "05",
-                    "Prepare for Interviews",
+                    "Interview Preparation",
                     "Practice technical, behavioral and "
                     "role-specific interviews."
                 ),
                 (
                     "06",
-                    "Apply Strategically",
-                    "Target relevant opportunities based on "
-                    "your skills and career goals."
-                )
+                    "Targeted Applications",
+                    "Apply to roles that align with your "
+                    "skills and demonstrated projects."
+                ),
             ]
 
             for number, title, description in steps:
 
-                html(f"""
-                <div class="feature-card">
-
-                    <div class="feature-title">
-                        {number} • {title}
+                render_html(
+                    f"""
+                    <div class="card">
+                        <div class="card-title">
+                            {number} · {title}
+                        </div>
+                        <div class="card-text">
+                            {description}
+                        </div>
                     </div>
-
-                    <div class="feature-description">
-                        {description}
-                    </div>
-
-                </div>
-                """)
+                    """
+                )
 
 
 # ============================================================
-# APPLICATION TRACKER
+# JOB SEEKER — APPLICATION TRACKER
 # ============================================================
 
-elif workspace == "Job Seeker" and current_page == "Application Tracker":
+elif workspace == "Job Seeker" and page == "Application Tracker":
 
-    html("""
-    <div class="section-title">
-        📋 Application Tracker
-    </div>
-
-    <div class="section-subtitle">
-        Track your job applications from application to offer.
-    </div>
-    """)
-
-    html("""
-    <div class="info-card">
-
-        <div class="info-title">
-            No Applications Yet
+    render_html(
+        """
+        <div class="section-title">
+            📋 Application Tracker
         </div>
 
-        <div class="info-text">
-            Once you start applying to jobs, your applications,
-            interview status and application history will appear
-            here.
+        <div class="section-subtitle">
+            Manage your job applications.
+        </div>
+        """
+    )
+
+    with st.form(
+        "application_form",
+        clear_on_submit=True
+    ):
+
+        company = st.text_input(
+            "Company"
+        )
+
+        role = st.text_input(
+            "Role"
+        )
+
+        status = st.selectbox(
+            "Status",
+            [
+                "Applied",
+                "Screening",
+                "Interview",
+                "Offer",
+                "Rejected"
+            ]
+        )
+
+        submitted = st.form_submit_button(
+            "➕ Add Application",
+            use_container_width=True
+        )
+
+        if submitted:
+
+            if company and role:
+
+                st.session_state.applications.append({
+                    "Company": company,
+                    "Role": role,
+                    "Status": status,
+                })
+
+                st.success(
+                    "Application added."
+                )
+
+            else:
+
+                st.warning(
+                    "Company and role are required."
+                )
+
+    if st.session_state.applications:
+
+        df = pd.DataFrame(
+            st.session_state.applications
+        )
+
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+# ============================================================
+# JOB SEEKER — AI ASSISTANT
+# ============================================================
+
+elif workspace == "Job Seeker" and page == "AI Career Assistant":
+
+    render_html(
+        """
+        <div class="section-title">
+            🤖 AI Career Assistant
         </div>
 
-    </div>
-    """)
-
-
-# ============================================================
-# AI CAREER ASSISTANT
-# ============================================================
-
-elif workspace == "Job Seeker" and current_page == "AI Career Assistant":
-
-    html("""
-    <div class="section-title">
-        🤖 AI Career Assistant
-    </div>
-
-    <div class="section-subtitle">
-        Ask questions about careers, skills, resumes and
-        job searching.
-    </div>
-    """)
+        <div class="section-subtitle">
+            Ask CareerLens AI about your profile and job search.
+        </div>
+        """
+    )
 
     question = st.chat_input(
-        "Ask CareerLens AI..."
+        "Ask about your career..."
     )
 
     if question:
+
+        lower = question.lower()
 
         with st.chat_message("user"):
             st.write(question)
 
         with st.chat_message("assistant"):
-            st.write(
-                "The AI Career Assistant will be connected "
-                "to the language model in the AI integration "
-                "phase."
-            )
+
+            profile = st.session_state.resume_profile
+
+            if profile and (
+                "skill" in lower
+                or "resume" in lower
+            ):
+
+                st.write(
+                    f"Your current resume analysis contains "
+                    f"{len(profile['skills'])} detected skills: "
+                    f"{', '.join(profile['skills'][:12])}."
+                )
+
+            elif "fraud" in lower:
+
+                st.write(
+                    "Paste a job posting into Job Fraud Detection. "
+                    "CareerLens will examine predefined risk signals "
+                    "such as payment requests, sensitive financial "
+                    "information and suspicious urgency."
+                )
+
+            elif "match" in lower:
+
+                st.write(
+                    "Use AI Job Matching to compare your resume "
+                    "against a specific job description using "
+                    "TF-IDF text similarity and skill overlap."
+                )
+
+            else:
+
+                st.write(
+                    "I can help you with resume analysis, job "
+                    "matching, skill gaps, fraud-risk screening "
+                    "and career planning. Choose a module from "
+                    "the sidebar for a detailed analysis."
+                )
 
 
 # ============================================================
-# RECRUITER DASHBOARD
+# RECRUITER — DASHBOARD
 # ============================================================
 
-elif workspace == "Recruiter" and current_page == "Dashboard":
+elif workspace == "Recruiter" and page == "Dashboard":
 
-    html("""
-    <div class="hero-box">
+    render_html(
+        """
+        <div class="hero">
 
-        <div class="hero-small">
-            AI Recruitment Intelligence
+            <div class="hero-kicker">
+                AI Recruitment Intelligence
+            </div>
+
+            <div class="hero-title">
+                Recruit Smarter.
+                <br>
+                <span class="gradient">
+                    Hire Better.
+                </span>
+            </div>
+
+            <div class="hero-description">
+                Upload large batches of resumes, analyze
+                candidate profiles, compare skills and
+                experience, and let CareerLens AI rank the
+                strongest candidates for your role.
+            </div>
+
         </div>
+        """
+    )
 
-        <div class="hero-title">
-            Recruit Smarter.
-            <br>
-            <span class="hero-gradient">
-                Hire Better.
-            </span>
-        </div>
+    candidate_df = st.session_state.candidate_df
 
-        <div class="hero-text">
-            Upload hundreds of resumes, analyze candidate
-            profiles, compare skills and experience, and
-            create an intelligent shortlist using AI.
-        </div>
+    total_candidates = (
+        len(candidate_df)
+        if candidate_df is not None
+        else 0
+    )
 
-    </div>
-    """)
+    shortlisted = len(
+        st.session_state.shortlisted
+    )
 
     c1, c2, c3, c4 = st.columns(4)
 
-    recruiter_metrics = [
-        ("Active Jobs", "0", "Create your first job"),
-        ("Candidates", "0", "Upload resumes"),
-        ("Shortlisted", "0", "AI ranking pending"),
-        ("Interviews", "0", "No interviews yet")
-    ]
+    with c1:
+        render_html(
+            metric_card(
+                "Active Jobs",
+                len(
+                    st.session_state.created_jobs
+                ),
+                "Recruitment positions"
+            )
+        )
 
-    for col, (title, number, change) in zip(
-        [c1, c2, c3, c4],
-        recruiter_metrics
-    ):
+    with c2:
+        render_html(
+            metric_card(
+                "Candidates",
+                total_candidates,
+                "Resumes processed"
+            )
+        )
 
-        with col:
+    with c3:
+        render_html(
+            metric_card(
+                "Shortlisted",
+                shortlisted,
+                "AI / recruiter selection"
+            )
+        )
 
-            html(f"""
-            <div class="metric-card">
+    with c4:
+        render_html(
+            metric_card(
+                "Interviews",
+                sum(
+                    1
+                    for app in st.session_state.applications
+                    if app.get("Status")
+                    == "Interview"
+                ),
+                "Current pipeline"
+            )
+        )
 
-                <div class="metric-title">
-                    {title}
-                </div>
+    render_html(
+        """
+        <div class="section-title">
+            Recruiter Intelligence
+        </div>
 
-                <div class="metric-number">
-                    {number}
-                </div>
+        <div class="section-subtitle">
+            A professional AI-assisted recruitment workflow.
+        </div>
+        """
+    )
 
-                <div class="metric-change">
-                    {change}
-                </div>
-
-            </div>
-            """)
-
-    html("""
-    <div class="section-title">
-        Recruitment Intelligence
-    </div>
-
-    <div class="section-subtitle">
-        Powerful tools for modern AI-assisted recruitment.
-    </div>
-    """)
-
-    recruiter_features = [
+    features = [
         (
             "📋",
             "Create Job",
-            "Define the role, skills, experience and hiring "
-            "requirements."
+            "Define role, skills, experience and requirements."
         ),
         (
             "📂",
             "Bulk Resume Upload",
-            "Upload 100 or even hundreds of candidate resumes "
-            "at once."
+            "Process 10, 50, 100 or more resumes together."
         ),
         (
             "🧠",
             "AI Candidate Ranking",
-            "Automatically score candidates against the "
-            "selected job."
-        ),
-        (
-            "🔍",
-            "Smart Filtering",
-            "Filter candidates according to skills, "
-            "experience and match score."
+            "Rank candidates using NLP and skill similarity."
         ),
         (
             "⚖️",
             "Candidate Comparison",
-            "Compare selected candidates side by side."
+            "Compare top candidates side by side."
         ),
         (
-            "📊",
+            "⭐",
+            "Shortlisting",
+            "Recruiter controls exactly how many candidates "
+            "to shortlist."
+        ),
+        (
+            "📈",
             "Hiring Analytics",
-            "Understand recruitment performance through "
-            "data and visual analytics."
-        )
+            "Visualize candidate quality and recruitment data."
+        ),
     ]
 
     cols = st.columns(3)
 
-    for index, (icon, title, description) in enumerate(
-        recruiter_features
+    for i, feature in enumerate(features):
+
+        with cols[i % 3]:
+
+            render_html(
+                feature_card(*feature)
+            )
+
+
+# ============================================================
+# RECRUITER — CREATE JOB
+# ============================================================
+
+elif workspace == "Recruiter" and page == "Create Job":
+
+    render_html(
+        """
+        <div class="section-title">
+            📋 Create Recruitment Job
+        </div>
+
+        <div class="section-subtitle">
+            Define the job that CareerLens AI will use for
+            candidate matching.
+        </div>
+        """
+    )
+
+    with st.form(
+        "create_job_form"
     ):
 
-        with cols[index % 3]:
+        title = st.text_input(
+            "Job Title",
+            placeholder="Machine Learning Engineer"
+        )
 
-            html(f"""
-            <div class="feature-card">
+        company = st.text_input(
+            "Company",
+            placeholder="Your company"
+        )
 
-                <div class="feature-icon">
-                    {icon}
-                </div>
+        minimum_experience = st.number_input(
+            "Minimum Experience",
+            min_value=0,
+            max_value=30,
+            value=0
+        )
 
-                <div class="feature-title">
-                    {title}
-                </div>
+        description = st.text_area(
+            "Complete Job Description",
+            height=280,
+            placeholder=(
+                "Responsibilities, required skills, "
+                "qualifications..."
+            )
+        )
 
-                <div class="feature-description">
-                    {description}
-                </div>
+        submit = st.form_submit_button(
+            "💾 Save Job",
+            use_container_width=True
+        )
 
+        if submit:
+
+            if not title or not description:
+
+                st.warning(
+                    "Job title and description are required."
+                )
+
+            else:
+
+                job = {
+                    "title": title,
+                    "company": company,
+                    "experience": minimum_experience,
+                    "description": description,
+                    "skills": extract_skills(
+                        description
+                    ),
+                }
+
+                st.session_state.created_jobs.append(
+                    job
+                )
+
+                st.session_state.job_text = description
+                st.session_state.job_title = title
+
+                st.success(
+                    f"{title} is ready for candidate ranking."
+                )
+
+    if st.session_state.created_jobs:
+
+        render_html(
+            """
+            <div class="section-title">
+                Saved Jobs
             </div>
-            """)
+            """
+        )
 
+        for job in st.session_state.created_jobs:
 
-# ============================================================
-# CREATE JOB
-# ============================================================
+            render_html(
+                f"""
+                <div class="card">
+                    <div class="card-title">
+                        {html_lib.escape(job['title'])}
+                    </div>
 
-elif workspace == "Recruiter" and current_page == "Create Job":
-
-    html("""
-    <div class="section-title">
-        📋 Create Job
-    </div>
-
-    <div class="section-subtitle">
-        Define the requirements that the AI candidate ranking
-        engine will use.
-    </div>
-    """)
-
-    job_title = st.text_input(
-        "Job Title",
-        placeholder="Machine Learning Engineer"
-    )
-
-    company = st.text_input(
-        "Company",
-        placeholder="Company name"
-    )
-
-    required_skills = st.text_area(
-        "Required Skills",
-        placeholder="Python, SQL, Machine Learning, NLP..."
-    )
-
-    experience = st.number_input(
-        "Minimum Experience",
-        min_value=0,
-        max_value=30,
-        value=0
-    )
-
-    job_description = st.text_area(
-        "Job Description",
-        height=250
-    )
-
-    if st.button(
-        "📋 Create Job",
-        use_container_width=True
-    ):
-
-        if not job_title:
-
-            st.warning(
-                "Job title is required."
-            )
-
-        else:
-
-            st.success(
-                f"Job '{job_title}' created successfully."
+                    <div class="card-text">
+                        {html_lib.escape(job['company'])}
+                        ·
+                        {job['experience']}+ years
+                        <br><br>
+                        Skills:
+                        {html_lib.escape(
+                            ", ".join(job["skills"])
+                        )}
+                    </div>
+                </div>
+                """
             )
 
 
 # ============================================================
-# BULK RESUME UPLOAD
+# RECRUITER — BULK RESUME UPLOAD
 # ============================================================
 
-elif workspace == "Recruiter" and current_page == "Bulk Resume Upload":
+elif workspace == "Recruiter" and page == "Bulk Resume Upload":
 
-    html("""
-    <div class="section-title">
-        📂 Bulk Resume Upload
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            📂 Bulk Candidate Processing
+        </div>
 
-    <div class="section-subtitle">
-        Upload multiple candidate resumes for AI-powered
-        processing.
-    </div>
-    """)
+        <div class="section-subtitle">
+            Upload multiple resumes and build a searchable
+            candidate pool.
+        </div>
+        """
+    )
 
     resumes = st.file_uploader(
-        "Candidate Resumes",
-        type=["pdf", "docx"],
-        accept_multiple_files=True
+        "Upload Candidate Resumes",
+        type=[
+            "pdf",
+            "docx",
+            "txt"
+        ],
+        accept_multiple_files=True,
+        help="Upload resumes in PDF, DOCX or TXT format."
     )
 
     if resumes:
 
-        st.success(
-            f"{len(resumes)} resume(s) uploaded successfully."
-        )
-
         if st.button(
-            "🧠 Analyze All Candidates",
+            "🧠 Process All Resumes",
             use_container_width=True
         ):
 
-            st.info(
-                "Bulk resume parsing and candidate analysis "
-                "will be connected in the next phase."
+            profiles = []
+
+            progress = st.progress(
+                0
+            )
+
+            for i, resume in enumerate(
+                resumes
+            ):
+
+                text = extract_text_from_file(
+                    resume
+                )
+
+                if len(text) >= 20:
+
+                    profiles.append(
+                        analyze_resume(
+                            resume.name,
+                            text
+                        )
+                    )
+
+                progress.progress(
+                    (i + 1) /
+                    len(resumes)
+                )
+
+            st.session_state.candidate_df = pd.DataFrame(
+                profiles
+            )
+
+            st.success(
+                f"{len(profiles)} candidates processed."
+            )
+
+    candidate_df = st.session_state.candidate_df
+
+    if candidate_df is not None and not candidate_df.empty:
+
+        preview = candidate_df[
+            [
+                "name",
+                "score",
+                "experience_years",
+                "skills",
+                "email"
+            ]
+        ].copy()
+
+        preview.columns = [
+            "Candidate",
+            "Resume Score",
+            "Experience",
+            "Skills",
+            "Email"
+        ]
+
+        st.dataframe(
+            preview,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        csv = preview.to_csv(
+            index=False
+        ).encode(
+            "utf-8"
+        )
+
+        st.download_button(
+            "⬇️ Export Candidate Pool CSV",
+            csv,
+            "candidate_pool.csv",
+            "text/csv",
+            use_container_width=True
+        )
+
+
+# ============================================================
+# RECRUITER — CANDIDATE RANKING
+# ============================================================
+
+elif workspace == "Recruiter" and page == "Candidate Ranking":
+
+    render_html(
+        """
+        <div class="section-title">
+            🧠 AI Candidate Ranking
+        </div>
+
+        <div class="section-subtitle">
+            Recruiter-controlled Top-N selection from a bulk
+            candidate pool.
+        </div>
+        """
+    )
+
+    candidate_df = st.session_state.candidate_df
+
+    if candidate_df is None or candidate_df.empty:
+
+        st.warning(
+            "Upload candidate resumes first."
+        )
+
+    else:
+
+        saved_jobs = st.session_state.created_jobs
+
+        if saved_jobs:
+
+            job_options = [
+                job["title"]
+                for job in saved_jobs
+            ]
+
+            selected_job = st.selectbox(
+                "Select Job",
+                job_options
+            )
+
+            selected = next(
+                job
+                for job in saved_jobs
+                if job["title"]
+                == selected_job
+            )
+
+            job_text = selected["description"]
+
+        else:
+
+            job_text = st.text_area(
+                "Job Description",
+                value=st.session_state.job_text,
+                height=220,
+                placeholder="Paste job description..."
+            )
+
+        top_n = st.selectbox(
+            "How many candidates should be shortlisted?",
+            [
+                5,
+                10,
+                20,
+                30,
+                50,
+                100
+            ],
+            index=2
+        )
+
+        minimum_score = st.slider(
+            "Minimum final score",
+            0,
+            100,
+            50
+        )
+
+        if st.button(
+            "🚀 Run AI Ranking",
+            use_container_width=True
+        ):
+
+            if len(job_text.strip()) < 30:
+
+                st.warning(
+                    "A complete job description is required."
+                )
+
+            else:
+
+                profiles = (
+                    candidate_df
+                    .to_dict("records")
+                )
+
+                ranking = rank_candidates(
+                    profiles,
+                    job_text,
+                    top_n
+                )
+
+                ranking = ranking[
+                    ranking["Final Score"]
+                    >= minimum_score
+                ].copy()
+
+                st.session_state.ranked_df = ranking
+
+                st.success(
+                    f"AI ranking completed. "
+                    f"Showing the strongest candidates."
+                )
+
+        ranking = st.session_state.get(
+            "ranked_df"
+        )
+
+        if ranking is not None and not ranking.empty:
+
+            render_html(
+                """
+                <div class="section-title">
+                    🏆 Candidate Leaderboard
+                </div>
+                """
+            )
+
+            display_columns = [
+                "Rank",
+                "Candidate",
+                "Resume Score",
+                "Match Score",
+                "Skill Match",
+                "Experience",
+                "Final Score",
+                "Decision",
+            ]
+
+            st.dataframe(
+                ranking[display_columns],
+                use_container_width=True,
+                hide_index=True
+            )
+
+            csv = ranking.to_csv(
+                index=False
+            ).encode(
+                "utf-8"
+            )
+
+            st.download_button(
+                "⬇️ Download AI Ranking",
+                csv,
+                "candidate_ranking.csv",
+                "text/csv",
+                use_container_width=True
             )
 
 
 # ============================================================
-# CANDIDATE RANKING
+# RECRUITER — COMPARISON
 # ============================================================
 
-elif workspace == "Recruiter" and current_page == "Candidate Ranking":
+elif workspace == "Recruiter" and page == "Candidate Comparison":
 
-    html("""
-    <div class="section-title">
-        🧠 AI Candidate Ranking
-    </div>
+    render_html(
+        """
+        <div class="section-title">
+            ⚖️ Candidate Comparison
+        </div>
 
-    <div class="section-subtitle">
-        Recruiter-controlled ranking — choose exactly how
-        many candidates you want to shortlist.
-    </div>
-    """)
-
-    top_n = st.selectbox(
-        "How many candidates do you want?",
-        [
-            5,
-            10,
-            20,
-            30,
-            50,
-            100
-        ],
-        index=2
+        <div class="section-subtitle">
+            Compare your strongest candidates before making
+            the final decision.
+        </div>
+        """
     )
 
-    min_score = st.slider(
-        "Minimum AI Match Score",
-        min_value=0,
-        max_value=100,
-        value=60
+    ranking = st.session_state.get(
+        "ranked_df"
     )
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        html(f"""
-        <div class="info-card">
-
-            <div class="info-title">
-                Selection
-            </div>
-
-            <div class="info-text">
-                Top <b>{top_n}</b> candidates
-                will be displayed.
-            </div>
-
-        </div>
-        """)
-
-    with col2:
-
-        html(f"""
-        <div class="info-card">
-
-            <div class="info-title">
-                Match Threshold
-            </div>
-
-            <div class="info-text">
-                Candidates below <b>{min_score}%</b>
-                can be excluded.
-            </div>
-
-        </div>
-        """)
-
-    if st.button(
-        "🚀 Rank Candidates",
-        use_container_width=True
-    ):
+    if ranking is None or ranking.empty:
 
         st.info(
-            f"AI will rank the candidate pool and return "
-            f"the Top {top_n} candidates."
+            "Run AI Candidate Ranking first."
+        )
+
+    else:
+
+        candidates = ranking[
+            "Candidate"
+        ].tolist()
+
+        selected = st.multiselect(
+            "Select candidates to compare",
+            candidates,
+            default=candidates[:min(3, len(candidates))]
+        )
+
+        if selected:
+
+            comparison = ranking[
+                ranking["Candidate"].isin(
+                    selected
+                )
+            ][
+                [
+                    "Candidate",
+                    "Resume Score",
+                    "Match Score",
+                    "Skill Match",
+                    "Experience",
+                    "Final Score",
+                    "Matched Skills",
+                    "Missing Skills"
+                ]
+            ]
+
+            st.dataframe(
+                comparison,
+                use_container_width=True,
+                hide_index=True
+            )
+
+            chart = px.bar(
+                comparison,
+                x="Candidate",
+                y="Final Score",
+                title="Candidate Final Scores",
+                template="plotly_dark"
+            )
+
+            chart.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)"
+            )
+
+            st.plotly_chart(
+                chart,
+                use_container_width=True
+            )
+
+
+# ============================================================
+# RECRUITER — SHORTLIST
+# ============================================================
+
+elif workspace == "Recruiter" and page == "Shortlist":
+
+    render_html(
+        """
+        <div class="section-title">
+            ⭐ Shortlist Management
+        </div>
+
+        <div class="section-subtitle">
+            Recruiter has the final control over candidate
+            selection.
+        </div>
+        """
+    )
+
+    ranking = st.session_state.get(
+        "ranked_df"
+    )
+
+    if ranking is None or ranking.empty:
+
+        st.info(
+            "Run candidate ranking first."
+        )
+
+    else:
+
+        candidates = ranking[
+            "Candidate"
+        ].tolist()
+
+        selected = st.multiselect(
+            "Select final shortlist",
+            candidates
+        )
+
+        if st.button(
+            "⭐ Save Shortlist",
+            use_container_width=True
+        ):
+
+            st.session_state.shortlisted = selected
+
+            st.success(
+                f"{len(selected)} candidates shortlisted."
+            )
+
+        if st.session_state.shortlisted:
+
+            render_html(
+                """
+                <div class="section-title">
+                    Final Shortlist
+                </div>
+                """
+            )
+
+            for name in st.session_state.shortlisted:
+
+                render_html(
+                    f"""
+                    <div class="success-box">
+                        ⭐ {html_lib.escape(name)}
+                    </div>
+                    """
+                )
+
+
+# ============================================================
+# RECRUITER — PIPELINE
+# ============================================================
+
+elif workspace == "Recruiter" and page == "Recruitment Pipeline":
+
+    render_html(
+        """
+        <div class="section-title">
+            📊 Recruitment Pipeline
+        </div>
+
+        <div class="section-subtitle">
+            Move candidates through the hiring lifecycle.
+        </div>
+        """
+    )
+
+    shortlisted = st.session_state.shortlisted
+
+    if not shortlisted:
+
+        st.info(
+            "Your shortlist is empty."
+        )
+
+    else:
+
+        for name in shortlisted:
+
+            status = st.selectbox(
+                name,
+                [
+                    "Shortlisted",
+                    "HR Screening",
+                    "Technical Interview",
+                    "Final Interview",
+                    "Offer",
+                    "Rejected"
+                ],
+                key=f"pipeline_{name}"
+            )
+
+            st.caption(
+                f"Current stage: {status}"
+            )
+
+
+# ============================================================
+# RECRUITER — ANALYTICS
+# ============================================================
+
+elif workspace == "Recruiter" and page == "Hiring Analytics":
+
+    render_html(
+        """
+        <div class="section-title">
+            📈 Hiring Analytics
+        </div>
+
+        <div class="section-subtitle">
+            Understand the quality and distribution of your
+            candidate pool.
+        </div>
+        """
+    )
+
+    ranking = st.session_state.get(
+        "ranked_df"
+    )
+
+    if ranking is None or ranking.empty:
+
+        st.info(
+            "Run candidate ranking to generate analytics."
+        )
+
+    else:
+
+        c1, c2, c3 = st.columns(3)
+
+        with c1:
+            render_html(
+                metric_card(
+                    "Candidates",
+                    len(ranking),
+                    "Ranked candidates"
+                )
+            )
+
+        with c2:
+            render_html(
+                metric_card(
+                    "Average Score",
+                    f"{ranking['Final Score'].mean():.1f}",
+                    "Average AI score"
+                )
+            )
+
+        with c3:
+            render_html(
+                metric_card(
+                    "Top Score",
+                    f"{ranking['Final Score'].max():.1f}",
+                    "Highest candidate"
+                )
+            )
+
+        chart = px.histogram(
+            ranking,
+            x="Final Score",
+            nbins=10,
+            title="Candidate Score Distribution",
+            template="plotly_dark"
+        )
+
+        chart.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)"
+        )
+
+        st.plotly_chart(
+            chart,
+            use_container_width=True
         )
 
 
 # ============================================================
-# CANDIDATE COMPARISON
+# RECRUITER — AI ASSISTANT
 # ============================================================
 
-elif workspace == "Recruiter" and current_page == "Candidate Comparison":
+elif workspace == "Recruiter" and page == "AI Recruiter Assistant":
 
-    html("""
-    <div class="section-title">
-        ⚖️ Candidate Comparison
-    </div>
-
-    <div class="section-subtitle">
-        Compare shortlisted candidates before making a
-        recruitment decision.
-    </div>
-    """)
-
-    html("""
-    <div class="info-card">
-
-        <div class="info-title">
-            Candidate Comparison
+    render_html(
+        """
+        <div class="section-title">
+            🤖 AI Recruiter Assistant
         </div>
 
-        <div class="info-text">
-            AI-ranked candidates will appear here with their
-            skills, experience, education, match score and
-            strengths.
+        <div class="section-subtitle">
+            Ask questions about your candidate pool.
         </div>
-
-    </div>
-    """)
-
-
-# ============================================================
-# SHORTLIST
-# ============================================================
-
-elif workspace == "Recruiter" and current_page == "Shortlist":
-
-    html("""
-    <div class="section-title">
-        ⭐ Shortlisted Candidates
-    </div>
-
-    <div class="section-subtitle">
-        Manage candidates selected for the next stage.
-    </div>
-    """)
-
-    html("""
-    <div class="info-card">
-
-        <div class="info-title">
-            Shortlist
-        </div>
-
-        <div class="info-text">
-            Candidates selected from the AI ranking system
-            will appear here.
-        </div>
-
-    </div>
-    """)
-
-
-# ============================================================
-# RECRUITMENT PIPELINE
-# ============================================================
-
-elif workspace == "Recruiter" and current_page == "Recruitment Pipeline":
-
-    html("""
-    <div class="section-title">
-        📊 Recruitment Pipeline
-    </div>
-
-    <div class="section-subtitle">
-        Track candidates through the recruitment process.
-    </div>
-    """)
-
-    pipeline = st.columns(4)
-
-    stages = [
-        ("Applied", "0"),
-        ("Shortlisted", "0"),
-        ("Interview", "0"),
-        ("Selected", "0")
-    ]
-
-    for col, (stage, count) in zip(
-        pipeline,
-        stages
-    ):
-
-        with col:
-
-            html(f"""
-            <div class="metric-card">
-
-                <div class="metric-title">
-                    {stage}
-                </div>
-
-                <div class="metric-number">
-                    {count}
-                </div>
-
-            </div>
-            """)
-
-
-# ============================================================
-# HIRING ANALYTICS
-# ============================================================
-
-elif workspace == "Recruiter" and current_page == "Hiring Analytics":
-
-    html("""
-    <div class="section-title">
-        📈 Hiring Analytics
-    </div>
-
-    <div class="section-subtitle">
-        Recruitment insights and performance metrics.
-    </div>
-    """)
-
-    html("""
-    <div class="info-card">
-
-        <div class="info-title">
-            Analytics Dashboard
-        </div>
-
-        <div class="info-text">
-            Once candidate and recruitment data is connected,
-            this dashboard will display hiring trends,
-            candidate quality, shortlist rates and
-            recruitment performance.
-        </div>
-
-    </div>
-    """)
-
-
-# ============================================================
-# AI RECRUITER ASSISTANT
-# ============================================================
-
-elif workspace == "Recruiter" and current_page == "AI Recruiter Assistant":
-
-    html("""
-    <div class="section-title">
-        🤖 AI Recruiter Assistant
-    </div>
-
-    <div class="section-subtitle">
-        Ask questions about your candidate pool and
-        recruitment process.
-    </div>
-    """)
+        """
+    )
 
     question = st.chat_input(
-        "Example: Show me the strongest Python candidates..."
+        "Example: Who are my strongest candidates?"
     )
 
     if question:
+
+        ranking = st.session_state.get(
+            "ranked_df"
+        )
 
         with st.chat_message("user"):
             st.write(question)
 
         with st.chat_message("assistant"):
-            st.write(
-                "The AI Recruiter Assistant will be connected "
-                "to the candidate database and ranking engine."
-            )
+
+            if ranking is None or ranking.empty:
+
+                st.write(
+                    "Run candidate ranking first so I can "
+                    "analyze the candidate pool."
+                )
+
+            else:
+
+                lower = question.lower()
+
+                if (
+                    "top"
+                    in lower
+                    or "strongest"
+                    in lower
+                    or "best"
+                    in lower
+                ):
+
+                    top = ranking.head(5)
+
+                    response = []
+
+                    for _, row in top.iterrows():
+
+                        response.append(
+                            f"**{row['Candidate']}** — "
+                            f"{row['Final Score']}/100"
+                        )
+
+                    st.markdown(
+                        "\n\n".join(
+                            response
+                        )
+                    )
+
+                elif "python" in lower:
+
+                    matches = ranking[
+                        ranking["Skills"]
+                        .str.contains(
+                            "Python",
+                            case=False,
+                            na=False
+                        )
+                    ]
+
+                    if matches.empty:
+
+                        st.write(
+                            "No Python candidates were detected."
+                        )
+
+                    else:
+
+                        st.write(
+                            "Candidates with Python detected:"
+                        )
+
+                        st.dataframe(
+                            matches[
+                                [
+                                    "Candidate",
+                                    "Final Score",
+                                    "Experience"
+                                ]
+                            ],
+                            hide_index=True,
+                            use_container_width=True
+                        )
+
+                else:
+
+                    st.write(
+                        "I can summarize top candidates, inspect "
+                        "skills, compare scores and help review "
+                        "the ranked candidate pool."
+                    )
 
 
 # ============================================================
 # FOOTER
 # ============================================================
 
-html("""
-<div class="footer">
+render_html(
+    """
+    <div class="footer">
 
-    🎯 <b>CareerLens AI</b>
-    <br><br>
+        🎯 <b>CareerLens AI</b>
+        <br>
+        AI-Powered Career Intelligence & Recruitment Platform
+        <br>
+        Final Year Project · AI · ML · NLP
 
-    AI-Powered Career Intelligence & Recruitment Platform
-    <br>
-
-    Final Year Project • AI • ML • NLP
-
-</div>
-""")
+    </div>
+    """
+)
