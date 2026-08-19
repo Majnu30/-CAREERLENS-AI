@@ -24,116 +24,93 @@ except ImportError:
 
 st.set_page_config(
     page_title="CareerLens AI — Career Intelligence & Recruitment",
-    page_icon="🎯",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 
 # ============================================================
-# MODERN SAAS UI STYLING & CUSTOM CSS
+# ULTRA-PREMIUM SAAS UI STYLING & GLASSMORPHISM
 # ============================================================
 
 st.markdown(
     """
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
         * {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        code, pre {
+            font-family: 'JetBrains Mono', monospace !important;
         }
 
         .stApp {
-            background-color: #060d19;
+            background: radial-gradient(circle at 10% 20%, rgba(30, 27, 75, 0.4) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(15, 23, 42, 0.6) 0%, transparent 40%),
+                        #050b14;
             color: #cbd5e1;
         }
 
         [data-testid="stSidebar"] {
-            background-color: #0b1426;
-            border-right: 1px solid #1e293b;
+            background: #08101e;
+            border-right: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         .block-container {
-            max-width: 1350px;
+            max-width: 1400px;
             padding-top: 1.5rem;
-            padding-bottom: 3rem;
+            padding-bottom: 3.5rem;
         }
 
         /* Typography */
         h1, h2, h3, h4 {
             color: #f8fafc !important;
             font-weight: 700;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
         }
 
         p, label, span {
             color: #94a3b8;
         }
 
-        /* Brand Container & Logo Button */
-        .brand-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        .brand-logo-icon {
-            font-size: 32px;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .brand-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-            line-height: 1.1;
-        }
-        .brand-accent {
-            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .brand-badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #a5b4fc;
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 6px;
-            padding: 2px 8px;
-            margin-bottom: 12px;
-        }
-
         /* Hero Banner */
         .hero-banner {
-            background: linear-gradient(135deg, #0d1527 0%, #111e38 50%, #1e1b4b 100%);
-            border: 1px solid #2e3856;
-            border-radius: 18px;
-            padding: 28px 32px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 27, 75, 0.6) 50%, rgba(17, 24, 39, 0.9) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 20px;
+            padding: 32px 36px;
             margin-bottom: 24px;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
         .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             color: #a5b4fc;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 4px 12px;
+            margin-bottom: 12px;
         }
         .hero-heading {
             color: #ffffff;
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
-            line-height: 1.2;
-            margin: 6px 0 10px 0;
+            line-height: 1.15;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.03em;
         }
         .hero-heading span {
-            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -141,43 +118,50 @@ st.markdown(
             color: #94a3b8;
             font-size: 14px;
             line-height: 1.6;
-            max-width: 820px;
+            max-width: 850px;
             margin: 0;
         }
 
-        /* Skill & Category Chips */
+        /* Glassmorphism Stat Cards */
+        .glass-card {
+            background: rgba(13, 22, 38, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        /* Chips & Badges */
         .chip {
             display: inline-block;
-            background: #111e36;
-            color: #cbd5e1;
-            border: 1px solid #233554;
-            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             margin: 3px 4px 3px 0;
+            letter-spacing: 0.2px;
         }
         .chip-gap {
-            background: rgba(239, 68, 68, 0.12);
+            background: rgba(239, 68, 68, 0.15);
             color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.35);
         }
         .chip-match {
-            background: rgba(34, 197, 94, 0.12);
+            background: rgba(34, 197, 94, 0.15);
             color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            border: 1px solid rgba(34, 197, 94, 0.35);
         }
 
-        /* Stat & Data Cards */
-        .stat-card {
-            background-color: #0b1426;
-            border: 1px solid #1e293b;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        /* Risk Badges */
+        /* Risk Level Indicator */
         .badge-low {
             background: rgba(34, 197, 94, 0.15);
             color: #4ade80;
@@ -185,6 +169,7 @@ st.markdown(
             padding: 6px 14px;
             border-radius: 8px;
             font-weight: 700;
+            font-size: 13px;
             display: inline-block;
         }
         .badge-medium {
@@ -194,6 +179,7 @@ st.markdown(
             padding: 6px 14px;
             border-radius: 8px;
             font-weight: 700;
+            font-size: 13px;
             display: inline-block;
         }
         .badge-high {
@@ -203,46 +189,52 @@ st.markdown(
             padding: 6px 14px;
             border-radius: 8px;
             font-weight: 700;
+            font-size: 13px;
             display: inline-block;
         }
 
-        /* Status Indicator */
+        /* Pulse Status */
         .status-pill {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 11px;
             font-weight: 700;
             color: #4ade80;
-            background: rgba(34, 197, 94, 0.08);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            padding: 5px 10px;
-            border-radius: 6px;
-            width: fit-content;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            padding: 5px 12px;
+            border-radius: 20px;
         }
         .status-dot {
             height: 7px;
             width: 7px;
             background-color: #22c55e;
             border-radius: 50%;
-            display: inline-block;
+            box-shadow: 0 0 8px #22c55e;
         }
 
-        /* Streamlit Native Metric Overrides */
+        /* Native Metric Reskinning */
         div[data-testid="stMetric"] {
-            background-color: #0b1426;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 16px;
+            background: rgba(13, 22, 38, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
         div[data-testid="stMetricValue"] {
-            color: #f8fafc !important;
-            font-weight: 700;
+            color: #ffffff !important;
+            font-weight: 800;
+            font-size: 26px !important;
+            letter-spacing: -0.03em;
         }
         div[data-testid="stMetricLabel"] {
             color: #64748b !important;
             font-size: 12px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
     """,
@@ -251,90 +243,92 @@ st.markdown(
 
 
 # ============================================================
-# SKILL TAXONOMY
+# EXTENDED SKILL KNOWLEDGE GRAPH
 # ============================================================
 
 SKILL_ALIASES = {
     "Python": ["python", "py"],
     "Java": ["java", "jvm"],
-    "JavaScript": ["javascript", "js"],
+    "JavaScript": ["javascript", "js", "ecmascript"],
     "TypeScript": ["typescript", "ts"],
     "C++": ["c++", "cpp"],
     "C#": ["c#", "csharp", "c sharp"],
     ".NET": [".net", "dotnet", "asp.net"],
-    "React": ["react", "react.js", "reactjs"],
+    "Go / Golang": ["golang", "go language"],
+    "Rust": ["rust", "cargo"],
+    "React": ["react", "react.js", "reactjs", "next.js", "nextjs"],
     "Angular": ["angular", "angularjs"],
-    "Vue.js": ["vue", "vue.js", "vuejs"],
-    "Node.js": ["node.js", "nodejs", "node js"],
+    "Vue.js": ["vue", "vue.js", "vuejs", "nuxt"],
+    "Node.js": ["node.js", "nodejs", "node js", "express", "expressjs"],
     "FastAPI": ["fastapi", "fast api"],
     "Flask": ["flask"],
     "Django": ["django"],
-    "Spring Boot": ["spring boot", "springboot", "spring"],
-    "HTML": ["html", "html5"],
-    "CSS": ["css", "css3", "tailwind", "bootstrap"],
-    "SQL": ["sql", "mysql", "postgresql", "postgres", "sqlite", "oracle"],
+    "Spring Boot": ["spring boot", "springboot", "spring framework"],
+    "HTML/CSS": ["html", "html5", "css", "css3", "tailwind", "bootstrap", "sass"],
+    "SQL": ["sql", "mysql", "postgresql", "postgres", "sqlite", "oracle", "mariadb"],
     "MongoDB": ["mongodb", "mongo db", "mongo"],
     "Redis": ["redis"],
-    "Machine Learning": ["machine learning", "machine-learning", "ml"],
-    "Deep Learning": ["deep learning", "deep-learning", "dl", "neural networks"],
-    "NLP": ["nlp", "natural language processing", "text mining", "spacy", "nltk"],
+    "GraphQL": ["graphql"],
+    "REST API": ["rest api", "restful api", "restful", "apis", "api development"],
+    "Machine Learning": ["machine learning", "machine-learning", "ml", "supervised learning"],
+    "Deep Learning": ["deep learning", "deep-learning", "dl", "neural networks", "cnn", "rnn", "lstm"],
+    "NLP": ["nlp", "natural language processing", "text mining", "spacy", "nltk", "transformers", "llm", "genai", "rag"],
     "Computer Vision": ["computer vision", "opencv", "yolo", "image processing"],
     "TensorFlow": ["tensorflow", "tf"],
     "PyTorch": ["pytorch", "torch"],
     "Scikit-learn": ["scikit-learn", "sklearn"],
     "Pandas": ["pandas"],
     "NumPy": ["numpy"],
-    "Data Analysis": ["data analysis", "data analytics", "eda"],
-    "Data Science": ["data science"],
+    "Data Analysis": ["data analysis", "data analytics", "eda", "statistical analysis"],
+    "Data Science": ["data science", "predictive modeling"],
     "Power BI": ["power bi", "powerbi"],
     "Tableau": ["tableau"],
-    "Excel": ["excel", "microsoft excel", "spreadsheets"],
-    "AWS": ["aws", "amazon web services", "ec2", "s3", "lambda"],
+    "Excel": ["excel", "microsoft excel", "spreadsheets", "vlookup"],
+    "AWS": ["aws", "amazon web services", "ec2", "s3", "lambda", "ecs", "cloudformation"],
     "Azure": ["azure", "microsoft azure"],
     "GCP": ["gcp", "google cloud", "google cloud platform"],
-    "Docker": ["docker", "containerization"],
-    "Kubernetes": ["kubernetes", "k8s"],
+    "Docker": ["docker", "containerization", "docker-compose"],
+    "Kubernetes": ["kubernetes", "k8s", "helm"],
     "Git": ["git", "github", "gitlab", "version control"],
     "Linux": ["linux", "unix", "bash", "shell scripting"],
-    "REST API": ["rest api", "restful api", "restful", "apis"],
-    "GraphQL": ["graphql"],
     "CI/CD": ["ci/cd", "continuous integration", "github actions", "jenkins"],
-    "Microservices": ["microservices", "distributed systems"],
-    "Figma": ["figma"],
-    "UI/UX": ["ui/ux", "ui ux", "user experience", "wireframing"],
-    "Agile": ["agile", "scrum", "kanban", "sprint"],
-    "Communication": ["communication", "presentation"],
-    "Leadership": ["leadership", "mentoring", "team management"],
-    "Problem Solving": ["problem solving", "problem-solving", "analytical skills"],
+    "Microservices": ["microservices", "distributed systems", "event-driven"],
+    "Figma / UI": ["figma", "ui/ux", "ui ux", "wireframing", "prototyping"],
+    "Agile": ["agile", "scrum", "kanban", "sprint planning"],
+    "Leadership": ["leadership", "mentoring", "team management", "stakeholder management"],
+    "Problem Solving": ["problem solving", "analytical thinking", "troubleshooting"],
 }
 
 
 # ============================================================
-# FRAUD DETECTION PATTERNS
+# FRAUD DETECTION HEURISTICS
 # ============================================================
 
 FRAUD_RULES = {
-    "Financial & Payment Demands": [
+    "Financial Demands & Upfront Fees": [
         "pay a fee", "registration fee", "processing fee", "training fee",
         "security deposit", "send money", "payment required", "upfront payment",
-        "pay to apply", "application fee", "wire transfer", "cashier check"
+        "pay to apply", "application fee", "wire transfer", "cashier check",
+        "purchase equipment first", "refundable deposit"
     ],
-    "Sensitive Banking Requests": [
+    "Sensitive Banking & ID Requests": [
         "bank account", "bank details", "credit card", "debit card",
         "otp", "one time password", "crypto", "cryptocurrency", "wallet address",
-        "social security number", "ssn", "netbanking"
+        "social security number", "ssn", "netbanking password", "routing number"
     ],
-    "Artificial Urgency": [
+    "High-Pressure Urgency": [
         "act now", "urgent hiring", "immediate joiner today", "within 24 hours",
-        "limited slots left", "last chance", "today only", "instant offer"
+        "limited slots left", "last chance", "today only", "instant offer letter",
+        "no delay join now"
     ],
-    "Unofficial Communication Channels": [
+    "Unofficial Recruitment Channels": [
         "whatsapp only", "telegram only", "contact on telegram", "contact on whatsapp",
-        "personal gmail", "inbox me directly", "dm on telegram"
+        "personal gmail", "inbox me directly", "dm on telegram", "no official email"
     ],
-    "Unrealistic Guarantees": [
+    "Unrealistic Employment Guarantees": [
         "guaranteed job", "100% placement", "guaranteed placement", "no interview required",
-        "no experience high salary", "earn $5000 weekly effortless", "guaranteed selection"
+        "no experience high salary", "earn $5000 weekly effortless", "guaranteed selection",
+        "direct hiring without technical round"
     ]
 }
 
@@ -352,7 +346,7 @@ defaults = {
     "applications": 0,
     "recruiter_results": None,
     "chat_history": [
-        {"role": "assistant", "content": "Hello! I am your CareerLens AI Advisor. Upload your resume or ask me any question about resume tuning, interview preparation, or closing your technical skill gaps."}
+        {"role": "assistant", "content": "Welcome to **CareerLens AI Advisor**! I can analyze your resume, pinpoint skill deficits, suggest high-yield keywords, or run interview simulations. How can I assist your career today?"}
     ],
 }
 
@@ -362,7 +356,7 @@ for key, value in defaults.items():
 
 
 # ============================================================
-# TEXT EXTRACTION & NLP FUNCTIONS
+# AI & TEXT PROCESSING ENGINE
 # ============================================================
 
 def normalize_text(text: str) -> str:
@@ -437,7 +431,7 @@ def extract_name(text: str) -> str:
             and "@" not in line
             and not re.search(r"\d", line)
             and len(line) < 40
-            and not any(keyword in line.lower() for keyword in ["resume", "curriculum", "cv", "profile"])
+            and not any(keyword in line.lower() for keyword in ["resume", "curriculum", "cv", "profile", "contact", "email"])
         ):
             return line.title()
     return "Candidate"
@@ -551,51 +545,59 @@ def generate_bot_response(user_prompt: str) -> str:
     if "resume" in p and ("score" in p or "improve" in p):
         if st.session_state.resume_analysis:
             score = st.session_state.resume_analysis["resume_score"]
-            return f"Your current Resume Quality Score is **{score}/100**. To optimize it further: ensure all projects feature measurable business outcomes (e.g., 'improved latency by 30%'), provide clear GitHub/LinkedIn handles, and list standard education credentials."
-        return "Upload your resume first in the **Resume Intelligence** module, and I'll generate a targeted diagnostic score with recommendations."
+            return f"Your current **Resume Quality Score is {score}/100**.\n\nTo raise this to a 90+ tier:\n1. Use metric-driven action verbs (e.g., *'Architected microservices reducing latency by 35%'*).\n2. Ensure LinkedIn and GitHub profiles are clearly hyperlinked.\n3. Make sure all detected skills ({len(profile_skills)} detected) appear in project context bullet points."
+        return "Upload your resume in the **Resume Intelligence** module first, and I will evaluate your metrics and structure."
 
-    if "skill" in p or "learn" in p or "gap" in p:
+    if "skill" in p or "gap" in p or "learn" in p:
         if profile_skills:
-            return f"I've currently indexed **{len(profile_skills)} skills** from your profile: {', '.join(profile_skills[:6])}... To advance into senior roles, consider mastering containerization (Docker, Kubernetes), Cloud architecture (AWS/GCP), and CI/CD pipelines."
-        return "You can discover specific missing competencies by comparing your resume against job specifications in the **Skill Gap & Roadmap** module."
+            return f"Your indexed skills currently include: **{', '.join(profile_skills[:6])}**.\n\nTo enhance your candidacy for top-tier roles, consider adding:\n- **Cloud & DevOps**: Docker, Kubernetes, AWS Lambda, CI/CD.\n- **Data & AI**: Vector DBs, RAG pipelines, FastAPI microservices."
+        return "You can check your target skill gaps by pasting a job description in the **Skill & Roadmap** module."
 
-    if "fraud" in p or "scam" in p or "risk" in p:
-        return "Legitimate employers will never demand registration fees, bank account passwords, OTPs, or require communication exclusively over unofficial apps like Telegram or WhatsApp. Use our **Fraud Job Detection** tab to scan suspicious job descriptions."
+    if "fraud" in p or "scam" in p or "fake" in p:
+        return "⚠️ **Red Flags in Job Postings**:\n- Demands for registration, background-check, or training fees upfront.\n- Recruiter reaching out via personal Gmail, WhatsApp, or Telegram only.\n- Guaranteed hiring without formal technical or behavioral interviews.\n\nRun the text through our **Fraud Job Detection** tab to assess the risk score."
 
     if "interview" in p:
-        return "For technical interviews, prepare for: (1) Core Data Structures & Algorithms, (2) System Design & Microservice trade-offs, and (3) STAR-format behavioral examples demonstrating leadership and problem-solving."
+        return "💡 **High-Impact Interview Strategies**:\n1. **STAR Method**: Structure behavioral answers around Situation, Task, Action, and Result.\n2. **System Design**: Focus on scalability bottlenecks, trade-offs (SQL vs NoSQL), and caching strategies.\n3. **Live Coding**: Clarify edge cases before typing a single line of logic."
 
-    return "I am your CareerLens Career Advisor. You can ask me about resume optimization, target skill acquisitions, interview questions, or how to navigate through the AI recruitment modules!"
+    return "I am your CareerLens AI copilot. Ask me about resume metrics, skill acquisitions, fraud red flags, or interview preparation."
 
 
 # ============================================================
-# SIDEBAR NAVIGATION & LOGO ACTION
+# SIDEBAR NAVIGATION & PERSISTENT LOGO
 # ============================================================
 
 with st.sidebar:
     st.markdown(
         """
-        <div class="brand-header">
-            <span class="brand-logo-icon">🎯</span>
-            <span class="brand-title">Career<span class="brand-accent">Lens</span> AI</span>
+        <div style="padding: 10px 0 16px 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 30px;">⚡</span>
+                <span style="font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
+                    Career<span style="background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lens</span> AI
+                </span>
+            </div>
+            <div style="font-size: 10px; font-weight: 700; color: #818cf8; letter-spacing: 1.5px; margin-top: 4px; text-transform: uppercase;">
+                Career Intelligence Platform
+            </div>
         </div>
-        <div class="brand-badge">Enterprise Edition</div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Clickable Logo/Home Bar: Resets and opens the Job Seeker workspace
-    if st.button("🏠 Open Job Seeker Workspace", use_container_width=True):
+    # Clickable Home / Reset Action
+    if st.button("🏠 Home / Job Seeker Hub", use_container_width=True):
         st.session_state.workspace_mode = "Job Seeker"
         st.session_state.active_nav = "Resume Intelligence"
         st.rerun()
 
     st.markdown("---")
 
+    st.caption("SELECT WORKSPACE")
     workspace_choice = st.radio(
-        "WORKSPACE VIEW",
-        ["👨‍💻 Job Seeker", "🏢 Recruiter Screening"],
+        "Workspace Selector",
+        ["👨‍💻 Job Seeker Workspace", "🏢 Recruiter Workspace"],
         index=0 if st.session_state.workspace_mode == "Job Seeker" else 1,
+        label_visibility="collapsed"
     )
 
     if "Job Seeker" in workspace_choice:
@@ -611,8 +613,8 @@ with st.sidebar:
             <span class="status-dot"></span>
             AI ENGINE ONLINE
         </div>
-        <div style="font-size: 11px; color: #64748b; margin-top: 8px;">
-            TF-IDF • Cosine Similarity • NLP Intelligence
+        <div style="font-size: 11px; color: #64748b; margin-top: 10px; line-height: 1.5;">
+            NLP • Cosine TF-IDF • Skill Extraction • Fraud Heuristics
         </div>
         """,
         unsafe_allow_html=True,
@@ -620,26 +622,27 @@ with st.sidebar:
 
 
 # ============================================================
-# DASHBOARD 1: JOB SEEKER (APP-BAR DRIVEN)
+# WORKSPACE 1: JOB SEEKER DASHBOARD
 # ============================================================
 
 if st.session_state.workspace_mode == "Job Seeker":
 
+    # Hero Banner
     st.markdown(
         """
         <div class="hero-banner">
             <div class="hero-tag">AI Career Intelligence</div>
             <div class="hero-heading">Understand Your Career. <span>Build Your Future.</span></div>
             <p class="hero-sub">
-                Multidimensional resume scoring, semantic job description matching, instant skill-gap diagnosis,
-                recruitment fraud detection, and an integrated AI Career Advisor chatbot.
+                CareerLens AI provides comprehensive resume scoring, semantic job description matching,
+                instant skill-gap diagnosis, recruitment fraud screening, and an integrated AI Career Advisor.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Top Overview Metrics
+    # Overview Metrics Row
     analysis = st.session_state.resume_analysis
     resume_score = analysis["resume_score"] if analysis else None
     readiness = analysis["readiness"] if analysis else None
@@ -655,45 +658,45 @@ if st.session_state.workspace_mode == "Job Seeker":
     with m4:
         st.metric("Applications Tracked", st.session_state.applications)
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # Interactive Navigation App-Bar
-    st.markdown("#### ⚡ Platform Navigation")
-    nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns(5)
+    # Interactive Navigation App-Bar (5 Interactive Modules)
+    st.markdown("#### 🚀 Intelligence Modules")
+    nav_c1, nav_c2, nav_c3, nav_c4, nav_c5 = st.columns(5)
 
-    with nav_col1:
+    with nav_c1:
         if st.button("📄 Resume Intelligence", use_container_width=True, type="primary" if st.session_state.active_nav == "Resume Intelligence" else "secondary"):
             st.session_state.active_nav = "Resume Intelligence"
             st.rerun()
 
-    with nav_col2:
+    with nav_c2:
         if st.button("🎯 Job Matching", use_container_width=True, type="primary" if st.session_state.active_nav == "Job Matching" else "secondary"):
             st.session_state.active_nav = "Job Matching"
             st.rerun()
 
-    with nav_col3:
+    with nav_c3:
         if st.button("🛡️ Fraud Job Detection", use_container_width=True, type="primary" if st.session_state.active_nav == "Fraud Job Detection" else "secondary"):
             st.session_state.active_nav = "Fraud Job Detection"
             st.rerun()
 
-    with nav_col4:
+    with nav_c4:
         if st.button("🗺️ Skill & Roadmap", use_container_width=True, type="primary" if st.session_state.active_nav == "Skill & Roadmap" else "secondary"):
             st.session_state.active_nav = "Skill & Roadmap"
             st.rerun()
 
-    with nav_col5:
+    with nav_c5:
         if st.button("💬 AI Career Chatbot", use_container_width=True, type="primary" if st.session_state.active_nav == "AI Career Chatbot" else "secondary"):
             st.session_state.active_nav = "AI Career Chatbot"
             st.rerun()
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("---")
 
     # ----------------------------------------------------
-    # SECTION 1: RESUME INTELLIGENCE
+    # MODULE 1: RESUME INTELLIGENCE
     # ----------------------------------------------------
     if st.session_state.active_nav == "Resume Intelligence":
         st.subheader("📄 Resume Intelligence & Profile Parsing")
-        st.caption("Upload your resume in PDF, DOCX, or TXT format to index your competencies and calculate your profile quality score.")
+        st.caption("Upload your resume in PDF, DOCX, or TXT format to evaluate your profile against industry scoring standards.")
 
         resume_file = st.file_uploader(
             "Upload Resume",
@@ -728,12 +731,12 @@ if st.session_state.workspace_mode == "Job Seeker":
                 with p_col1:
                     st.markdown(
                         f"""
-                        <div class="stat-card">
-                            <h4 style="margin:0 0 10px 0;">👤 Profile Signals</h4>
-                            <p><b>Name:</b> {st.session_state.resume_analysis['name']}</p>
-                            <p><b>Email:</b> {st.session_state.resume_analysis['email']}</p>
-                            <p><b>Phone:</b> {st.session_state.resume_analysis['phone']}</p>
-                            <p><b>Document:</b> {resume_file.name}</p>
+                        <div class="glass-card">
+                            <h4 style="margin:0 0 12px 0;">👤 Candidate Profile</h4>
+                            <p style="margin: 4px 0;"><b>Name:</b> {st.session_state.resume_analysis['name']}</p>
+                            <p style="margin: 4px 0;"><b>Email:</b> {st.session_state.resume_analysis['email']}</p>
+                            <p style="margin: 4px 0;"><b>Phone:</b> {st.session_state.resume_analysis['phone']}</p>
+                            <p style="margin: 4px 0;"><b>Document:</b> {resume_file.name}</p>
                         </div>
                         """,
                         unsafe_allow_html=True,
@@ -741,8 +744,8 @@ if st.session_state.workspace_mode == "Job Seeker":
                 with p_col2:
                     st.markdown(
                         f"""
-                        <div class="stat-card">
-                            <h4 style="margin:0 0 10px 0;">🛠️ Detected Competencies ({len(detected)})</h4>
+                        <div class="glass-card">
+                            <h4 style="margin:0 0 12px 0;">🛠️ Extracted Skills ({len(detected)})</h4>
                             <div>{render_chips(detected)}</div>
                         </div>
                         """,
@@ -750,16 +753,16 @@ if st.session_state.workspace_mode == "Job Seeker":
                     )
 
     # ----------------------------------------------------
-    # SECTION 2: JOB MATCHING
+    # MODULE 2: JOB MATCHING
     # ----------------------------------------------------
     elif st.session_state.active_nav == "Job Matching":
         st.subheader("🎯 Semantic Job Matching Engine")
-        st.caption("Calculates TF-IDF n-gram cosine similarity combined with explicit skill taxonomy overlap.")
+        st.caption("Evaluates semantic context similarity (TF-IDF + Cosine Similarity) blended with exact skill overlap.")
 
         job_input = st.text_area(
             "Paste Target Job Description",
             height=200,
-            placeholder="Paste target job responsibilities, requirements, and qualifications...",
+            placeholder="Paste target job responsibilities, tech stack, and qualifications here...",
             key="match_jd_input",
         )
 
@@ -779,19 +782,19 @@ if st.session_state.workspace_mode == "Job Seeker":
 
                 c1, c2, c3 = st.columns(3)
                 with c1:
-                    st.metric("Overall Match Index", f"{overall}%")
+                    st.metric("Overall Match Score", f"{overall}%")
                 with c2:
-                    st.metric("NLP Similarity", f"{nlp_sim}%")
+                    st.metric("NLP Semantic Match", f"{nlp_sim}%")
                 with c3:
-                    st.metric("Skill Overlap Ratio", f"{skill_sim}%")
+                    st.metric("Skill Alignment", f"{skill_sim}%")
 
                 st.markdown("<br>", unsafe_allow_html=True)
                 sc1, sc2 = st.columns(2)
                 with sc1:
                     st.markdown(
                         f"""
-                        <div class="stat-card">
-                            <h4 style="color:#4ade80 !important; margin:0 0 10px 0;">✓ Matched Skills ({len(matched)})</h4>
+                        <div class="glass-card">
+                            <h4 style="color:#4ade80 !important; margin:0 0 12px 0;">✓ Matched Skills ({len(matched)})</h4>
                             <div>{render_chips(matched, 'chip chip-match')}</div>
                         </div>
                         """,
@@ -800,8 +803,8 @@ if st.session_state.workspace_mode == "Job Seeker":
                 with sc2:
                     st.markdown(
                         f"""
-                        <div class="stat-card">
-                            <h4 style="color:#f87171 !important; margin:0 0 10px 0;">⚠ Skill Gaps ({len(missing)})</h4>
+                        <div class="glass-card">
+                            <h4 style="color:#f87171 !important; margin:0 0 12px 0;">⚠ Skill Gaps ({len(missing)})</h4>
                             <div>{render_chips(missing, 'chip chip-gap')}</div>
                         </div>
                         """,
@@ -809,16 +812,16 @@ if st.session_state.workspace_mode == "Job Seeker":
                     )
 
     # ----------------------------------------------------
-    # SECTION 3: FRAUD JOB DETECTION
+    # MODULE 3: FRAUD JOB DETECTION
     # ----------------------------------------------------
     elif st.session_state.active_nav == "Fraud Job Detection":
         st.subheader("🛡️ Job Fraud & Suspicious Signal Screening")
-        st.caption("Inspects text for payment requests, sensitive banking demands, artificial urgency, and unofficial communication routes.")
+        st.caption("Screens listings for payment demands, banking requests, artificial urgency, and unofficial channels.")
 
         posting_input = st.text_area(
             "Paste Job Advertisement or Offer",
             height=180,
-            placeholder="Paste job posting, email offer, or message here...",
+            placeholder="Paste job description, recruitment email, or offer text...",
             key="fraud_input",
         )
 
@@ -835,34 +838,34 @@ if st.session_state.workspace_mode == "Job Seeker":
                 st.markdown(
                     f"""
                     <div style="margin: 15px 0;">
-                        <span class="{badge_class}">{lvl} — RISK SCORE: {scr}/100</span>
+                        <span class="{badge_class}">{lvl} — RISK INDEX: {scr}/100</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
                 if fraud_res["signals"]:
-                    st.markdown("<div class='stat-card'>", unsafe_allow_html=True)
-                    st.markdown("#### Detected Risk Indicators")
+                    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+                    st.markdown("#### Identified Risk Indicators")
                     for cat, hits in fraud_res["signals"].items():
                         st.markdown(f"**{cat}:** `{', '.join(hits)}`")
                     st.markdown("</div>", unsafe_allow_html=True)
                 else:
-                    st.success("✓ No predefined suspicious signals or red flags detected.")
+                    st.success("✓ No common recruitment scam patterns or high-risk phrases detected.")
 
-                st.caption("Disclaimer: Fraud detection provides risk signals and is not definitive proof that a job is fraudulent.")
+                st.caption("Advisory Note: AI screening detects statistical risk signals and is not a definitive certification of fraud or authenticity.")
 
     # ----------------------------------------------------
-    # SECTION 4: SKILL & ROADMAP
+    # MODULE 4: SKILL & ROADMAP
     # ----------------------------------------------------
     elif st.session_state.active_nav == "Skill & Roadmap":
-        st.subheader("🗺️ Skill Gap Analysis & Career Roadmap")
-        st.caption("Diagnose technical missing links and create a prioritized step-by-step career progression plan.")
+        st.subheader("🗺️ Skill Gap Diagnosis & Career Roadmap")
+        st.caption("Transform technical missing links into an actionable step-by-step development strategy.")
 
-        r_role = st.text_input("Target Job Title", placeholder="e.g., Senior Machine Learning Engineer, Cloud Architect")
-        r_jd = st.text_area("Target Job Context", height=150, placeholder="Paste target requirements to diagnose missing competencies...")
+        r_role = st.text_input("Target Career Role", placeholder="e.g., Lead Data Engineer, Senior Full-Stack Architect")
+        r_jd = st.text_area("Target Job Context", height=150, placeholder="Paste target job qualifications to identify gaps...")
 
-        if st.button("Generate Development Roadmap", use_container_width=True):
+        if st.button("Generate Career Roadmap", use_container_width=True):
             if not st.session_state.resume_text:
                 st.warning("⚠️ Please upload your resume in Resume Intelligence first.")
             elif not r_jd.strip():
@@ -874,30 +877,29 @@ if st.session_state.workspace_mode == "Job Seeker":
 
                 st.markdown("#### Skill Deficit Diagnosis")
                 st.markdown(f"**Target Role:** `{r_role or 'Target Role'}`")
-                st.markdown(f"**Missing Competencies:** {render_chips(gaps, 'chip chip-gap')}", unsafe_allow_html=True)
+                st.markdown(f"**Identified Gaps:** {render_chips(gaps, 'chip chip-gap')}", unsafe_allow_html=True)
 
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.markdown("#### Structured 5-Stage Action Plan")
+                st.markdown("#### Structured 5-Phase Action Plan")
 
                 steps = [
-                    f"**Stage 1: Core Competency Acquisition** — Master highest priority gaps: *{', '.join(gaps[:3]) if gaps else 'Advanced Architecture and Patterns'}*.",
-                    f"**Stage 2: Production Portfolio** — Build 2 end-to-end projects implementing {', '.join(gaps[3:6]) if len(gaps) > 3 else 'system scalability and automated testing'}.",
-                    "**Stage 3: Resume Keyword Calibration** — Quantify impact metrics (e.g., latency reduction, cost optimization, accuracy gain) on your resume.",
-                    "**Stage 4: Technical & Behavioral Prep** — Complete mock coding rounds and STAR framework scenario questions.",
-                    "**Stage 5: High-Precision Applications** — Apply directly to target listings and iterate based on response analytics."
+                    f"**Phase 1: Core Competency Acquisition** — Prioritize learning: *{', '.join(gaps[:3]) if gaps else 'Advanced System Architecture'}*.",
+                    f"**Phase 2: Project Engineering** — Build 2 end-to-end applications demonstrating {', '.join(gaps[3:6]) if len(gaps) > 3 else 'high-throughput microservices and automated testing'}.",
+                    "**Phase 3: Impact-Oriented Resume Calibration** — Highlight quantified performance metrics (e.g., latency reduction, cost optimization) matching role expectations.",
+                    "**Phase 4: Technical & System Design Prep** — Master system trade-offs, architecture blueprints, and behavioral STAR questions.",
+                    "**Phase 5: Targeted Application Strategy** — Apply selectively to matching roles and refine resumes based on keyword feedback."
                 ]
 
                 for s in steps:
                     st.markdown(f"- {s}")
 
     # ----------------------------------------------------
-    # SECTION 5: AI CAREER CHATBOT
+    # MODULE 5: AI CAREER CHATBOT
     # ----------------------------------------------------
     elif st.session_state.active_nav == "AI Career Chatbot":
         st.subheader("💬 AI Career Advisor Chatbot")
-        st.caption("Ask questions regarding your resume, technical interview tips, career transitions, and skill development.")
+        st.caption("Ask questions regarding resume calibration, interview techniques, skill roadmaps, and career progression.")
 
-        # Display Chat History
         for msg in st.session_state.chat_history:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
@@ -914,18 +916,18 @@ if st.session_state.workspace_mode == "Job Seeker":
 
 
 # ============================================================
-# DASHBOARD 2: RECRUITER SCREENING
+# WORKSPACE 2: RECRUITER SCREENING DASHBOARD
 # ============================================================
 
 else:
     st.markdown(
         """
         <div class="hero-banner">
-            <div class="hero-tag">Enterprise Screening</div>
+            <div class="hero-tag">Enterprise Screening Hub</div>
             <div class="hero-heading">Bulk Resume Screening & <span>Candidate Ranking</span></div>
             <p class="hero-sub">
-                Screen large batches of candidate resumes at scale. Leverage TF-IDF similarity, skill alignment,
-                and configurable Top-N shortlist slicing with instant CSV export.
+                Screen large batches of applicants against target job requirements. Compute TF-IDF semantic
+                similarity and skill alignment, select your custom Top-N cohort, and export shortlists.
             </p>
         </div>
         """,
@@ -935,34 +937,34 @@ else:
     rec_col1, rec_col2 = st.columns([1.2, 0.8])
 
     with rec_col1:
-        st.subheader("1. Job Description Benchmark")
+        st.subheader("1. Job Requirements Benchmark")
         recruiter_job_text = st.text_area(
             "Benchmark Job Description",
             height=230,
-            placeholder="Paste role requirements, mandatory tech stack, and responsibilities...",
+            placeholder="Paste complete job requirements, responsibilities, and required skill sets...",
             key="rec_jd_box",
         )
 
     with rec_col2:
-        st.subheader("2. Screening Configuration")
+        st.subheader("2. Shortlist Parameters")
         top_n_val = st.number_input(
             "Shortlist Limit (Top-N)",
             min_value=1,
             max_value=500,
             value=10,
             step=1,
-            help="Recruiter decides how many candidates should be shortlisted (e.g., Top 5, 10, 20, 50).",
+            help="Recruiter decides the exact number of top candidates to shortlist.",
         )
         st.caption("Recruiter-controlled: Select any cohort size from 1 to 500.")
 
         candidate_batch = st.file_uploader(
-            "Upload Candidate Resumes (PDF, DOCX, TXT)",
+            "Upload Batch Resumes (PDF, DOCX, TXT)",
             type=["pdf", "docx", "txt"],
             accept_multiple_files=True,
             key="rec_batch_uploader",
         )
 
-    if st.button("🚀 Screen & Rank Candidates", type="primary", use_container_width=True):
+    if st.button("🚀 Execute Batch AI Screening", type="primary", use_container_width=True):
         if not recruiter_job_text.strip():
             st.warning("⚠️ Please provide a job description benchmark first.")
         elif not candidate_batch:
@@ -1034,34 +1036,34 @@ else:
         df_top = df_all.head(shortlist_size)
 
         st.markdown("---")
-        st.subheader("3. AI Candidate Ranking")
+        st.subheader("3. Ranked Candidate Shortlist")
 
         k1, k2, k3 = st.columns(3)
         with k1:
-            st.metric("Total Screened", len(df_all))
+            st.metric("Total Resumes Screened", len(df_all))
         with k2:
             st.metric("Shortlisted Cohort", len(df_top))
         with k3:
             best_score = df_all.iloc[0]["Overall Match"] if not df_all.empty else 0
-            st.metric("Top Overall Match", f"{best_score}%")
+            st.metric("Top Candidate Score", f"{best_score}%")
 
         st.markdown(f"#### 🏆 Top {shortlist_size} Candidates")
         display_cols = ["Rank", "Candidate", "Email", "Resume Score", "NLP Match", "Skill Match", "Overall Match", "Missing Skills", "Status"]
         st.dataframe(df_top[display_cols], use_container_width=True, hide_index=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.subheader("4. Candidate Intelligence Diagnostic")
+        st.subheader("4. Candidate Diagnostic Drill-Down")
 
         candidate_list = df_top["Candidate"].tolist()
         if candidate_list:
-            selected_person = st.selectbox("Select Candidate for Deep-Dive", candidate_list)
+            selected_person = st.selectbox("Select Candidate for Diagnostic Analysis", candidate_list)
             row = df_top[df_top["Candidate"] == selected_person].iloc[0]
 
             cd1, cd2 = st.columns(2)
             with cd1:
                 st.markdown(
                     f"""
-                    <div class="stat-card">
+                    <div class="glass-card">
                         <h4 style="margin:0 0 10px 0;">Candidate: {row['Candidate']}</h4>
                         <p><b>Email:</b> {row['Email']}</p>
                         <p><b>Overall Match:</b> {row['Overall Match']}%</p>
@@ -1073,7 +1075,7 @@ else:
             with cd2:
                 st.markdown(
                     f"""
-                    <div class="stat-card">
+                    <div class="glass-card">
                         <h4 style="margin:0 0 10px 0;">Match Diagnostic</h4>
                         <p><b>NLP Similarity:</b> {row['NLP Match']}%</p>
                         <p><b>Skill Overlap:</b> {row['Skill Match']}%</p>
@@ -1088,9 +1090,9 @@ else:
 
         csv_buffer = df_top.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label="⬇️ Download Shortlist CSV",
+            label="⬇️ Download Shortlist as CSV",
             data=csv_buffer,
-            file_name="careerLens_shortlist.csv",
+            file_name="CareerLens_Shortlist.csv",
             mime="text/csv",
             type="primary",
             use_container_width=True,
@@ -1098,14 +1100,14 @@ else:
 
 
 # ============================================================
-# FOOTER
+# PLATFORM FOOTER
 # ============================================================
 
 st.markdown("---")
 st.markdown(
     """
-    <div style="text-align: center; color: #475569; font-size: 12px; padding: 10px 0;">
-        🎯 <b>CareerLens AI</b> — AI-Powered Career Intelligence & Recruitment Platform | Final Year Project
+    <div style="text-align: center; color: #475569; font-size: 12px; padding: 8px 0;">
+        ⚡ <b>CareerLens AI</b> — AI-Powered Career Intelligence & Recruitment Platform | Final Year Project
     </div>
     """,
     unsafe_allow_html=True,
