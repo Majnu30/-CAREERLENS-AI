@@ -19,12 +19,11 @@ except ImportError:
 
 
 # ============================================================
-# CAREERLENS AI
-# AI-Powered Career Intelligence & Recruitment Platform
+# PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
-    page_title="CareerLens AI",
+    page_title="CareerLens AI — Career Intelligence & Recruitment",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -32,135 +31,231 @@ st.set_page_config(
 
 
 # ============================================================
-# PROFESSIONAL STREAMLIT THEME
+# MODERN SAAS UI STYLING
 # ============================================================
 
 st.markdown(
     """
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
         .stApp {
-            background-color: #07111f;
+            background-color: #070d18;
+            color: #cbd5e1;
         }
 
         [data-testid="stSidebar"] {
-            background-color: #0b1728;
+            background-color: #0c1527;
+            border-right: 1px solid #1e293b;
         }
 
         .block-container {
-            max-width: 1400px;
-            padding-top: 2rem;
+            max-width: 1350px;
+            padding-top: 1.8rem;
             padding-bottom: 3rem;
         }
 
-        h1, h2, h3 {
+        /* Typography */
+        h1, h2, h3, h4 {
             color: #f8fafc !important;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
-        p, label {
-            color: #b8c5d6;
+        p, label, span {
+            color: #94a3b8;
         }
 
+        /* Brand Elements */
+        .brand-container {
+            padding: 10px 0 20px 0;
+        }
         .brand-name {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
-            color: white;
+            color: #ffffff;
+            letter-spacing: -0.5px;
         }
-
         .brand-accent {
-            color: #8b7cff;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-
-        .brand-subtitle {
-            font-size: 11px;
-            letter-spacing: 2px;
-            color: #8091a8;
-        }
-
-        .hero-box {
-            background-color: #0e1d34;
-            border: 1px solid #263d61;
-            border-radius: 22px;
-            padding: 36px;
-            margin-bottom: 28px;
-        }
-
-        .hero-label {
-            color: #8b7cff;
-            font-size: 13px;
+        .brand-badge {
+            display: inline-block;
+            font-size: 10px;
             font-weight: 700;
-            letter-spacing: 2px;
-        }
-
-        .hero-title {
-            color: white;
-            font-size: 44px;
-            line-height: 1.1;
-            font-weight: 800;
-            margin-top: 12px;
-        }
-
-        .hero-accent {
-            color: #38bdf8;
-        }
-
-        .hero-description {
-            color: #aebdd0;
-            font-size: 16px;
-            line-height: 1.7;
-            max-width: 780px;
-            margin-top: 15px;
-        }
-
-        .section-description {
-            color: #8293aa;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
-
-        .feature-card {
-            background-color: #0d1b2e;
-            border: 1px solid #20344f;
-            border-radius: 16px;
-            padding: 22px;
-            min-height: 150px;
-        }
-
-        .feature-icon {
-            font-size: 28px;
-        }
-
-        .feature-title {
-            color: white;
-            font-size: 17px;
-            font-weight: 700;
-            margin-top: 8px;
-        }
-
-        .feature-description {
-            color: #91a2b7;
-            font-size: 14px;
-            line-height: 1.6;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #a5b4fc;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 6px;
+            padding: 2px 8px;
             margin-top: 6px;
         }
 
-        .online {
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #172554 50%, #1e1b4b 100%);
+            border: 1px solid #312e81;
+            border-radius: 20px;
+            padding: 36px 40px;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .hero-tag {
+            color: #a5b4fc;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .hero-heading {
+            color: #ffffff;
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin: 8px 0 14px 0;
+        }
+        .hero-heading span {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-sub {
+            color: #94a3b8;
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0;
+        }
+
+        /* Skill Chips */
+        .chip {
+            display: inline-block;
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 3px 4px 3px 0;
+        }
+        .chip-gap {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .chip-match {
+            background: rgba(34, 197, 94, 0.12);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* Stat & Info Cards */
+        .stat-card {
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .feature-card {
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 22px;
+            min-height: 155px;
+            transition: all 0.2s ease-in-out;
+        }
+        .feature-icon {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+        .feature-title {
+            color: #f1f5f9;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .feature-desc {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Risk Badges */
+        .badge-low {
+            background: rgba(34, 197, 94, 0.15);
             color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .badge-medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .badge-high {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        /* System Status Pill */
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Streamlit Native Widget Reskins */
+        div[data-testid="stMetric"] {
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        div[data-testid="stMetricValue"] {
+            color: #f8fafc !important;
             font-weight: 700;
         }
-
-        div[data-testid="stMetric"] {
-            background-color: #0d1b2e;
-            border: 1px solid #20344f;
-            border-radius: 14px;
-            padding: 18px;
-        }
-
-        div[data-testid="stMetricValue"] {
-            color: white !important;
-        }
-
         div[data-testid="stMetricLabel"] {
-            color: #94a3b8 !important;
+            color: #64748b !important;
+            font-size: 13px;
+            font-weight: 600;
         }
     </style>
     """,
@@ -169,166 +264,96 @@ st.markdown(
 
 
 # ============================================================
-# SKILL DATABASE
+# SKILL TAXONOMY
 # ============================================================
 
 SKILL_ALIASES = {
-    "Python": ["python"],
-    "Java": ["java"],
+    "Python": ["python", "py"],
+    "Java": ["java", "jvm"],
     "JavaScript": ["javascript", "js"],
     "TypeScript": ["typescript", "ts"],
+    "C++": ["c++", "cpp"],
+    "C#": ["c#", "csharp", "c sharp"],
+    ".NET": [".net", "dotnet", "asp.net"],
     "React": ["react", "react.js", "reactjs"],
+    "Angular": ["angular", "angularjs"],
+    "Vue.js": ["vue", "vue.js", "vuejs"],
     "Node.js": ["node.js", "nodejs", "node js"],
-    "SQL": ["sql", "mysql", "postgresql", "postgres"],
+    "FastAPI": ["fastapi", "fast api"],
+    "Flask": ["flask"],
+    "Django": ["django"],
+    "Spring Boot": ["spring boot", "springboot", "spring"],
+    "HTML": ["html", "html5"],
+    "CSS": ["css", "css3", "tailwind", "bootstrap"],
+    "SQL": ["sql", "mysql", "postgresql", "postgres", "sqlite", "oracle"],
     "MongoDB": ["mongodb", "mongo db", "mongo"],
-    "Machine Learning": [
-        "machine learning",
-        "machine-learning",
-        "ml",
-    ],
-    "Deep Learning": [
-        "deep learning",
-        "deep-learning",
-    ],
-    "NLP": [
-        "nlp",
-        "natural language processing",
-    ],
-    "Computer Vision": [
-        "computer vision",
-        "opencv",
-    ],
-    "TensorFlow": ["tensorflow"],
-    "PyTorch": ["pytorch"],
-    "Scikit-learn": [
-        "scikit-learn",
-        "sklearn",
-    ],
+    "Redis": ["redis"],
+    "Machine Learning": ["machine learning", "machine-learning", "ml"],
+    "Deep Learning": ["deep learning", "deep-learning", "dl", "neural networks"],
+    "NLP": ["nlp", "natural language processing", "text mining", "spacy", "nltk"],
+    "Computer Vision": ["computer vision", "opencv", "yolo", "image processing"],
+    "TensorFlow": ["tensorflow", "tf"],
+    "PyTorch": ["pytorch", "torch"],
+    "Scikit-learn": ["scikit-learn", "sklearn"],
     "Pandas": ["pandas"],
     "NumPy": ["numpy"],
-    "Data Analysis": [
-        "data analysis",
-        "data analytics",
-    ],
+    "Data Analysis": ["data analysis", "data analytics", "eda"],
     "Data Science": ["data science"],
     "Power BI": ["power bi", "powerbi"],
     "Tableau": ["tableau"],
-    "Excel": [
-        "excel",
-        "microsoft excel",
-    ],
-    "AWS": [
-        "aws",
-        "amazon web services",
-    ],
-    "Azure": [
-        "azure",
-        "microsoft azure",
-    ],
-    "GCP": [
-        "gcp",
-        "google cloud",
-    ],
-    "Docker": ["docker"],
-    "Kubernetes": [
-        "kubernetes",
-        "k8s",
-    ],
-    "Git": [
-        "git",
-        "github",
-        "gitlab",
-    ],
-    "Linux": ["linux"],
-    "REST API": [
-        "rest api",
-        "restful api",
-        "rest apis",
-    ],
-    "FastAPI": [
-        "fastapi",
-        "fast api",
-    ],
-    "Flask": ["flask"],
-    "Django": ["django"],
-    "Spring Boot": ["spring boot"],
-    "C++": ["c++", "cpp"],
-    "C#": ["c#", "c sharp"],
-    ".NET": [".net", "dotnet"],
-    "HTML": ["html", "html5"],
-    "CSS": ["css", "css3"],
+    "Excel": ["excel", "microsoft excel", "spreadsheets"],
+    "AWS": ["aws", "amazon web services", "ec2", "s3", "lambda"],
+    "Azure": ["azure", "microsoft azure"],
+    "GCP": ["gcp", "google cloud", "google cloud platform"],
+    "Docker": ["docker", "containerization"],
+    "Kubernetes": ["kubernetes", "k8s"],
+    "Git": ["git", "github", "gitlab", "version control"],
+    "Linux": ["linux", "unix", "bash", "shell scripting"],
+    "REST API": ["rest api", "restful api", "restful", "apis"],
+    "GraphQL": ["graphql"],
+    "CI/CD": ["ci/cd", "continuous integration", "github actions", "jenkins"],
+    "Microservices": ["microservices", "distributed systems"],
     "Figma": ["figma"],
-    "UI/UX": [
-        "ui/ux",
-        "ui ux",
-    ],
-    "Agile": [
-        "agile",
-        "scrum",
-    ],
-    "Communication": ["communication"],
-    "Leadership": ["leadership"],
-    "Problem Solving": [
-        "problem solving",
-        "problem-solving",
-    ],
+    "UI/UX": ["ui/ux", "ui ux", "user experience", "wireframing"],
+    "Agile": ["agile", "scrum", "kanban", "sprint"],
+    "Communication": ["communication", "presentation"],
+    "Leadership": ["leadership", "mentoring", "team management"],
+    "Problem Solving": ["problem solving", "problem-solving", "analytical skills"],
 }
 
 
 # ============================================================
-# FRAUD SIGNAL DATABASE
+# FRAUD DETECTION PATTERNS
 # ============================================================
 
 FRAUD_RULES = {
-    "Payment Request": [
-        "pay a fee",
-        "registration fee",
-        "processing fee",
-        "training fee",
-        "security deposit",
-        "send money",
-        "payment required",
-        "upfront payment",
-        "pay to apply",
+    "Financial & Payment Demands": [
+        "pay a fee", "registration fee", "processing fee", "training fee",
+        "security deposit", "send money", "payment required", "upfront payment",
+        "pay to apply", "application fee", "wire transfer", "cashier check"
     ],
-    "Financial Information": [
-        "bank account",
-        "bank details",
-        "credit card",
-        "debit card",
-        "otp",
-        "one time password",
-        "wallet",
-        "crypto",
-        "cryptocurrency",
+    "Sensitive Banking Requests": [
+        "bank account", "bank details", "credit card", "debit card",
+        "otp", "one time password", "crypto", "cryptocurrency", "wallet address",
+        "social security number", "ssn", "netbanking"
     ],
-    "Urgency Pressure": [
-        "act now",
-        "urgent",
-        "immediately",
-        "within 24 hours",
-        "limited slots",
-        "last chance",
-        "today only",
+    "Artificial Urgency": [
+        "act now", "urgent hiring", "immediate joiner today", "within 24 hours",
+        "limited slots left", "last chance", "today only", "instant offer"
     ],
-    "Suspicious Communication": [
-        "whatsapp only",
-        "telegram only",
-        "contact on telegram",
-        "contact on whatsapp",
-        "personal gmail",
+    "Unofficial Communication Channels": [
+        "whatsapp only", "telegram only", "contact on telegram", "contact on whatsapp",
+        "personal gmail", "inbox me directly", "dm on telegram"
     ],
-    "Guaranteed Claims": [
-        "guaranteed job",
-        "100% placement",
-        "guaranteed placement",
-        "no interview required",
-    ],
+    "Unrealistic Guarantees": [
+        "guaranteed job", "100% placement", "guaranteed placement", "no interview required",
+        "no experience high salary", "earn $5000 weekly effortless", "guaranteed selection"
+    ]
 }
 
 
 # ============================================================
-# SESSION STATE
+# SESSION STATE INITIALIZATION
 # ============================================================
 
 defaults = {
@@ -345,33 +370,19 @@ for key, value in defaults.items():
 
 
 # ============================================================
-# UTILITY FUNCTIONS
+# TEXT EXTRACTION & NLP ENGINES
 # ============================================================
 
-def normalize(text: str) -> str:
-    return re.sub(
-        r"\s+",
-        " ",
-        str(text).lower(),
-    ).strip()
+def normalize_text(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text).lower()).strip()
 
 
 def extract_pdf(data: bytes) -> str:
     if PdfReader is None:
         return ""
-
     try:
         reader = PdfReader(io.BytesIO(data))
-
-        pages = []
-
-        for page in reader.pages:
-            pages.append(
-                page.extract_text() or ""
-            )
-
-        return "\n".join(pages)
-
+        return "\n".join([page.extract_text() or "" for page in reader.pages])
     except Exception:
         return ""
 
@@ -379,17 +390,9 @@ def extract_pdf(data: bytes) -> str:
 def extract_docx(data: bytes) -> str:
     if Document is None:
         return ""
-
     try:
-        document = Document(
-            io.BytesIO(data)
-        )
-
-        return "\n".join(
-            paragraph.text
-            for paragraph in document.paragraphs
-        )
-
+        doc = Document(io.BytesIO(data))
+        return "\n".join([p.text for p in doc.paragraphs])
     except Exception:
         return ""
 
@@ -397,322 +400,148 @@ def extract_docx(data: bytes) -> str:
 def extract_file_text(uploaded_file) -> str:
     if uploaded_file is None:
         return ""
-
     try:
         data = uploaded_file.getvalue()
     except Exception:
         return ""
 
-    extension = (
-        uploaded_file.name
-        .lower()
-        .split(".")[-1]
-    )
-
-    if extension == "txt":
-        return data.decode(
-            "utf-8",
-            errors="ignore",
-        )
-
-    if extension == "pdf":
+    ext = uploaded_file.name.lower().split(".")[-1]
+    if ext == "txt":
+        return data.decode("utf-8", errors="ignore")
+    if ext == "pdf":
         return extract_pdf(data)
-
-    if extension == "docx":
+    if ext == "docx":
         return extract_docx(data)
-
     return ""
 
 
 def detect_skills(text: str) -> List[str]:
-    text = normalize(text)
-
+    text_clean = normalize_text(text)
     detected = []
-
     for skill, aliases in SKILL_ALIASES.items():
-
         for alias in aliases:
-
-            pattern = (
-                r"(?<![a-z0-9])"
-                + re.escape(alias.lower())
-                + r"(?![a-z0-9])"
-            )
-
-            if re.search(
-                pattern,
-                text,
-            ):
+            pattern = r"(?<![a-z0-9])" + re.escape(alias.lower()) + r"(?![a-z0-9])"
+            if re.search(pattern, text_clean):
                 detected.append(skill)
                 break
-
-    return sorted(
-        set(detected)
-    )
+    return sorted(set(detected))
 
 
 def extract_email(text: str) -> str:
-    match = re.search(
-        r"[\w.+-]+@[\w-]+\.[\w.-]+",
-        text,
-    )
-
-    if match:
-        return match.group(0)
-
-    return "Not detected"
+    match = re.search(r"[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}", text)
+    return match.group(0) if match else "Not detected"
 
 
 def extract_phone(text: str) -> str:
-    matches = re.findall(
-        r"(?:\+?\d[\d\s().-]{8,}\d)",
-        text,
-    )
-
-    if matches:
-        return matches[0].strip()
-
-    return "Not detected"
+    matches = re.findall(r"(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", text)
+    return matches[0].strip() if matches else "Not detected"
 
 
 def extract_name(text: str) -> str:
-
-    lines = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip()
-    ]
-
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
     for line in lines[:10]:
-
         if (
-            2 <= len(line.split()) <= 5
+            2 <= len(line.split()) <= 4
             and "@" not in line
-            and not re.search(
-                r"\d",
-                line,
-            )
-            and len(line) < 60
+            and not re.search(r"\d", line)
+            and len(line) < 40
+            and not any(keyword in line.lower() for keyword in ["resume", "curriculum", "cv", "profile"])
         ):
             return line.title()
-
     return "Candidate"
 
 
-def calculate_resume_score(
-    text: str,
-    skills: List[str],
-) -> int:
-
+def calculate_resume_score(text: str, skills: List[str]) -> int:
     score = 0
+    lower = normalize_text(text)
 
-    lower = normalize(text)
-
-    if len(text.strip()) >= 300:
+    # Content length & depth
+    if len(text.strip()) >= 500:
         score += 15
-
-    if extract_email(text) != "Not detected":
+    elif len(text.strip()) >= 250:
         score += 10
 
+    # Contact indicators
+    if extract_email(text) != "Not detected":
+        score += 10
     if extract_phone(text) != "Not detected":
         score += 5
 
-    score += min(
-        len(skills) * 3,
-        30,
-    )
+    # Skill footprint (up to 30 pts)
+    score += min(len(skills) * 3, 30)
 
-    education_words = [
-        "b.tech",
-        "btech",
-        "bachelor",
-        "master",
-        "degree",
-        "computer science",
-        "engineering",
-    ]
-
-    if any(
-        word in lower
-        for word in education_words
-    ):
+    # Core Structural Sections
+    education_markers = ["b.tech", "btech", "bachelor", "master", "degree", "computer science", "engineering", "university", "gpa"]
+    if any(m in lower for m in education_markers):
         score += 15
 
-    if "experience" in lower:
+    if any(k in lower for k in ["experience", "employment", "work history", "internship"]):
         score += 10
 
-    if "project" in lower:
+    if any(k in lower for k in ["project", "portfolio", "capstone", "github.com"]):
+        score += 10
+
+    if any(k in lower for k in ["linkedin.com", "github.com", "leetcode", "certifi"]):
         score += 5
 
-    if (
-        "linkedin" in lower
-        or "github" in lower
-    ):
-        score += 5
-
-    return min(
-        score,
-        100,
-    )
+    return min(score, 100)
 
 
-def calculate_readiness(
-    resume_score: int,
-    skills: List[str],
-) -> int:
-
-    return min(
-        100,
-        round(
-            resume_score * 0.7
-            + min(
-                len(skills) * 4,
-                30,
-            )
-        ),
-    )
+def calculate_readiness(resume_score: int, skills: List[str]) -> int:
+    skill_factor = min(len(skills) * 3.5, 30)
+    return min(100, round((resume_score * 0.7) + skill_factor))
 
 
-def nlp_similarity(
-    profile: str,
-    job: str,
-) -> float:
-
-    if (
-        not profile.strip()
-        or not job.strip()
-    ):
+def nlp_similarity(profile: str, job: str) -> float:
+    if not profile.strip() or not job.strip():
         return 0.0
-
     try:
-
-        vectorizer = TfidfVectorizer(
-            stop_words="english",
-            ngram_range=(1, 2),
-        )
-
-        matrix = vectorizer.fit_transform(
-            [
-                normalize(profile),
-                normalize(job),
-            ]
-        )
-
-        similarity = cosine_similarity(
-            matrix[0:1],
-            matrix[1:2],
-        )[0][0]
-
-        return float(similarity)
-
+        vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2))
+        matrix = vectorizer.fit_transform([normalize_text(profile), normalize_text(job)])
+        return float(cosine_similarity(matrix[0:1], matrix[1:2])[0][0])
     except Exception:
         return 0.0
 
 
-def skill_similarity(
-    profile_skills: List[str],
-    job_skills: List[str],
-) -> float:
-
+def skill_similarity(profile_skills: List[str], job_skills: List[str]) -> float:
     if not job_skills:
         return 0.0
-
-    profile = set(profile_skills)
-    job = set(job_skills)
-
-    return (
-        len(profile & job)
-        / len(job)
-    )
+    return len(set(profile_skills) & set(job_skills)) / len(set(job_skills))
 
 
-def calculate_match(
-    profile: str,
-    job: str,
-) -> Tuple[int, int, int]:
+def calculate_match(profile: str, job: str) -> Tuple[int, int, int]:
+    profile_skills = detect_skills(profile)
+    job_skills = detect_skills(job)
 
-    profile_skills = detect_skills(
-        profile
-    )
+    nlp_score = nlp_similarity(profile, job)
+    skill_score = skill_similarity(profile_skills, job_skills)
 
-    job_skills = detect_skills(
-        job
-    )
-
-    nlp_score = nlp_similarity(
-        profile,
-        job,
-    )
-
-    skill_score = skill_similarity(
-        profile_skills,
-        job_skills,
-    )
-
-    final_score = (
-        nlp_score * 0.55
-        + skill_score * 0.45
-    )
+    # Blended weighting: 50% NLP semantics + 50% explicit skill alignment
+    overall = (nlp_score * 0.50) + (skill_score * 0.50)
 
     return (
-        min(
-            round(
-                final_score * 100
-            ),
-            100,
-        ),
-        min(
-            round(
-                nlp_score * 100
-            ),
-            100,
-        ),
-        min(
-            round(
-                skill_score * 100
-            ),
-            100,
-        ),
+        min(round(overall * 100), 100),
+        min(round(nlp_score * 100), 100),
+        min(round(skill_score * 100), 100),
     )
 
 
-def detect_fraud(
-    job_text: str,
-) -> Dict:
-
-    text = normalize(
-        job_text
-    )
-
+def detect_fraud(job_text: str) -> Dict:
+    text = normalize_text(job_text)
     found = {}
 
     for category, phrases in FRAUD_RULES.items():
-
-        hits = [
-            phrase
-            for phrase in phrases
-            if phrase in text
-        ]
-
+        hits = [phrase for phrase in phrases if phrase in text]
         if hits:
             found[category] = hits
 
-    total_signals = sum(
-        len(values)
-        for values in found.values()
-    )
+    total_signals = sum(len(v) for v in found.values())
+    risk_score = min(total_signals * 20, 100)
 
-    risk_score = min(
-        total_signals * 15,
-        100,
-    )
-
-    if risk_score >= 60:
+    if risk_score >= 50:
         level = "HIGH RISK"
-
-    elif risk_score >= 30:
+    elif risk_score >= 20:
         level = "MEDIUM RISK"
-
     else:
         level = "LOW RISK"
 
@@ -723,1145 +552,470 @@ def detect_fraud(
     }
 
 
+def render_chips(skills: List[str], chip_class="chip") -> str:
+    if not skills:
+        return "<span style='color:#64748b; font-size:13px;'>None detected</span>"
+    return "".join([f"<span class='{chip_class}'>{s}</span>" for s in skills])
+
+
 # ============================================================
-# SIDEBAR
+# SIDEBAR NAVIGATION
 # ============================================================
 
 with st.sidebar:
-
     st.markdown(
-        '<div class="brand-name">'
-        'Career<span class="brand-accent">Lens</span> AI'
-        '</div>',
+        """
+        <div class="brand-container">
+            <div class="brand-name">Career<span class="brand-accent">Lens</span> AI</div>
+            <div class="brand-badge">Enterprise Edition</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-
-    st.markdown(
-        '<div class="brand-subtitle">'
-        'CAREER INTELLIGENCE PLATFORM'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.divider()
 
     workspace = st.radio(
-        "WORKSPACE",
-        [
-            "👨‍💻 Job Seeker",
-            "🏢 Recruiter",
-        ],
+        "WORKSPACE VIEW",
+        ["👨‍💻 Job Seeker Workspace", "🏢 Recruiter Intelligence"],
+        index=0,
     )
 
-    st.divider()
+    st.markdown("---")
 
     st.markdown(
-        '<p class="online">● AI ENGINE ONLINE</p>',
+        """
+        <div class="status-pill">
+            <span class="status-dot"></span>
+            AI ENGINE ONLINE
+        </div>
+        <div style="font-size: 11px; color: #64748b; margin-top: 8px;">
+            TF-IDF • Cosine Similarity • NLP Heuristics
+        </div>
+        """,
         unsafe_allow_html=True,
-    )
-
-    st.caption(
-        "NLP • Machine Learning • "
-        "Recruitment Intelligence"
     )
 
 
 # ============================================================
-# JOB SEEKER
+# WORKSPACE 1: JOB SEEKER
 # ============================================================
 
-if workspace == "👨‍💻 Job Seeker":
+if workspace == "👨‍💻 Job Seeker Workspace":
 
     st.markdown(
-        '<div class="hero-box">'
-        '<div class="hero-label">'
-        'AI CAREER INTELLIGENCE'
-        '</div>'
-        '<div class="hero-title">'
-        'Understand Your Career.'
-        '<br>'
-        '<span class="hero-accent">'
-        'Build Your Future.'
-        '</span>'
-        '</div>'
-        '<div class="hero-description">'
-        'CareerLens AI analyzes your resume, '
-        'evaluates opportunities, detects job-risk '
-        'signals, identifies skill gaps and builds '
-        'a personalized career intelligence profile.'
-        '</div>'
-        '</div>',
+        """
+        <div class="hero-banner">
+            <div class="hero-tag">AI Career Intelligence</div>
+            <div class="hero-heading">Understand Your Career. <span>Build Your Future.</span></div>
+            <p class="hero-sub">
+                CareerLens AI provides multidimensional resume scoring, semantic job description matching,
+                instant skill-gap diagnosis, and automated job-posting fraud screening.
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    st.header(
-        "Career Overview"
-    )
+    # Top Overview Metrics
+    analysis = st.session_state.resume_analysis
+    resume_score = analysis["resume_score"] if analysis else None
+    readiness = analysis["readiness"] if analysis else None
+    skill_count = len(analysis["skills"]) if analysis else 0
 
-    st.write(
-        "Your career intelligence at a glance."
-    )
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric("Resume Score", "—" if resume_score is None else f"{resume_score}/100")
+    with m2:
+        st.metric("Career Readiness", "—" if readiness is None else f"{readiness}%")
+    with m3:
+        st.metric("Skills Extracted", skill_count)
+    with m4:
+        st.metric("Target Applications", st.session_state.applications)
 
-    analysis = (
-        st.session_state.resume_analysis
-    )
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    if analysis:
+    # Modular Tabs for Clean UX
+    tab_resume, tab_match, tab_fraud, tab_roadmap = st.tabs([
+        "📄 Resume Intelligence",
+        "🎯 Semantic Job Match",
+        "🛡️ Fraud Risk Screening",
+        "🗺️ Skill Gap & Roadmap"
+    ])
 
-        resume_score = analysis[
-            "resume_score"
-        ]
+    # --- TAB 1: RESUME INTELLIGENCE ---
+    with tab_resume:
+        st.subheader("Upload & Parse Resume")
+        st.caption("Supports PDF, DOCX, and TXT files. Evaluated against industry structural benchmarks.")
 
-        readiness = analysis[
-            "readiness"
-        ]
-
-        skill_count = len(
-            analysis["skills"]
+        resume_file = st.file_uploader(
+            "Upload Resume",
+            type=["pdf", "docx", "txt"],
+            key="js_resume_file",
+            label_visibility="collapsed"
         )
 
-    else:
-
-        resume_score = None
-        readiness = None
-        skill_count = 0
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        st.metric(
-            "Resume Score",
-            (
-                "—"
-                if resume_score is None
-                else f"{resume_score}/100"
-            ),
-        )
-
-    with c2:
-        st.metric(
-            "Career Readiness",
-            (
-                "—"
-                if readiness is None
-                else f"{readiness}%"
-            ),
-        )
-
-    with c3:
-        st.metric(
-            "Skills Detected",
-            skill_count,
-        )
-
-    with c4:
-        st.metric(
-            "Applications",
-            st.session_state.applications,
-        )
-
-    st.divider()
-
-    # --------------------------------------------------------
-    # RESUME INTELLIGENCE
-    # --------------------------------------------------------
-
-    st.header(
-        "📄 Resume Intelligence"
-    )
-
-    st.write(
-        "Upload your resume to extract your "
-        "professional profile."
-    )
-
-    resume = st.file_uploader(
-        "Resume File",
-        type=[
-            "pdf",
-            "docx",
-            "txt",
-        ],
-        key="jobseeker_resume",
-    )
-
-    if resume:
-
-        resume_text = extract_file_text(
-            resume
-        )
-
-        if not resume_text.strip():
-
-            st.error(
-                "Could not extract text from this file. "
-                "Please use a text-based PDF, DOCX or TXT file."
-            )
-
-        else:
-
-            skills = detect_skills(
-                resume_text
-            )
-
-            score = calculate_resume_score(
-                resume_text,
-                skills,
-            )
-
-            readiness_score = (
-                calculate_readiness(
-                    score,
-                    skills,
-                )
-            )
-
-            st.session_state.resume_text = (
-                resume_text
-            )
-
-            st.session_state.resume_name = (
-                resume.name
-            )
-
-            st.session_state.resume_analysis = {
-                "name": extract_name(
-                    resume_text
-                ),
-                "email": extract_email(
-                    resume_text
-                ),
-                "phone": extract_phone(
-                    resume_text
-                ),
-                "skills": skills,
-                "resume_score": score,
-                "readiness": readiness_score,
-            }
-
-            st.success(
-                "Resume analyzed successfully."
-            )
-
-            a, b, c = st.columns(3)
-
-            with a:
-                st.metric(
-                    "Resume Score",
-                    f"{score}/100",
-                )
-
-            with b:
-                st.metric(
-                    "Career Readiness",
-                    f"{readiness_score}%",
-                )
-
-            with c:
-                st.metric(
-                    "Skills Detected",
-                    len(skills),
-                )
-
-            st.subheader(
-                "Candidate Profile"
-            )
-
-            p1, p2 = st.columns(2)
-
-            with p1:
-
-                st.write(
-                    f"**Name:** "
-                    f"{extract_name(resume_text)}"
-                )
-
-                st.write(
-                    f"**Email:** "
-                    f"{extract_email(resume_text)}"
-                )
-
-            with p2:
-
-                st.write(
-                    f"**Phone:** "
-                    f"{extract_phone(resume_text)}"
-                )
-
-                st.write(
-                    f"**File:** "
-                    f"{resume.name}"
-                )
-
-            st.subheader(
-                "Detected Skills"
-            )
-
-            if skills:
-                st.write(
-                    " • ".join(skills)
-                )
+        if resume_file:
+            text = extract_file_text(resume_file)
+            if not text.strip():
+                st.error("⚠️ Unable to extract text. Please ensure the document contains selectable text.")
             else:
-                st.info(
-                    "No predefined skills detected."
-                )
+                detected = detect_skills(text)
+                r_score = calculate_resume_score(text, detected)
+                readiness_score = calculate_readiness(r_score, detected)
 
-    st.divider()
+                st.session_state.resume_text = text
+                st.session_state.resume_name = resume_file.name
+                st.session_state.resume_analysis = {
+                    "name": extract_name(text),
+                    "email": extract_email(text),
+                    "phone": extract_phone(text),
+                    "skills": detected,
+                    "resume_score": r_score,
+                    "readiness": readiness_score,
+                }
 
-    # --------------------------------------------------------
-    # JOB MATCHING
-    # --------------------------------------------------------
+                st.success("✅ Resume analyzed and indexed successfully!")
 
-    st.header(
-        "🎯 AI Job Matching"
-    )
-
-    st.write(
-        "Compare your profile against a target job."
-    )
-
-    job_description = st.text_area(
-        "Job Description",
-        height=220,
-        placeholder=(
-            "Paste the complete job description here..."
-        ),
-        key="job_match_description",
-    )
-
-    if st.button(
-        "Analyze Job Match",
-        type="primary",
-        use_container_width=True,
-    ):
-
-        if not st.session_state.resume_text:
-
-            st.warning(
-                "Upload your resume first."
-            )
-
-        elif not job_description.strip():
-
-            st.warning(
-                "Enter a job description."
-            )
-
-        else:
-
-            overall, nlp, skill = (
-                calculate_match(
-                    st.session_state.resume_text,
-                    job_description,
-                )
-            )
-
-            profile_skills = detect_skills(
-                st.session_state.resume_text
-            )
-
-            job_skills = detect_skills(
-                job_description
-            )
-
-            missing = sorted(
-                set(job_skills)
-                - set(profile_skills)
-            )
-
-            m1, m2, m3 = st.columns(3)
-
-            with m1:
-                st.metric(
-                    "Overall Match",
-                    f"{overall}%",
-                )
-
-            with m2:
-                st.metric(
-                    "NLP Similarity",
-                    f"{nlp}%",
-                )
-
-            with m3:
-                st.metric(
-                    "Skill Match",
-                    f"{skill}%",
-                )
-
-            if missing:
-
-                st.warning(
-                    "Skill gaps: "
-                    + ", ".join(missing)
-                )
-
-            else:
-
-                st.success(
-                    "No major predefined skill gaps detected."
-                )
-
-    st.divider()
-
-    # --------------------------------------------------------
-    # FRAUD DETECTION
-    # --------------------------------------------------------
-
-    st.header(
-        "🛡️ Job Fraud Detection"
-    )
-
-    st.write(
-        "Screen job advertisements for suspicious signals."
-    )
-
-    fraud_text = st.text_area(
-        "Job Advertisement",
-        height=220,
-        placeholder=(
-            "Paste a job advertisement here..."
-        ),
-        key="fraud_description",
-    )
-
-    if st.button(
-        "Run Fraud Detection",
-        use_container_width=True,
-    ):
-
-        if not fraud_text.strip():
-
-            st.warning(
-                "Enter a job advertisement."
-            )
-
-        else:
-
-            fraud_result = detect_fraud(
-                fraud_text
-            )
-
-            level = fraud_result[
-                "level"
-            ]
-
-            score = fraud_result[
-                "score"
-            ]
-
-            if level == "HIGH RISK":
-
-                st.error(
-                    f"⚠️ {level} — {score}/100"
-                )
-
-            elif level == "MEDIUM RISK":
-
-                st.warning(
-                    f"⚠️ {level} — {score}/100"
-                )
-
-            else:
-
-                st.success(
-                    f"✓ {level} — {score}/100"
-                )
-
-            if fraud_result["signals"]:
-
-                st.subheader(
-                    "Detected Risk Signals"
-                )
-
-                for category, signals in (
-                    fraud_result["signals"].items()
-                ):
-
-                    st.write(
-                        f"**{category}:** "
-                        + ", ".join(signals)
+                p_col1, p_col2 = st.columns(2)
+                with p_col1:
+                    st.markdown(
+                        f"""
+                        <div class="stat-card">
+                            <h4 style="margin:0 0 10px 0;">Candidate Identification</h4>
+                            <p><b>Name:</b> {st.session_state.resume_analysis['name']}</p>
+                            <p><b>Email:</b> {st.session_state.resume_analysis['email']}</p>
+                            <p><b>Phone:</b> {st.session_state.resume_analysis['phone']}</p>
+                            <p><b>Source File:</b> {resume_file.name}</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with p_col2:
+                    st.markdown(
+                        f"""
+                        <div class="stat-card">
+                            <h4 style="margin:0 0 10px 0;">Identified Competencies ({len(detected)})</h4>
+                            <div>{render_chips(detected)}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
                     )
 
+    # --- TAB 2: SEMANTIC JOB MATCH ---
+    with tab_match:
+        st.subheader("Job Compatibility Engine")
+        st.caption("Calculates TF-IDF n-gram cosine similarity paired with explicit skill taxonomy overlap.")
+
+        job_input = st.text_area(
+            "Paste Target Job Description",
+            height=200,
+            placeholder="Paste target job responsibilities, requirements, and qualifications...",
+            key="match_jd_input"
+        )
+
+        if st.button("Run Compatibility Match", type="primary", use_container_width=True):
+            if not st.session_state.resume_text:
+                st.warning("⚠️ Please upload your resume in the Resume Intelligence tab first.")
+            elif not job_input.strip():
+                st.warning("⚠️ Please provide a job description to compare against.")
             else:
+                overall, nlp_sim, skill_sim = calculate_match(st.session_state.resume_text, job_input)
+                cand_skills = detect_skills(st.session_state.resume_text)
+                req_skills = detect_skills(job_input)
+                missing = sorted(set(req_skills) - set(cand_skills))
+                matched = sorted(set(req_skills) & set(cand_skills))
 
-                st.info(
-                    "No predefined suspicious signals detected."
-                )
+                st.session_state.applications += 1
 
-            st.caption(
-                "This is an AI-assisted screening tool, "
-                "not a guarantee that a job is legitimate "
-                "or fraudulent."
-            )
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    st.metric("Overall Match Index", f"{overall}%")
+                with c2:
+                    st.metric("Semantic Context Similarity", f"{nlp_sim}%")
+                with c3:
+                    st.metric("Skill Overlap Ratio", f"{skill_sim}%")
 
-    st.divider()
-
-    # --------------------------------------------------------
-    # SKILL GAP + ROADMAP
-    # --------------------------------------------------------
-
-    st.header(
-        "🧩 Skill Gap Analysis"
-    )
-
-    target_role = st.text_input(
-        "Target Role",
-        placeholder=(
-            "Example: Machine Learning Engineer"
-        ),
-    )
-
-    target_job = st.text_area(
-        "Target Job Description",
-        height=180,
-        placeholder=(
-            "Paste the target job description..."
-        ),
-    )
-
-    if st.button(
-        "Generate Career Plan",
-        use_container_width=True,
-    ):
-
-        if not st.session_state.resume_text:
-
-            st.warning(
-                "Upload your resume first."
-            )
-
-        elif not target_job.strip():
-
-            st.warning(
-                "Enter the target job description."
-            )
-
-        else:
-
-            profile_skills = detect_skills(
-                st.session_state.resume_text
-            )
-
-            target_skills = detect_skills(
-                target_job
-            )
-
-            missing = sorted(
-                set(target_skills)
-                - set(profile_skills)
-            )
-
-            left, right = st.columns(2)
-
-            with left:
-
-                st.subheader(
-                    "Your Skills"
-                )
-
-                if profile_skills:
-                    st.write(
-                        ", ".join(profile_skills)
+                st.markdown("<br>", unsafe_allow_html=True)
+                sc1, sc2 = st.columns(2)
+                with sc1:
+                    st.markdown(
+                        f"""
+                        <div class="stat-card">
+                            <h4 style="color:#4ade80 !important; margin:0 0 10px 0;">✓ Matched Job Skills ({len(matched)})</h4>
+                            <div>{render_chips(matched, 'chip chip-match')}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
                     )
+                with sc2:
+                    st.markdown(
+                        f"""
+                        <div class="stat-card">
+                            <h4 style="color:#f87171 !important; margin:0 0 10px 0;">⚠ Missing Target Skills ({len(missing)})</h4>
+                            <div>{render_chips(missing, 'chip chip-gap')}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+    # --- TAB 3: FRAUD SCREENING ---
+    with tab_fraud:
+        st.subheader("Job Posting Risk & Fraud Shield")
+        st.caption("Evaluates text patterns for payment demands, unofficial communications, and unrealistic guarantees.")
+
+        posting_input = st.text_area(
+            "Paste Job Posting or Email Offer",
+            height=180,
+            placeholder="Paste suspicious job advertisement, recruitment email, or offer letter...",
+            key="fraud_input"
+        )
+
+        if st.button("Inspect Risk Signals", use_container_width=True):
+            if not posting_input.strip():
+                st.warning("⚠️ Please provide job advertisement text to screen.")
+            else:
+                fraud_res = detect_fraud(posting_input)
+                lvl = fraud_res["level"]
+                scr = fraud_res["score"]
+
+                badge_class = "badge-low" if lvl == "LOW RISK" else ("badge-medium" if lvl == "MEDIUM RISK" else "badge-high")
+
+                st.markdown(
+                    f"""
+                    <div style="margin: 15px 0;">
+                        <span class="{badge_class}">{lvl} — RISK INDEX: {scr}/100</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                if fraud_res["signals"]:
+                    st.markdown("<div class='stat-card'>", unsafe_allow_html=True)
+                    st.markdown("#### Detected Risk Indicators")
+                    for cat, hits in fraud_res["signals"].items():
+                        st.markdown(f"**{cat}:** `{', '.join(hits)}`")
+                    st.markdown("</div>", unsafe_allow_html=True)
                 else:
-                    st.info(
-                        "No predefined skills detected."
-                    )
+                    st.success("✓ No common recruitment risk patterns or red-flag phrases detected.")
 
-            with right:
+                st.caption("Disclaimer: AI screening identifies statistical risk markers and is not absolute legal proof of legitimacy or fraud.")
 
-                st.subheader(
-                    "Skill Gaps"
-                )
+    # --- TAB 4: SKILL GAP & ROADMAP ---
+    with tab_roadmap:
+        st.subheader("Career Progression Roadmap")
+        st.caption("Transform skill deficits into an actionable step-by-step career development path.")
 
-                if missing:
-                    st.write(
-                        ", ".join(missing)
-                    )
-                else:
-                    st.success(
-                        "No major predefined skill gaps."
-                    )
+        r_role = st.text_input("Target Career Role", placeholder="e.g., Senior Machine Learning Engineer, Full Stack Developer")
+        r_jd = st.text_area("Target Job Context", height=150, placeholder="Paste target requirements to diagnose specific gaps...")
 
-            st.subheader(
-                "🗺️ Career Roadmap"
-            )
+        if st.button("Generate Development Plan", use_container_width=True):
+            if not st.session_state.resume_text:
+                st.warning("⚠️ Please upload your resume in the Resume Intelligence tab first.")
+            elif not r_jd.strip():
+                st.warning("⚠️ Please provide the target job context.")
+            else:
+                c_skills = detect_skills(st.session_state.resume_text)
+                t_skills = detect_skills(r_jd)
+                gaps = sorted(set(t_skills) - set(c_skills))
 
-            roadmap = [
-                (
-                    f"Focus on your target role: "
-                    f"{target_role or 'Target Role'}"
-                ),
-                (
-                    "Strengthen your core technical "
-                    "and professional skills."
-                ),
-            ]
+                st.markdown("#### Skill Gap Analysis")
+                st.markdown(f"**Target Role:** `{r_role or 'Specified Target Role'}`")
+                st.markdown(f"**Identified Gaps:** {render_chips(gaps, 'chip chip-gap')}", unsafe_allow_html=True)
 
-            if missing:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("#### Personalized Action Plan")
 
-                roadmap.append(
-                    "Prioritize learning: "
-                    + ", ".join(missing)
-                )
-
-            roadmap.extend(
-                [
-                    "Build strong portfolio projects.",
-                    "Improve your resume for the target role.",
-                    "Prepare technical and behavioral interviews.",
-                    "Apply to relevant opportunities.",
+                steps = [
+                    f"**Phase 1: Foundation Alignment** — Master missing core competencies: *{', '.join(gaps[:3]) if gaps else 'Advanced Role Architectures'}*.",
+                    f"**Phase 2: Project Demonstration** — Build 2 end-to-end production-grade portfolio projects showcasing {', '.join(gaps[3:6]) if len(gaps) > 3 else 'system design & deployment'}.",
+                    "**Phase 3: Resume Keyword Calibration** — Quantify impact metrics (latency reduction, revenue impact, accuracy improvement) matching role requirements.",
+                    "**Phase 4: Interview Simulation** — Practice technical system architecture rounds and behavioral scenarios.",
+                    "**Phase 5: Targeted Pipeline** — Apply to relevant positions and iterate based on screening feedback."
                 ]
-            )
 
-            for index, item in enumerate(
-                roadmap,
-                start=1,
-            ):
-
-                st.write(
-                    f"**{index}.** {item}"
-                )
-
-    st.divider()
-
-    # --------------------------------------------------------
-    # FEATURE GRID
-    # --------------------------------------------------------
-
-    st.header(
-        "Career Intelligence"
-    )
-
-    st.write(
-        "AI-powered tools for smarter career decisions."
-    )
-
-    features = [
-        (
-            "📄",
-            "Resume Intelligence",
-            "Extract skills, education, projects and experience.",
-        ),
-        (
-            "🎯",
-            "AI Job Matching",
-            "Compare your profile with job opportunities.",
-        ),
-        (
-            "🛡️",
-            "Job Fraud Detection",
-            "Detect suspicious payment, urgency and communication signals.",
-        ),
-        (
-            "🧩",
-            "Skill Gap Analysis",
-            "Discover missing skills for your target career.",
-        ),
-        (
-            "🔎",
-            "Job Intelligence",
-            "Understand important job requirements.",
-        ),
-        (
-            "🗺️",
-            "Career Roadmap",
-            "Build a structured learning and career path.",
-        ),
-    ]
-
-    feature_cols = st.columns(3)
-
-    for index, (
-        icon,
-        title,
-        description,
-    ) in enumerate(features):
-
-        with feature_cols[
-            index % 3
-        ]:
-
-            st.markdown(
-                '<div class="feature-card">'
-                f'<div class="feature-icon">{icon}</div>'
-                f'<div class="feature-title">{title}</div>'
-                f'<div class="feature-description">'
-                f'{description}'
-                '</div>'
-                '</div>',
-                unsafe_allow_html=True,
-            )
+                for s in steps:
+                    st.markdown(f"- {s}")
 
 
 # ============================================================
-# RECRUITER DASHBOARD
+# WORKSPACE 2: RECRUITER INTELLIGENCE
 # ============================================================
 
 else:
-
-    st.title(
-        "🏢 Recruiter Intelligence"
+    st.markdown(
+        """
+        <div class="hero-banner">
+            <div class="hero-tag">Enterprise Screening</div>
+            <div class="hero-heading">High-Throughput <span>Candidate Intelligence.</span></div>
+            <p class="hero-sub">
+                Batch screen hundreds of applicants simultaneously. Rank candidates with blended NLP similarity
+                and skill extraction metrics, then export recruiter-controlled shortlists in seconds.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    st.write(
-        "Screen large resume batches, rank candidates "
-        "and create a recruiter-controlled shortlist."
-    )
+    rec_col1, rec_col2 = st.columns([1.2, 0.8])
 
-    st.divider()
-
-    r1, r2, r3 = st.columns(3)
-
-    with r1:
-        st.metric(
-            "AI Engine",
-            "ONLINE",
+    with rec_col1:
+        st.subheader("1. Job Description & Benchmarks")
+        recruiter_job_text = st.text_area(
+            "Benchmark Job Description",
+            height=230,
+            placeholder="Paste role requirements, mandatory tech stack, and responsibilities...",
+            key="rec_jd_box"
         )
 
-    with r2:
-        st.metric(
-            "Screening",
-            "NLP + SKILLS",
+    with rec_col2:
+        st.subheader("2. Target Configuration")
+        top_n_val = st.number_input(
+            "Shortlist Limit (Top-N)",
+            min_value=1,
+            max_value=500,
+            value=10,
+            step=1,
+            help="Select the exact number of top candidates you want in the final ranked cohort."
+        )
+        st.caption("Recruiter-controlled: Select Top 5, 10, 20, 50, or custom bounds.")
+
+        candidate_batch = st.file_uploader(
+            "Upload Batch Resumes (PDF, DOCX, TXT)",
+            type=["pdf", "docx", "txt"],
+            accept_multiple_files=True,
+            key="rec_batch_uploader"
         )
 
-    with r3:
-        st.metric(
-            "Shortlist",
-            "RECRUITER CONTROLLED",
-        )
-
-    st.divider()
-
-    # --------------------------------------------------------
-    # JOB REQUIREMENTS
-    # --------------------------------------------------------
-
-    st.header(
-        "1. Job Requirements"
-    )
-
-    recruiter_job = st.text_area(
-        "Job Description",
-        height=240,
-        placeholder=(
-            "Paste the complete job description..."
-        ),
-        key="recruiter_job",
-    )
-
-    if recruiter_job.strip():
-
-        required_skills = detect_skills(
-            recruiter_job
-        )
-
-        st.subheader(
-            "Required Skills Detected"
-        )
-
-        if required_skills:
-
-            st.write(
-                " • ".join(required_skills)
-            )
-
+    if st.button("🚀 Execute Batch AI Screening", type="primary", use_container_width=True):
+        if not recruiter_job_text.strip():
+            st.warning("⚠️ Please provide a job description benchmark first.")
+        elif not candidate_batch:
+            st.warning("⚠️ Please upload at least one candidate resume.")
         else:
+            records = []
+            bar = st.progress(0)
+            status_text = st.empty()
+            total_docs = len(candidate_batch)
 
-            st.info(
-                "No predefined skills detected."
-            )
+            target_skills = detect_skills(recruiter_job_text)
 
-    st.divider()
+            for i, doc_file in enumerate(candidate_batch):
+                status_text.text(f"Processing ({i+1}/{total_docs}): {doc_file.name}")
+                raw_text = extract_file_text(doc_file)
 
-    # --------------------------------------------------------
-    # BULK RESUME UPLOAD
-    # --------------------------------------------------------
-
-    st.header(
-        "2. Bulk Resume Screening"
-    )
-
-    candidate_files = st.file_uploader(
-        "Upload Candidate Resumes",
-        type=[
-            "pdf",
-            "docx",
-            "txt",
-        ],
-        accept_multiple_files=True,
-        key="candidate_resumes",
-    )
-
-    top_n = st.number_input(
-        "Shortlist Size",
-        min_value=1,
-        max_value=500,
-        value=20,
-        step=1,
-        help=(
-            "Recruiter decides how many candidates "
-            "should be shortlisted."
-        ),
-    )
-
-    st.info(
-        "You can choose Top 5, Top 10, Top 20, "
-        "Top 50 or any other number up to 500."
-    )
-
-    if st.button(
-        "🚀 Screen & Rank Candidates",
-        type="primary",
-        use_container_width=True,
-    ):
-
-        if not recruiter_job.strip():
-
-            st.warning(
-                "Enter the job description first."
-            )
-
-        elif not candidate_files:
-
-            st.warning(
-                "Upload candidate resumes first."
-            )
-
-        else:
-
-            results = []
-
-            progress = st.progress(
-                0
-            )
-
-            status = st.empty()
-
-            total = len(
-                candidate_files
-            )
-
-            for index, candidate in enumerate(
-                candidate_files,
-                start=1,
-            ):
-
-                status.write(
-                    f"Analyzing {candidate.name}..."
-                )
-
-                text = extract_file_text(
-                    candidate
-                )
-
-                if not text.strip():
-
-                    results.append(
-                        {
-                            "Candidate": candidate.name,
-                            "Email": "Not detected",
-                            "Resume Score": 0,
-                            "NLP Match": 0,
-                            "Skill Match": 0,
-                            "Overall Match": 0,
-                            "Skills": "",
-                            "Missing Skills": "",
-                            "Status": "Unreadable",
-                        }
-                    )
-
+                if not raw_text.strip():
+                    records.append({
+                        "Candidate": doc_file.name,
+                        "Email": "Unreadable",
+                        "Resume Score": 0,
+                        "NLP Match": 0,
+                        "Skill Match": 0,
+                        "Overall Match": 0,
+                        "Skills": "",
+                        "Missing Skills": "",
+                        "Status": "Failed / Unreadable"
+                    })
                 else:
+                    c_skills = detect_skills(raw_text)
+                    overall_s, nlp_s, skill_s = calculate_match(raw_text, recruiter_job_text)
+                    r_score = calculate_resume_score(raw_text, c_skills)
+                    gaps = sorted(set(target_skills) - set(c_skills))
+                    c_name = extract_name(raw_text)
+                    if c_name == "Candidate":
+                        c_name = doc_file.name
 
-                    profile_skills = detect_skills(
-                        text
-                    )
+                    records.append({
+                        "Candidate": c_name,
+                        "Email": extract_email(raw_text),
+                        "Resume Score": r_score,
+                        "NLP Match": nlp_s,
+                        "Skill Match": skill_s,
+                        "Overall Match": overall_s,
+                        "Skills": ", ".join(c_skills),
+                        "Missing Skills": ", ".join(gaps),
+                        "Status": "Screened"
+                    })
 
-                    job_skills = detect_skills(
-                        recruiter_job
-                    )
+                bar.progress((i + 1) / total_docs)
 
-                    overall, nlp, skill = (
-                        calculate_match(
-                            text,
-                            recruiter_job,
-                        )
-                    )
+            status_text.empty()
+            bar.empty()
 
-                    resume_score = (
-                        calculate_resume_score(
-                            text,
-                            profile_skills,
-                        )
-                    )
+            df_results = pd.DataFrame(records)
+            df_results = df_results.sort_values(
+                by=["Overall Match", "Skill Match", "Resume Score"],
+                ascending=False
+            ).reset_index(drop=True)
 
-                    missing = sorted(
-                        set(job_skills)
-                        - set(profile_skills)
-                    )
+            df_results.insert(0, "Rank", range(1, len(df_results) + 1))
+            st.session_state.recruiter_results = df_results
+            st.success(f"✓ Successfully screened and ranked {len(df_results)} candidate profiles!")
 
-                    candidate_name = (
-                        extract_name(text)
-                    )
+    # Display Recruiter Results
+    if st.session_state.recruiter_results is not None:
+        df_all = st.session_state.recruiter_results
+        shortlist_size = min(int(top_n_val), len(df_all))
+        df_top = df_all.head(shortlist_size)
 
-                    if (
-                        candidate_name
-                        == "Candidate"
-                    ):
-                        candidate_name = (
-                            candidate.name
-                        )
+        st.markdown("---")
+        st.subheader("3. Candidate Ranking & Shortlist")
 
-                    results.append(
-                        {
-                            "Candidate": candidate_name,
-                            "Email": extract_email(text),
-                            "Resume Score": resume_score,
-                            "NLP Match": nlp,
-                            "Skill Match": skill,
-                            "Overall Match": overall,
-                            "Skills": ", ".join(
-                                profile_skills
-                            ),
-                            "Missing Skills": ", ".join(
-                                missing
-                            ),
-                            "Status": "Analyzed",
-                        }
-                    )
+        k1, k2, k3 = st.columns(3)
+        with k1:
+            st.metric("Total Resumes Screened", len(df_all))
+        with k2:
+            st.metric("Shortlisted Cohort", len(df_top))
+        with k3:
+            best_score = df_all.iloc[0]["Overall Match"] if not df_all.empty else 0
+            st.metric("Top Candidate Score", f"{best_score}%")
 
-                progress.progress(
-                    index / total
+        display_cols = ["Rank", "Candidate", "Email", "Resume Score", "NLP Match", "Skill Match", "Overall Match", "Missing Skills", "Status"]
+        st.dataframe(df_top[display_cols], use_container_width=True, hide_index=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("4. Candidate Intelligence Deep-Dive")
+
+        candidate_list = df_top["Candidate"].tolist()
+        if candidate_list:
+            selected_person = st.selectbox("Select Candidate for Diagnostic Drill-Down", candidate_list)
+            row = df_top[df_top["Candidate"] == selected_person].iloc[0]
+
+            cd1, cd2 = st.columns(2)
+            with cd1:
+                st.markdown(
+                    f"""
+                    <div class="stat-card">
+                        <h4 style="margin:0 0 10px 0;">Candidate: {row['Candidate']}</h4>
+                        <p><b>Email:</b> {row['Email']}</p>
+                        <p><b>Overall Match Index:</b> {row['Overall Match']}%</p>
+                        <p><b>Resume Quality Score:</b> {row['Resume Score']}/100</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with cd2:
+                st.markdown(
+                    f"""
+                    <div class="stat-card">
+                        <h4 style="margin:0 0 10px 0;">Match Diagnostic</h4>
+                        <p><b>Semantic NLP Match:</b> {row['NLP Match']}%</p>
+                        <p><b>Explicit Skill Match:</b> {row['Skill Match']}%</p>
+                        <p><b>Skill Gaps:</b> {row['Missing Skills'] or 'None'}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
 
-            status.empty()
-            progress.empty()
+        st.markdown("---")
+        st.subheader("5. Export Recruitment Intelligence")
 
-            result_df = pd.DataFrame(
-                results
-            )
-
-            result_df = result_df.sort_values(
-                by=[
-                    "Overall Match",
-                    "Skill Match",
-                    "Resume Score",
-                ],
-                ascending=False,
-            ).reset_index(
-                drop=True
-            )
-
-            result_df.insert(
-                0,
-                "Rank",
-                range(
-                    1,
-                    len(result_df) + 1,
-                ),
-            )
-
-            st.session_state.recruiter_results = (
-                result_df
-            )
-
-            st.success(
-                f"Completed screening of "
-                f"{len(result_df)} resumes."
-            )
-
-    # --------------------------------------------------------
-    # RANKING RESULTS
-    # --------------------------------------------------------
-
-    if (
-        st.session_state.recruiter_results
-        is not None
-    ):
-
-        result_df = (
-            st.session_state.recruiter_results
-        )
-
-        shortlist_count = min(
-            int(top_n),
-            len(result_df),
-        )
-
-        shortlist = result_df.head(
-            shortlist_count
-        )
-
-        st.divider()
-
-        st.header(
-            "3. AI Candidate Ranking"
-        )
-
-        a, b, c = st.columns(3)
-
-        with a:
-
-            st.metric(
-                "Resumes Screened",
-                len(result_df),
-            )
-
-        with b:
-
-            st.metric(
-                "Shortlisted",
-                len(shortlist),
-            )
-
-        with c:
-
-            best = int(
-                result_df.iloc[0][
-                    "Overall Match"
-                ]
-            )
-
-            st.metric(
-                "Best Match",
-                f"{best}%",
-            )
-
-        st.subheader(
-            f"🏆 Top {shortlist_count} Candidates"
-        )
-
-        display_columns = [
-            "Rank",
-            "Candidate",
-            "Email",
-            "Resume Score",
-            "NLP Match",
-            "Skill Match",
-            "Overall Match",
-            "Missing Skills",
-            "Status",
-        ]
-
-        st.dataframe(
-            shortlist[
-                display_columns
-            ],
-            use_container_width=True,
-            hide_index=True,
-        )
-
-        st.divider()
-
-        # ----------------------------------------------------
-        # CANDIDATE DETAILS
-        # ----------------------------------------------------
-
-        st.header(
-            "4. Candidate Intelligence"
-        )
-
-        candidates = shortlist[
-            "Candidate"
-        ].tolist()
-
-        if candidates:
-
-            selected_candidate = (
-                st.selectbox(
-                    "Select Candidate",
-                    candidates,
-                )
-            )
-
-            selected = shortlist[
-                shortlist["Candidate"]
-                == selected_candidate
-            ].iloc[0]
-
-            d1, d2 = st.columns(2)
-
-            with d1:
-
-                st.write(
-                    f"**Candidate:** "
-                    f"{selected['Candidate']}"
-                )
-
-                st.write(
-                    f"**Email:** "
-                    f"{selected['Email']}"
-                )
-
-                st.write(
-                    f"**Overall Match:** "
-                    f"{selected['Overall Match']}%"
-                )
-
-            with d2:
-
-                st.write(
-                    f"**Resume Score:** "
-                    f"{selected['Resume Score']}/100"
-                )
-
-                st.write(
-                    f"**NLP Match:** "
-                    f"{selected['NLP Match']}%"
-                )
-
-                st.write(
-                    f"**Skill Match:** "
-                    f"{selected['Skill Match']}%"
-                )
-
-            st.subheader(
-                "Detected Skills"
-            )
-
-            st.write(
-                selected["Skills"]
-                or "None detected"
-            )
-
-            st.subheader(
-                "Missing Skills"
-            )
-
-            st.write(
-                selected["Missing Skills"]
-                or "No major predefined skill gaps"
-            )
-
-        st.divider()
-
-        # ----------------------------------------------------
-        # EXPORT
-        # ----------------------------------------------------
-
-        st.header(
-            "5. Export Shortlist"
-        )
-
-        csv_data = shortlist.to_csv(
-            index=False
-        ).encode("utf-8")
-
+        csv_buffer = df_top.to_csv(index=False).encode("utf-8")
         st.download_button(
-            "⬇️ Download Shortlist CSV",
-            data=csv_data,
-            file_name=(
-                "careerLens_shortlist.csv"
-            ),
+            label="⬇️ Download Shortlist as CSV",
+            data=csv_buffer,
+            file_name="CareerLens_Shortlist.csv",
             mime="text/csv",
+            type="primary",
             use_container_width=True,
-        )
-
-        st.caption(
-            "CareerLens AI provides AI-assisted candidate "
-            "screening. Recruiters should review candidates "
-            "before making final hiring decisions."
         )
 
 
@@ -1869,10 +1023,12 @@ else:
 # FOOTER
 # ============================================================
 
-st.divider()
-
-st.caption(
-    "🎯 CareerLens AI | AI-Powered Career Intelligence "
-    "& Recruitment Platform | Final Year Project | "
-    "Artificial Intelligence • Machine Learning • NLP"
+st.markdown("---")
+st.markdown(
+    """
+    <div style="text-align: center; color: #475569; font-size: 12px; padding: 10px 0;">
+        🎯 <b>CareerLens AI</b> — AI-Powered Career Intelligence & Recruitment Platform | Final Year Project
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
