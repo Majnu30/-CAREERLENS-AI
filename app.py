@@ -35,278 +35,277 @@ st.set_page_config(
 # ============================================================
 
 st.markdown(
-    """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    """<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-        * {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
+* {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
 
-        code, pre {
-            font-family: 'JetBrains Mono', monospace !important;
-        }
+code, pre {
+    font-family: 'JetBrains Mono', monospace !important;
+}
 
-        .stApp {
-            background: radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
-                        radial-gradient(circle at 90% 85%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
-                        radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%),
-                        #050914;
-            color: #cbd5e1;
-        }
+.stApp {
+    background: radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 90% 85%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%),
+                #050914;
+    color: #cbd5e1;
+}
 
-        [data-testid="stSidebar"] {
-            background: rgba(8, 15, 28, 0.95);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-        }
+[data-testid="stSidebar"] {
+    background: rgba(8, 15, 28, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+}
 
-        .block-container {
-            max-width: 1420px;
-            padding-top: 1.5rem;
-            padding-bottom: 3.5rem;
-        }
+.block-container {
+    max-width: 1420px;
+    padding-top: 1.5rem;
+    padding-bottom: 3.5rem;
+}
 
-        /* Typography */
-        h1, h2, h3, h4 {
-            color: #f8fafc !important;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-        }
+h1, h2, h3, h4 {
+    color: #f8fafc !important;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
 
-        p, label, span {
-            color: #94a3b8;
-        }
+p, label, span {
+    color: #94a3b8;
+}
 
-        /* Hero Banner & Frames */
-        .hero-container {
-            position: relative;
-            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
-                        radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
-                        linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(13, 19, 38, 0.95) 100%);
-            border: 1px solid rgba(129, 140, 248, 0.3);
-            border-radius: 24px;
-            padding: 38px 42px;
-            margin-bottom: 28px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-        }
+.hero-container {
+    position: relative;
+    background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+                radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(13, 19, 38, 0.95) 100%);
+    border: 1px solid rgba(129, 140, 248, 0.3);
+    border-radius: 24px;
+    padding: 38px 42px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
 
-        .hero-badge-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
+.hero-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
 
-        .hero-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: #a5b4fc;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.35);
-            border-radius: 20px;
-            padding: 4px 14px;
-        }
+.hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #a5b4fc;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    border-radius: 20px;
+    padding: 4px 14px;
+}
 
-        .hero-title {
-            color: #ffffff;
-            font-size: 40px;
-            font-weight: 800;
-            line-height: 1.15;
-            margin: 0 0 14px 0;
-            letter-spacing: -0.03em;
-        }
+.hero-title {
+    color: #ffffff;
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0 0 14px 0;
+    letter-spacing: -0.03em;
+}
 
-        .hero-gradient-text {
-            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+.hero-gradient-text {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-        .hero-description {
-            color: #94a3b8;
-            font-size: 15px;
-            line-height: 1.7;
-            max-width: 860px;
-            margin: 0 0 26px 0;
-        }
+.hero-description {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 860px;
+    margin: 0 0 26px 0;
+}
 
-        .hero-features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-top: 10px;
-        }
+.hero-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
 
-        .hero-mini-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s ease;
-        }
+.hero-mini-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
 
-        .hero-mini-card:hover {
-            background: rgba(99, 102, 241, 0.08);
-            border-color: rgba(99, 102, 241, 0.3);
-            transform: translateY(-2px);
-        }
+.hero-mini-card:hover {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
 
-        .hero-icon-box {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            flex-shrink: 0;
-        }
+.hero-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    flex-shrink: 0;
+}
 
-        .hero-card-text h5 {
-            margin: 0;
-            color: #f1f5f9;
-            font-size: 13px;
-            font-weight: 700;
-        }
+.hero-card-text h5 {
+    margin: 0;
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 700;
+}
 
-        .hero-card-text p {
-            margin: 0;
-            color: #64748b;
-            font-size: 11px;
-        }
+.hero-card-text p {
+    margin: 0;
+    color: #64748b;
+    font-size: 11px;
+}
 
-        /* Glassmorphism General Cards */
-        .glass-card {
-            background: rgba(11, 20, 38, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 24px;
-            backdrop-filter: blur(16px);
-            margin-bottom: 18px;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: all 0.25s ease;
-        }
-        .glass-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: translateY(-2px);
-        }
+.glass-card {
+    background: rgba(11, 20, 38, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 24px;
+    backdrop-filter: blur(16px);
+    margin-bottom: 18px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.25s ease;
+}
 
-        /* Chips & Badges */
-        .chip {
-            display: inline-block;
-            background: rgba(30, 41, 59, 0.85);
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 5px 14px;
-            font-size: 12px;
-            font-weight: 600;
-            margin: 4px 4px 4px 0;
-            letter-spacing: 0.2px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .chip-gap {
-            background: rgba(239, 68, 68, 0.18);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-        }
-        .chip-match {
-            background: rgba(34, 197, 94, 0.18);
-            color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.4);
-        }
+.glass-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+}
 
-        /* Risk Badges */
-        .badge-low {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            padding: 8px 18px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 14px;
-            display: inline-block;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
-        }
-        .badge-medium {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            padding: 8px 18px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 14px;
-            display: inline-block;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
-        }
-        .badge-high {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 8px 18px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 14px;
-            display: inline-block;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
-        }
+.chip {
+    display: inline-block;
+    background: rgba(30, 41, 59, 0.85);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 4px 4px 4px 0;
+    letter-spacing: 0.2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
 
-        /* Pulse Status */
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #4ade80;
-            background: rgba(34, 197, 94, 0.12);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-        .status-dot {
-            height: 7px;
-            width: 7px;
-            background-color: #22c55e;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #22c55e;
-        }
+.chip-gap {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
 
-        /* Metric Styling */
-        div[data-testid="stMetric"] {
-            background: rgba(11, 20, 38, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 18px 22px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-        div[data-testid="stMetricValue"] {
-            color: #ffffff !important;
-            font-weight: 800;
-            font-size: 28px !important;
-            letter-spacing: -0.03em;
-        }
-        div[data-testid="stMetricLabel"] {
-            color: #64748b !important;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-        }
-    </style>
-    """,
+.chip-match {
+    background: rgba(34, 197, 94, 0.18);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.badge-low {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    display: inline-block;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+}
+
+.badge-medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    display: inline-block;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.badge-high {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    display: inline-block;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.status-dot {
+    height: 7px;
+    width: 7px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+div[data-testid="stMetric"] {
+    background: rgba(11, 20, 38, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px 22px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+div[data-testid="stMetricValue"] {
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 28px !important;
+    letter-spacing: -0.03em;
+}
+
+div[data-testid="stMetricLabel"] {
+    color: #64748b !important;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+</style>""",
     unsafe_allow_html=True,
 )
 
@@ -732,19 +731,17 @@ def generate_dynamic_bot_response(prompt: str) -> str:
 
 with st.sidebar:
     st.markdown(
-        """
-        <div style="padding: 10px 0 16px 0;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 32px;">⚡</span>
-                <span style="font-size: 25px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
-                    Career<span style="background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lens</span> AI
-                </span>
-            </div>
-            <div style="font-size: 10px; font-weight: 700; color: #818cf8; letter-spacing: 1.5px; margin-top: 4px; text-transform: uppercase;">
-                Career Intelligence Platform
-            </div>
-        </div>
-        """,
+        """<div style="padding: 10px 0 16px 0;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 32px;">⚡</span>
+        <span style="font-size: 25px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
+            Career<span style="background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lens</span> AI
+        </span>
+    </div>
+    <div style="font-size: 10px; font-weight: 700; color: #818cf8; letter-spacing: 1.5px; margin-top: 4px; text-transform: uppercase;">
+        Career Intelligence Platform
+    </div>
+</div>""",
         unsafe_allow_html=True,
     )
 
@@ -771,15 +768,13 @@ with st.sidebar:
     st.markdown("---")
 
     st.markdown(
-        """
-        <div class="status-pill">
-            <span class="status-dot"></span>
-            AI ENGINE ONLINE
-        </div>
-        <div style="font-size: 11px; color: #64748b; margin-top: 10px; line-height: 1.5;">
-            NLP • Cosine TF-IDF • Skill Extraction • Fraud Heuristics
-        </div>
-        """,
+        """<div class="status-pill">
+    <span class="status-dot"></span>
+    AI ENGINE ONLINE
+</div>
+<div style="font-size: 11px; color: #64748b; margin-top: 10px; line-height: 1.5;">
+    NLP • Cosine TF-IDF • Skill Extraction • Fraud Heuristics
+</div>""",
         unsafe_allow_html=True,
     )
 
@@ -790,86 +785,75 @@ with st.sidebar:
 
 if st.session_state.workspace_mode == "Job Seeker":
 
-    # Ultra-Premium Hero Frame
     st.markdown(
-        """
-        <div class="hero-container">
-            <div class="hero-badge-row">
-                <div class="hero-pill">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                    </svg>
-                    AI Career Intelligence
-                </div>
-                <div class="hero-pill" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.1); color: #7dd3fc;">
-                    Next-Gen Workspace
-                </div>
+        """<div class="hero-container">
+    <div class="hero-badge-row">
+        <div class="hero-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            AI Career Intelligence
+        </div>
+        <div class="hero-pill" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.1); color: #7dd3fc;">
+            Next-Gen Workspace
+        </div>
+    </div>
+    <div class="hero-title">
+        Understand Your Career. <span class="hero-gradient-text">Build Your Future.</span>
+    </div>
+    <p class="hero-description">
+        CareerLens AI combines deep semantic NLP, precision skill indexing, real-time fraud risk screening, and adaptive career telemetry into a unified intelligence hub.
+    </p>
+    <div class="hero-features-grid">
+        <div class="hero-mini-card">
+            <div class="hero-icon-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
             </div>
-
-            <div class="hero-title">
-                Understand Your Career. <span class="hero-gradient-text">Build Your Future.</span>
-            </div>
-
-            <p class="hero-description">
-                CareerLens AI combines deep semantic NLP, precision skill indexing, real-time fraud risk screening, 
-                and adaptive career telemetry into a unified intelligence hub.
-            </p>
-
-            <div class="hero-features-grid">
-                <div class="hero-mini-card">
-                    <div class="hero-icon-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-                        </svg>
-                    </div>
-                    <div class="hero-card-text">
-                        <h5>Resume Scoring</h5>
-                        <p>Structural & NLP Audit</p>
-                    </div>
-                </div>
-
-                <div class="hero-mini-card">
-                    <div class="hero-icon-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-                        </svg>
-                    </div>
-                    <div class="hero-card-text">
-                        <h5>Semantic Matching</h5>
-                        <p>TF-IDF & Skill Alignment</p>
-                    </div>
-                </div>
-
-                <div class="hero-mini-card">
-                    <div class="hero-icon-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                    </div>
-                    <div class="hero-card-text">
-                        <h5>Fraud Shield</h5>
-                        <p>Heuristic Risk Detection</p>
-                    </div>
-                </div>
-
-                <div class="hero-mini-card">
-                    <div class="hero-icon-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                    </div>
-                    <div class="hero-card-text">
-                        <h5>Career Advisor</h5>
-                        <p>Interactive Copilot</p>
-                    </div>
-                </div>
+            <div class="hero-card-text">
+                <h5>Resume Scoring</h5>
+                <p>Structural & NLP Audit</p>
             </div>
         </div>
-        """,
+        <div class="hero-mini-card">
+            <div class="hero-icon-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+                </svg>
+            </div>
+            <div class="hero-card-text">
+                <h5>Semantic Matching</h5>
+                <p>TF-IDF & Skill Alignment</p>
+            </div>
+        </div>
+        <div class="hero-mini-card">
+            <div class="hero-icon-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <div class="hero-card-text">
+                <h5>Fraud Shield</h5>
+                <p>Heuristic Risk Detection</p>
+            </div>
+        </div>
+        <div class="hero-mini-card">
+            <div class="hero-icon-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
+            <div class="hero-card-text">
+                <h5>Career Advisor</h5>
+                <p>Interactive Copilot</p>
+            </div>
+        </div>
+    </div>
+</div>""",
         unsafe_allow_html=True,
     )
 
-    # Overview Metrics Row
     analysis = st.session_state.resume_analysis
     resume_score = analysis["resume_score"] if analysis else None
     readiness = analysis["readiness"] if analysis else None
@@ -887,7 +871,6 @@ if st.session_state.workspace_mode == "Job Seeker":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Interactive Navigation App-Bar
     st.markdown("#### ⚡ Module Navigation Bar")
     nav_c1, nav_c2, nav_c3, nav_c4, nav_c5 = st.columns(5)
 
@@ -957,25 +940,21 @@ if st.session_state.workspace_mode == "Job Seeker":
                 p_col1, p_col2 = st.columns(2)
                 with p_col1:
                     st.markdown(
-                        f"""
-                        <div class="glass-card">
-                            <h4 style="margin:0 0 12px 0;">👤 Candidate Profile</h4>
-                            <p style="margin: 4px 0;"><b>Name:</b> {st.session_state.resume_analysis['name']}</p>
-                            <p style="margin: 4px 0;"><b>Email:</b> {st.session_state.resume_analysis['email']}</p>
-                            <p style="margin: 4px 0;"><b>Phone:</b> {st.session_state.resume_analysis['phone']}</p>
-                            <p style="margin: 4px 0;"><b>Document:</b> {resume_file.name}</p>
-                        </div>
-                        """,
+                        f"""<div class="glass-card">
+    <h4 style="margin:0 0 12px 0;">👤 Candidate Profile</h4>
+    <p style="margin: 4px 0;"><b>Name:</b> {st.session_state.resume_analysis['name']}</p>
+    <p style="margin: 4px 0;"><b>Email:</b> {st.session_state.resume_analysis['email']}</p>
+    <p style="margin: 4px 0;"><b>Phone:</b> {st.session_state.resume_analysis['phone']}</p>
+    <p style="margin: 4px 0;"><b>Document:</b> {resume_file.name}</p>
+</div>""",
                         unsafe_allow_html=True,
                     )
                 with p_col2:
                     st.markdown(
-                        f"""
-                        <div class="glass-card">
-                            <h4 style="margin:0 0 12px 0;">🛠️ Extracted Skills ({len(detected)})</h4>
-                            <div>{render_chips(detected)}</div>
-                        </div>
-                        """,
+                        f"""<div class="glass-card">
+    <h4 style="margin:0 0 12px 0;">🛠️ Extracted Skills ({len(detected)})</h4>
+    <div>{render_chips(detected)}</div>
+</div>""",
                         unsafe_allow_html=True,
                     )
 
@@ -1019,22 +998,18 @@ if st.session_state.workspace_mode == "Job Seeker":
                 sc1, sc2 = st.columns(2)
                 with sc1:
                     st.markdown(
-                        f"""
-                        <div class="glass-card">
-                            <h4 style="color:#4ade80 !important; margin:0 0 12px 0;">✓ Matched Skills ({len(matched)})</h4>
-                            <div>{render_chips(matched, 'chip chip-match')}</div>
-                        </div>
-                        """,
+                        f"""<div class="glass-card">
+    <h4 style="color:#4ade80 !important; margin:0 0 12px 0;">✓ Matched Skills ({len(matched)})</h4>
+    <div>{render_chips(matched, 'chip chip-match')}</div>
+</div>""",
                         unsafe_allow_html=True,
                     )
                 with sc2:
                     st.markdown(
-                        f"""
-                        <div class="glass-card">
-                            <h4 style="color:#f87171 !important; margin:0 0 12px 0;">⚠ Skill Gaps ({len(missing)})</h4>
-                            <div>{render_chips(missing, 'chip chip-gap')}</div>
-                        </div>
-                        """,
+                        f"""<div class="glass-card">
+    <h4 style="color:#f87171 !important; margin:0 0 12px 0;">⚠ Skill Gaps ({len(missing)})</h4>
+    <div>{render_chips(missing, 'chip chip-gap')}</div>
+</div>""",
                         unsafe_allow_html=True,
                     )
 
@@ -1063,11 +1038,9 @@ if st.session_state.workspace_mode == "Job Seeker":
                 badge_class = "badge-low" if lvl == "LOW RISK" else ("badge-medium" if lvl == "MEDIUM RISK" else "badge-high")
 
                 st.markdown(
-                    f"""
-                    <div style="margin: 15px 0;">
-                        <span class="{badge_class}">{lvl} — RISK INDEX: {scr}/100</span>
-                    </div>
-                    """,
+                    f"""<div style="margin: 15px 0;">
+    <span class="{badge_class}">{lvl} — RISK INDEX: {scr}/100</span>
+</div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -1177,16 +1150,13 @@ if st.session_state.workspace_mode == "Job Seeker":
 
 else:
     st.markdown(
-        """
-        <div class="hero-banner">
-            <div class="hero-tag">Enterprise Screening Hub</div>
-            <div class="hero-heading">Bulk Resume Screening & <span>Candidate Ranking</span></div>
-            <p class="hero-sub">
-                Screen large batches of applicants against target job requirements. Compute TF-IDF semantic
-                similarity and skill alignment, select your custom Top-N cohort, and export shortlists.
-            </p>
-        </div>
-        """,
+        """<div class="hero-banner">
+    <div class="hero-tag">Enterprise Screening Hub</div>
+    <div class="hero-heading">Bulk Resume Screening & <span>Candidate Ranking</span></div>
+    <p class="hero-sub">
+        Screen large batches of applicants against target job requirements. Compute TF-IDF semantic similarity and skill alignment, select your custom Top-N cohort, and export shortlists.
+    </p>
+</div>""",
         unsafe_allow_html=True,
     )
 
@@ -1318,26 +1288,22 @@ else:
             cd1, cd2 = st.columns(2)
             with cd1:
                 st.markdown(
-                    f"""
-                    <div class="glass-card">
-                        <h4 style="margin:0 0 10px 0;">Candidate: {row['Candidate']}</h4>
-                        <p><b>Email:</b> {row['Email']}</p>
-                        <p><b>Overall Match:</b> {row['Overall Match']}%</p>
-                        <p><b>Resume Quality Score:</b> {row['Resume Score']}/100</p>
-                    </div>
-                    """,
+                    f"""<div class="glass-card">
+    <h4 style="margin:0 0 10px 0;">Candidate: {row['Candidate']}</h4>
+    <p><b>Email:</b> {row['Email']}</p>
+    <p><b>Overall Match:</b> {row['Overall Match']}%</p>
+    <p><b>Resume Quality Score:</b> {row['Resume Score']}/100</p>
+</div>""",
                     unsafe_allow_html=True,
                 )
             with cd2:
                 st.markdown(
-                    f"""
-                    <div class="glass-card">
-                        <h4 style="margin:0 0 10px 0;">Match Diagnostic</h4>
-                        <p><b>NLP Similarity:</b> {row['NLP Match']}%</p>
-                        <p><b>Skill Overlap:</b> {row['Skill Match']}%</p>
-                        <p><b>Skill Gaps:</b> {row['Missing Skills'] or 'None'}</p>
-                    </div>
-                    """,
+                    f"""<div class="glass-card">
+    <h4 style="margin:0 0 10px 0;">Match Diagnostic</h4>
+    <p><b>NLP Similarity:</b> {row['NLP Match']}%</p>
+    <p><b>Skill Overlap:</b> {row['Skill Match']}%</p>
+    <p><b>Skill Gaps:</b> {row['Missing Skills'] or 'None'}</p>
+</div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -1361,10 +1327,8 @@ else:
 
 st.markdown("---")
 st.markdown(
-    """
-    <div style="text-align: center; color: #475569; font-size: 12px; padding: 8px 0;">
-        ⚡ <b>CareerLens AI</b> — AI-Powered Career Intelligence & Recruitment Platform | Final Year Project
-    </div>
-    """,
+    """<div style="text-align: center; color: #475569; font-size: 12px; padding: 8px 0;">
+    ⚡ <b>CareerLens AI</b> — AI-Powered Career Intelligence & Recruitment Platform | Final Year Project
+</div>""",
     unsafe_allow_html=True,
 )
