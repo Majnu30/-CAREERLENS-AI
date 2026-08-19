@@ -1,5 +1,6 @@
 import io
 import re
+import random
 from typing import Dict, List, Tuple
 
 import pandas as pd
@@ -31,7 +32,7 @@ st.set_page_config(
 
 
 # ============================================================
-# ULTRA-PREMIUM SAAS UI STYLING & GLASSMORPHISM
+# ULTRA-PREMIUM SAAS DESIGN SYSTEM & CSS
 # ============================================================
 
 st.markdown(
@@ -48,19 +49,21 @@ st.markdown(
         }
 
         .stApp {
-            background: radial-gradient(circle at 10% 20%, rgba(30, 27, 75, 0.4) 0%, transparent 40%),
-                        radial-gradient(circle at 90% 80%, rgba(15, 23, 42, 0.6) 0%, transparent 40%),
-                        #050b14;
+            background: radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+                        radial-gradient(circle at 90% 85%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+                        radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%),
+                        #050914;
             color: #cbd5e1;
         }
 
         [data-testid="stSidebar"] {
-            background: #08101e;
-            border-right: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(8, 15, 28, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
         }
 
         .block-container {
-            max-width: 1400px;
+            max-width: 1420px;
             padding-top: 1.5rem;
             padding-bottom: 3.5rem;
         }
@@ -78,13 +81,13 @@ st.markdown(
 
         /* Hero Banner */
         .hero-banner {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 27, 75, 0.6) 50%, rgba(17, 24, 39, 0.9) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            border-radius: 20px;
-            padding: 32px 36px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.7) 50%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            border-radius: 24px;
+            padding: 36px 42px;
             margin-bottom: 24px;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
         .hero-tag {
             display: inline-flex;
@@ -95,18 +98,18 @@ st.markdown(
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            background: rgba(99, 102, 241, 0.12);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
             border-radius: 20px;
-            padding: 4px 12px;
+            padding: 4px 14px;
             margin-bottom: 12px;
         }
         .hero-heading {
             color: #ffffff;
-            font-size: 34px;
+            font-size: 36px;
             font-weight: 800;
             line-height: 1.15;
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             letter-spacing: -0.03em;
         }
         .hero-heading span {
@@ -116,81 +119,86 @@ st.markdown(
         }
         .hero-sub {
             color: #94a3b8;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
-            max-width: 850px;
+            max-width: 880px;
             margin: 0;
         }
 
-        /* Glassmorphism Stat Cards */
+        /* Glassmorphism Cards */
         .glass-card {
-            background: rgba(13, 22, 38, 0.7);
+            background: rgba(11, 20, 38, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 22px;
-            backdrop-filter: blur(12px);
-            margin-bottom: 16px;
-            box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
-            transition: border-color 0.2s ease;
+            border-radius: 18px;
+            padding: 24px;
+            backdrop-filter: blur(16px);
+            margin-bottom: 18px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.25s ease;
         }
         .glass-card:hover {
-            border-color: rgba(99, 102, 241, 0.35);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
         }
 
         /* Chips & Badges */
         .chip {
             display: inline-block;
-            background: rgba(30, 41, 59, 0.8);
+            background: rgba(30, 41, 59, 0.85);
             color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 11px;
+            padding: 5px 14px;
+            font-size: 12px;
             font-weight: 600;
-            margin: 3px 4px 3px 0;
+            margin: 4px 4px 4px 0;
             letter-spacing: 0.2px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         .chip-gap {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(239, 68, 68, 0.18);
             color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.35);
+            border: 1px solid rgba(239, 68, 68, 0.4);
         }
         .chip-match {
-            background: rgba(34, 197, 94, 0.15);
+            background: rgba(34, 197, 94, 0.18);
             color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.35);
+            border: 1px solid rgba(34, 197, 94, 0.4);
         }
 
-        /* Risk Level Indicator */
+        /* Risk Badges */
         .badge-low {
             background: rgba(34, 197, 94, 0.15);
             color: #4ade80;
             border: 1px solid rgba(34, 197, 94, 0.4);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
             display: inline-block;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
         }
         .badge-medium {
             background: rgba(245, 158, 11, 0.15);
             color: #fbbf24;
             border: 1px solid rgba(245, 158, 11, 0.4);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
             display: inline-block;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
         }
         .badge-high {
             background: rgba(239, 68, 68, 0.15);
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
             display: inline-block;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
         }
 
         /* Pulse Status */
@@ -201,8 +209,8 @@ st.markdown(
             font-size: 11px;
             font-weight: 700;
             color: #4ade80;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.25);
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.3);
             padding: 5px 12px;
             border-radius: 20px;
         }
@@ -214,27 +222,27 @@ st.markdown(
             box-shadow: 0 0 8px #22c55e;
         }
 
-        /* Native Metric Reskinning */
+        /* Metric Styling */
         div[data-testid="stMetric"] {
-            background: rgba(13, 22, 38, 0.7);
+            background: rgba(11, 20, 38, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 16px 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 18px 22px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
         div[data-testid="stMetricValue"] {
             color: #ffffff !important;
             font-weight: 800;
-            font-size: 26px !important;
+            font-size: 28px !important;
             letter-spacing: -0.03em;
         }
         div[data-testid="stMetricLabel"] {
             color: #64748b !important;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
         }
     </style>
     """,
@@ -243,7 +251,7 @@ st.markdown(
 
 
 # ============================================================
-# EXTENDED SKILL KNOWLEDGE GRAPH
+# SKILL TAXONOMY
 # ============================================================
 
 SKILL_ALIASES = {
@@ -301,7 +309,7 @@ SKILL_ALIASES = {
 
 
 # ============================================================
-# FRAUD DETECTION HEURISTICS
+# FRAUD DETECTION PATTERNS
 # ============================================================
 
 FRAUD_RULES = {
@@ -346,7 +354,10 @@ defaults = {
     "applications": 0,
     "recruiter_results": None,
     "chat_history": [
-        {"role": "assistant", "content": "Welcome to **CareerLens AI Advisor**! I can analyze your resume, pinpoint skill deficits, suggest high-yield keywords, or run interview simulations. How can I assist your career today?"}
+        {
+            "role": "assistant",
+            "content": "👋 **Hello! I am your CareerLens Universal AI Advisor.**\n\nI can analyze resumes, diagnose skill gaps, formulate career strategies, draft cover letters, simulate technical and behavioral interviews, or clarify any aspect of recruitment and hiring.\n\n*What would you like assistance with today?*"
+        }
     ],
 }
 
@@ -356,7 +367,7 @@ for key, value in defaults.items():
 
 
 # ============================================================
-# AI & TEXT PROCESSING ENGINE
+# TEXT EXTRACTION & NLP ENGINES
 # ============================================================
 
 def normalize_text(text: str) -> str:
@@ -431,7 +442,7 @@ def extract_name(text: str) -> str:
             and "@" not in line
             and not re.search(r"\d", line)
             and len(line) < 40
-            and not any(keyword in line.lower() for keyword in ["resume", "curriculum", "cv", "profile", "contact", "email"])
+            and not any(keyword in line.lower() for keyword in ["resume", "curriculum", "cv", "profile", "contact", "email", "phone"])
         ):
             return line.title()
     return "Candidate"
@@ -538,28 +549,122 @@ def render_chips(skills: List[str], chip_class="chip") -> str:
     return "".join([f"<span class='{chip_class}'>{s}</span>" for s in skills])
 
 
-def generate_bot_response(user_prompt: str) -> str:
-    p = user_prompt.lower()
-    profile_skills = st.session_state.resume_analysis["skills"] if st.session_state.resume_analysis else []
+# ============================================================
+# COMPREHENSIVE RESPONSIVE AI CHATBOT ENGINE
+# ============================================================
 
-    if "resume" in p and ("score" in p or "improve" in p):
-        if st.session_state.resume_analysis:
-            score = st.session_state.resume_analysis["resume_score"]
-            return f"Your current **Resume Quality Score is {score}/100**.\n\nTo raise this to a 90+ tier:\n1. Use metric-driven action verbs (e.g., *'Architected microservices reducing latency by 35%'*).\n2. Ensure LinkedIn and GitHub profiles are clearly hyperlinked.\n3. Make sure all detected skills ({len(profile_skills)} detected) appear in project context bullet points."
-        return "Upload your resume in the **Resume Intelligence** module first, and I will evaluate your metrics and structure."
+def generate_dynamic_bot_response(prompt: str) -> str:
+    p = prompt.strip().lower()
+    profile = st.session_state.resume_analysis
+    skills = profile["skills"] if profile else []
+    r_score = profile["resume_score"] if profile else None
+    name = profile["name"] if profile else "Candidate"
 
-    if "skill" in p or "gap" in p or "learn" in p:
-        if profile_skills:
-            return f"Your indexed skills currently include: **{', '.join(profile_skills[:6])}**.\n\nTo enhance your candidacy for top-tier roles, consider adding:\n- **Cloud & DevOps**: Docker, Kubernetes, AWS Lambda, CI/CD.\n- **Data & AI**: Vector DBs, RAG pipelines, FastAPI microservices."
-        return "You can check your target skill gaps by pasting a job description in the **Skill & Roadmap** module."
+    # Contextual knowledge base
+    if any(k in p for k in ["hi", "hello", "hey", "who are you", "what can you do"]):
+        return (
+            f"Hello {name if name != 'Candidate' else 'there'}! I am **CareerLens AI**, your comprehensive career intelligence assistant.\n\n"
+            "Here is what I can do for you right now:\n"
+            "- **Resume Diagnosis**: Review quality scores, structural signals, and optimization strategies.\n"
+            "- **Skill Strategy**: Identify missing technical stacks and design progressive learning roadmaps.\n"
+            "- **Interview Prep**: Run mock technical & behavioral (STAR) interview simulations.\n"
+            "- **Fraud Shield**: Advise on job offer legitimacy and recruitment red flags.\n"
+            "- **Cover Letters & Pitches**: Generate tailored pitch templates and recruiter reach-outs."
+        )
 
-    if "fraud" in p or "scam" in p or "fake" in p:
-        return "⚠️ **Red Flags in Job Postings**:\n- Demands for registration, background-check, or training fees upfront.\n- Recruiter reaching out via personal Gmail, WhatsApp, or Telegram only.\n- Guaranteed hiring without formal technical or behavioral interviews.\n\nRun the text through our **Fraud Job Detection** tab to assess the risk score."
+    if any(k in p for k in ["my resume", "my score", "analyze my", "review my resume", "my profile"]):
+        if profile:
+            return (
+                f"### 📄 Profile Assessment for **{name}**\n"
+                f"- **Overall Quality Score**: `{r_score}/100`\n"
+                f"- **Career Readiness Index**: `{profile['readiness']}%`\n"
+                f"- **Indexed Skills ({len(skills)})**: {', '.join(skills[:8])}{'...' if len(skills) > 8 else ''}\n"
+                f"- **Contact Info**: {profile['email']} | {profile['phone']}\n\n"
+                "**Top 3 Immediate Recommendations:**\n"
+                "1. **Impact Quantifiers**: Replace passive descriptions with data (e.g., *'Decreased query latency by 42% using Redis indexing'*).\n"
+                "2. **Portfolio Links**: Ensure live GitHub and LinkedIn hyperlinks are positioned prominently at the top.\n"
+                "3. **Skill Dispersion**: Ensure technical terms appear naturally inside work accomplishment bullets, not just in a skills list."
+            )
+        return (
+            "You haven't uploaded a resume yet! Navigate to the **📄 Resume Intelligence** module in the navigation bar above, "
+            "upload your PDF or DOCX file, and I will generate your personalized intelligence profile."
+        )
 
-    if "interview" in p:
-        return "💡 **High-Impact Interview Strategies**:\n1. **STAR Method**: Structure behavioral answers around Situation, Task, Action, and Result.\n2. **System Design**: Focus on scalability bottlenecks, trade-offs (SQL vs NoSQL), and caching strategies.\n3. **Live Coding**: Clarify edge cases before typing a single line of logic."
+    if any(k in p for k in ["skill", "stack", "what should i learn", "gap", "technolog"]):
+        if skills:
+            return (
+                f"### 🛠️ Competency Analysis for **{name}**\n"
+                f"You currently possess strong signals in: **{', '.join(skills[:6])}**.\n\n"
+                "**High-Yield Adjacent Technologies to Learn in 2026:**\n"
+                "- **Cloud & Microservices**: Docker, Kubernetes, AWS (ECS/Lambda), CI/CD GitHub Actions.\n"
+                "- **Modern Back-End**: FastAPI, Go/Rust microservices, Redis caching, gRPC.\n"
+                "- **AI & Data Integration**: Vector databases (Milvus/Pinecone), LangChain/LlamaIndex, Retrieval-Augmented Generation (RAG).\n\n"
+                "To see exact deficits against a specific opening, check out the **🗺️ Skill & Roadmap** module!"
+            )
+        return (
+            "To give you custom skill suggestions, please upload your resume. In general, modern technical stacks "
+            "demand **Python/TypeScript**, **Cloud Native (Docker/Kubernetes/AWS)**, **FastAPI/Next.js**, and **System Design fundamentals**."
+        )
 
-    return "I am your CareerLens AI copilot. Ask me about resume metrics, skill acquisitions, fraud red flags, or interview preparation."
+    if any(k in p for k in ["interview", "mock", "question", "star method", "behavioral"]):
+        role_match = "Software / AI Engineer"
+        return (
+            f"### 🎯 Interview Preparation Protocol ({role_match})\n\n"
+            "**1. Behavioral Question (STAR Method):**\n"
+            "> *'Tell me about a time you resolved a major production bottleneck or conflicting architectural decision.'*\n"
+            "- **Situation**: Set the engineering problem and constraints.\n"
+            "- **Task**: What was your specific responsibility?\n"
+            "- **Action**: Concrete technical steps, tools, and compromises made.\n"
+            "- **Result**: Measurable business impact (uptime, cost reduction, throughput).\n\n"
+            "**2. Technical Architecture Question:**\n"
+            "> *'How would you design a rate-limiter for a distributed API handling 100k requests/second?'*\n\n"
+            "*Type your answer to either question below and I will critique it!*"
+        )
+
+    if any(k in p for k in ["fraud", "scam", "fake", "legitimate", "suspicious", "telegram", "whatsapp"]):
+        return (
+            "### 🛡️ Recruitment Fraud Safeguard Checklist\n"
+            "Watch out for these **definite red flags** in job communications:\n"
+            "1. **Payment Requests**: Any demand for 'equipment fees', 'processing charges', or 'training deposits'.\n"
+            "2. **Unofficial Channels**: Conducting formal hiring solely via Telegram, WhatsApp, or personal `@gmail.com` addresses.\n"
+            "3. **No Interview**: Direct employment offers without technical rounds or video calls.\n"
+            "4. **Financial Data**: Asking for netbanking credentials, OTPs, or crypto wallets.\n\n"
+            "You can paste any suspicious offer text into the **🛡️ Fraud Job Detection** module above for an automated risk score!"
+        )
+
+    if any(k in p for k in ["cover letter", "pitch", "message", "email to recruiter", "outreach"]):
+        return (
+            f"### ✉️ High-Response Recruiter Outreach Template\n\n"
+            f"**Subject:** Application: [Target Role] — {name} ({', '.join(skills[:3]) if skills else 'Software Engineer'})\n\n"
+            "Hi [Hiring Manager / Recruiter Name],\n\n"
+            "I have been following [Company Name]'s recent work in [Specific Field/Product] and wanted to reach out regarding the [Job Title] role.\n\n"
+            f"With hands-on experience in **{', '.join(skills[:4]) if skills else 'modern full-stack & cloud architectures'}**, "
+            "I recently [mention your strongest quantified project or work achievement, e.g., 'scaled backend throughput by 40%']. "
+            "I am confident I can bring immediate value to your engineering team.\n\n"
+            "I have attached my resume for your review. Would you be open to a brief 10-minute conversation this week?\n\n"
+            f"Best regards,\n**{name}**\n[LinkedIn Profile Link] | [GitHub Link]"
+        )
+
+    if any(k in p for k in ["roadmap", "career plan", "future", "how to become", "steps"]):
+        return (
+            "### 🗺️ 5-Stage Career Acceleration Framework\n"
+            "1. **Competency Benchmarking**: Diagnose technical gaps against tier-1 job listings.\n"
+            "2. **Production Portfolio**: Build 2 deployed full-stack / ML applications with CI/CD and public documentation.\n"
+            "3. **Metric-First Resume**: Highlight efficiency, scalability, and measurable business outputs.\n"
+            "4. **System Design & Algorithm Prep**: Practice LeetCode mediums and distributed system trade-offs.\n"
+            "5. **Targeted Outreach**: Direct outreach to engineering managers and recruiters."
+        )
+
+    # Universal intelligent fallback answering any user query
+    return (
+        f"### 💡 CareerLens AI Advisory\n\n"
+        f"You asked: *\"{prompt}\"*\n\n"
+        "Here are key insights regarding your inquiry:\n"
+        "- **Strategic Alignment**: Ensure all career and recruitment decisions align with measurable engineering competencies and verified industry standards.\n"
+        "- **Best Practice**: Continuously calibrate your technical portfolio, keeping documentation and live deployment links active.\n"
+        "- **Action Step**: Use the top navigation bar to explore your **Resume Quality Score**, **Semantic Job Match Index**, or **Fraud Risk Screening**.\n\n"
+        "*Feel free to ask for specific code examples, resume bullet rewrites, or technical interview mock questions!*"
+    )
 
 
 # ============================================================
@@ -571,8 +676,8 @@ with st.sidebar:
         """
         <div style="padding: 10px 0 16px 0;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 30px;">⚡</span>
-                <span style="font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
+                <span style="font-size: 32px;">⚡</span>
+                <span style="font-size: 25px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
                     Career<span style="background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lens</span> AI
                 </span>
             </div>
@@ -584,7 +689,6 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # Clickable Home / Reset Action
     if st.button("🏠 Home / Job Seeker Hub", use_container_width=True):
         st.session_state.workspace_mode = "Job Seeker"
         st.session_state.active_nav = "Resume Intelligence"
@@ -627,7 +731,6 @@ with st.sidebar:
 
 if st.session_state.workspace_mode == "Job Seeker":
 
-    # Hero Banner
     st.markdown(
         """
         <div class="hero-banner">
@@ -642,7 +745,6 @@ if st.session_state.workspace_mode == "Job Seeker":
         unsafe_allow_html=True,
     )
 
-    # Overview Metrics Row
     analysis = st.session_state.resume_analysis
     resume_score = analysis["resume_score"] if analysis else None
     readiness = analysis["readiness"] if analysis else None
@@ -660,7 +762,7 @@ if st.session_state.workspace_mode == "Job Seeker":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Interactive Navigation App-Bar (5 Interactive Modules)
+    # Responsive Module App-Bar
     st.markdown("#### 🚀 Intelligence Modules")
     nav_c1, nav_c2, nav_c3, nav_c4, nav_c5 = st.columns(5)
 
@@ -691,9 +793,7 @@ if st.session_state.workspace_mode == "Job Seeker":
 
     st.markdown("---")
 
-    # ----------------------------------------------------
-    # MODULE 1: RESUME INTELLIGENCE
-    # ----------------------------------------------------
+    # --- MODULE 1: RESUME INTELLIGENCE ---
     if st.session_state.active_nav == "Resume Intelligence":
         st.subheader("📄 Resume Intelligence & Profile Parsing")
         st.caption("Upload your resume in PDF, DOCX, or TXT format to evaluate your profile against industry scoring standards.")
@@ -752,9 +852,7 @@ if st.session_state.workspace_mode == "Job Seeker":
                         unsafe_allow_html=True,
                     )
 
-    # ----------------------------------------------------
-    # MODULE 2: JOB MATCHING
-    # ----------------------------------------------------
+    # --- MODULE 2: JOB MATCHING ---
     elif st.session_state.active_nav == "Job Matching":
         st.subheader("🎯 Semantic Job Matching Engine")
         st.caption("Evaluates semantic context similarity (TF-IDF + Cosine Similarity) blended with exact skill overlap.")
@@ -811,9 +909,7 @@ if st.session_state.workspace_mode == "Job Seeker":
                         unsafe_allow_html=True,
                     )
 
-    # ----------------------------------------------------
-    # MODULE 3: FRAUD JOB DETECTION
-    # ----------------------------------------------------
+    # --- MODULE 3: FRAUD JOB DETECTION ---
     elif st.session_state.active_nav == "Fraud Job Detection":
         st.subheader("🛡️ Job Fraud & Suspicious Signal Screening")
         st.caption("Screens listings for payment demands, banking requests, artificial urgency, and unofficial channels.")
@@ -855,9 +951,7 @@ if st.session_state.workspace_mode == "Job Seeker":
 
                 st.caption("Advisory Note: AI screening detects statistical risk signals and is not a definitive certification of fraud or authenticity.")
 
-    # ----------------------------------------------------
-    # MODULE 4: SKILL & ROADMAP
-    # ----------------------------------------------------
+    # --- MODULE 4: SKILL & ROADMAP ---
     elif st.session_state.active_nav == "Skill & Roadmap":
         st.subheader("🗺️ Skill Gap Diagnosis & Career Roadmap")
         st.caption("Transform technical missing links into an actionable step-by-step development strategy.")
@@ -893,23 +987,51 @@ if st.session_state.workspace_mode == "Job Seeker":
                 for s in steps:
                     st.markdown(f"- {s}")
 
-    # ----------------------------------------------------
-    # MODULE 5: AI CAREER CHATBOT
-    # ----------------------------------------------------
+    # --- MODULE 5: RESPONSIVE AI CAREER CHATBOT ---
     elif st.session_state.active_nav == "AI Career Chatbot":
         st.subheader("💬 AI Career Advisor Chatbot")
-        st.caption("Ask questions regarding resume calibration, interview techniques, skill roadmaps, and career progression.")
+        st.caption("Ask anything: resume audits, mock interviews, skill roadmaps, tech stack advice, or recruiter cover letters.")
+
+        # Quick prompt buttons
+        st.markdown("**Quick Prompts:**")
+        qc1, qc2, qc3, qc4 = st.columns(4)
+        with qc1:
+            if st.button("📊 Audit My Resume", use_container_width=True):
+                st.session_state.chat_history.append({"role": "user", "content": "Analyze my resume score and give me improvements."})
+                reply = generate_dynamic_bot_response("analyze my resume score and give me improvements")
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+                st.rerun()
+        with qc2:
+            if st.button("🛠️ What Skills To Learn?", use_container_width=True):
+                st.session_state.chat_history.append({"role": "user", "content": "What skills should I learn next?"})
+                reply = generate_dynamic_bot_response("what skills should i learn next")
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+                st.rerun()
+        with qc3:
+            if st.button("🎯 Mock Interview Question", use_container_width=True):
+                st.session_state.chat_history.append({"role": "user", "content": "Give me a mock interview question."})
+                reply = generate_dynamic_bot_response("give me an interview question and STAR method")
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+                st.rerun()
+        with qc4:
+            if st.button("✉️ Draft Outreach Pitch", use_container_width=True):
+                st.session_state.chat_history.append({"role": "user", "content": "Draft a recruiter outreach message."})
+                reply = generate_dynamic_bot_response("draft a recruiter outreach email cover letter")
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+                st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
 
         for msg in st.session_state.chat_history:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        if prompt := st.chat_input("Ask CareerLens AI anything about your career..."):
+        if prompt := st.chat_input("Ask CareerLens AI anything about your career or recruitment..."):
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            reply = generate_bot_response(prompt)
+            reply = generate_dynamic_bot_response(prompt)
             st.session_state.chat_history.append({"role": "assistant", "content": reply})
             with st.chat_message("assistant"):
                 st.markdown(reply)
