@@ -1,6 +1,5 @@
 import io
 import re
-import random
 from typing import Dict, List, Tuple
 
 import pandas as pd
@@ -79,53 +78,115 @@ st.markdown(
             color: #94a3b8;
         }
 
-        /* Hero Banner */
-        .hero-banner {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.7) 50%, rgba(15, 23, 42, 0.9) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.35);
+        /* Hero Banner & Frames */
+        .hero-container {
+            position: relative;
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+                        radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+                        linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(13, 19, 38, 0.95) 100%);
+            border: 1px solid rgba(129, 140, 248, 0.3);
             border-radius: 24px;
-            padding: 36px 42px;
-            margin-bottom: 24px;
+            padding: 38px 42px;
+            margin-bottom: 28px;
             backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
-        .hero-tag {
+
+        .hero-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .hero-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             color: #a5b4fc;
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             background: rgba(99, 102, 241, 0.15);
             border: 1px solid rgba(99, 102, 241, 0.35);
             border-radius: 20px;
             padding: 4px 14px;
-            margin-bottom: 12px;
         }
-        .hero-heading {
+
+        .hero-title {
             color: #ffffff;
-            font-size: 36px;
+            font-size: 40px;
             font-weight: 800;
             line-height: 1.15;
-            margin: 0 0 12px 0;
+            margin: 0 0 14px 0;
             letter-spacing: -0.03em;
         }
-        .hero-heading span {
+
+        .hero-gradient-text {
             background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .hero-sub {
+
+        .hero-description {
             color: #94a3b8;
             font-size: 15px;
-            line-height: 1.6;
-            max-width: 880px;
-            margin: 0;
+            line-height: 1.7;
+            max-width: 860px;
+            margin: 0 0 26px 0;
         }
 
-        /* Glassmorphism Cards */
+        .hero-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .hero-mini-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .hero-mini-card:hover {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .hero-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            flex-shrink: 0;
+        }
+
+        .hero-card-text h5 {
+            margin: 0;
+            color: #f1f5f9;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hero-card-text p {
+            margin: 0;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        /* Glassmorphism General Cards */
         .glass-card {
             background: rgba(11, 20, 38, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -560,7 +621,6 @@ def generate_dynamic_bot_response(prompt: str) -> str:
     r_score = profile["resume_score"] if profile else None
     name = profile["name"] if profile else "Candidate"
 
-    # Contextual knowledge base
     if any(k in p for k in ["hi", "hello", "hey", "who are you", "what can you do"]):
         return (
             f"Hello {name if name != 'Candidate' else 'there'}! I am **CareerLens AI**, your comprehensive career intelligence assistant.\n\n"
@@ -655,7 +715,6 @@ def generate_dynamic_bot_response(prompt: str) -> str:
             "5. **Targeted Outreach**: Direct outreach to engineering managers and recruiters."
         )
 
-    # Universal intelligent fallback answering any user query
     return (
         f"### 💡 CareerLens AI Advisory\n\n"
         f"You asked: *\"{prompt}\"*\n\n"
@@ -701,7 +760,7 @@ with st.sidebar:
         "Workspace Selector",
         ["👨‍💻 Job Seeker Workspace", "🏢 Recruiter Workspace"],
         index=0 if st.session_state.workspace_mode == "Job Seeker" else 1,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
     if "Job Seeker" in workspace_choice:
@@ -731,20 +790,86 @@ with st.sidebar:
 
 if st.session_state.workspace_mode == "Job Seeker":
 
+    # Ultra-Premium Hero Frame
     st.markdown(
         """
-        <div class="hero-banner">
-            <div class="hero-tag">AI Career Intelligence</div>
-            <div class="hero-heading">Understand Your Career. <span>Build Your Future.</span></div>
-            <p class="hero-sub">
-                CareerLens AI provides comprehensive resume scoring, semantic job description matching,
-                instant skill-gap diagnosis, recruitment fraud screening, and an integrated AI Career Advisor.
+        <div class="hero-container">
+            <div class="hero-badge-row">
+                <div class="hero-pill">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                    AI Career Intelligence
+                </div>
+                <div class="hero-pill" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.1); color: #7dd3fc;">
+                    Next-Gen Workspace
+                </div>
+            </div>
+
+            <div class="hero-title">
+                Understand Your Career. <span class="hero-gradient-text">Build Your Future.</span>
+            </div>
+
+            <p class="hero-description">
+                CareerLens AI combines deep semantic NLP, precision skill indexing, real-time fraud risk screening, 
+                and adaptive career telemetry into a unified intelligence hub.
             </p>
+
+            <div class="hero-features-grid">
+                <div class="hero-mini-card">
+                    <div class="hero-icon-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="hero-card-text">
+                        <h5>Resume Scoring</h5>
+                        <p>Structural & NLP Audit</p>
+                    </div>
+                </div>
+
+                <div class="hero-mini-card">
+                    <div class="hero-icon-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+                        </svg>
+                    </div>
+                    <div class="hero-card-text">
+                        <h5>Semantic Matching</h5>
+                        <p>TF-IDF & Skill Alignment</p>
+                    </div>
+                </div>
+
+                <div class="hero-mini-card">
+                    <div class="hero-icon-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <div class="hero-card-text">
+                        <h5>Fraud Shield</h5>
+                        <p>Heuristic Risk Detection</p>
+                    </div>
+                </div>
+
+                <div class="hero-mini-card">
+                    <div class="hero-icon-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                    <div class="hero-card-text">
+                        <h5>Career Advisor</h5>
+                        <p>Interactive Copilot</p>
+                    </div>
+                </div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # Overview Metrics Row
     analysis = st.session_state.resume_analysis
     resume_score = analysis["resume_score"] if analysis else None
     readiness = analysis["readiness"] if analysis else None
@@ -762,8 +887,8 @@ if st.session_state.workspace_mode == "Job Seeker":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Responsive Module App-Bar
-    st.markdown("#### 🚀 Intelligence Modules")
+    # Interactive Navigation App-Bar
+    st.markdown("#### ⚡ Module Navigation Bar")
     nav_c1, nav_c2, nav_c3, nav_c4, nav_c5 = st.columns(5)
 
     with nav_c1:
@@ -793,7 +918,9 @@ if st.session_state.workspace_mode == "Job Seeker":
 
     st.markdown("---")
 
-    # --- MODULE 1: RESUME INTELLIGENCE ---
+    # ----------------------------------------------------
+    # MODULE 1: RESUME INTELLIGENCE
+    # ----------------------------------------------------
     if st.session_state.active_nav == "Resume Intelligence":
         st.subheader("📄 Resume Intelligence & Profile Parsing")
         st.caption("Upload your resume in PDF, DOCX, or TXT format to evaluate your profile against industry scoring standards.")
@@ -852,7 +979,9 @@ if st.session_state.workspace_mode == "Job Seeker":
                         unsafe_allow_html=True,
                     )
 
-    # --- MODULE 2: JOB MATCHING ---
+    # ----------------------------------------------------
+    # MODULE 2: JOB MATCHING
+    # ----------------------------------------------------
     elif st.session_state.active_nav == "Job Matching":
         st.subheader("🎯 Semantic Job Matching Engine")
         st.caption("Evaluates semantic context similarity (TF-IDF + Cosine Similarity) blended with exact skill overlap.")
@@ -909,7 +1038,9 @@ if st.session_state.workspace_mode == "Job Seeker":
                         unsafe_allow_html=True,
                     )
 
-    # --- MODULE 3: FRAUD JOB DETECTION ---
+    # ----------------------------------------------------
+    # MODULE 3: FRAUD JOB DETECTION
+    # ----------------------------------------------------
     elif st.session_state.active_nav == "Fraud Job Detection":
         st.subheader("🛡️ Job Fraud & Suspicious Signal Screening")
         st.caption("Screens listings for payment demands, banking requests, artificial urgency, and unofficial channels.")
@@ -951,7 +1082,9 @@ if st.session_state.workspace_mode == "Job Seeker":
 
                 st.caption("Advisory Note: AI screening detects statistical risk signals and is not a definitive certification of fraud or authenticity.")
 
-    # --- MODULE 4: SKILL & ROADMAP ---
+    # ----------------------------------------------------
+    # MODULE 4: SKILL & ROADMAP
+    # ----------------------------------------------------
     elif st.session_state.active_nav == "Skill & Roadmap":
         st.subheader("🗺️ Skill Gap Diagnosis & Career Roadmap")
         st.caption("Transform technical missing links into an actionable step-by-step development strategy.")
@@ -987,12 +1120,13 @@ if st.session_state.workspace_mode == "Job Seeker":
                 for s in steps:
                     st.markdown(f"- {s}")
 
-    # --- MODULE 5: RESPONSIVE AI CAREER CHATBOT ---
+    # ----------------------------------------------------
+    # MODULE 5: RESPONSIVE AI CAREER CHATBOT
+    # ----------------------------------------------------
     elif st.session_state.active_nav == "AI Career Chatbot":
         st.subheader("💬 AI Career Advisor Chatbot")
         st.caption("Ask anything: resume audits, mock interviews, skill roadmaps, tech stack advice, or recruiter cover letters.")
 
-        # Quick prompt buttons
         st.markdown("**Quick Prompts:**")
         qc1, qc2, qc3, qc4 = st.columns(4)
         with qc1:
