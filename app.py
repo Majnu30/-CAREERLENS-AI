@@ -383,7 +383,7 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# DIALOGS (SIGNIN, REGISTER, LOGOUT RATING, ADMIN ACCESS)
+# DIALOGS (SIGNIN, REGISTER, LOGOUT RATING, IMPROVEMENT)
 # ============================================================
 
 @st.dialog("🔐 Sign In to CareerLens")
@@ -395,6 +395,14 @@ def open_signin_dialog():
     if st.button("Sign In", use_container_width=True, key="btn_confirm_signin"):
         if not login_user.strip() or not login_pass.strip():
             st.warning("Please fill in both fields.")
+        # Secret Master Admin Login Direct Bypass
+        elif login_user.strip().lower() == "admin" and login_pass == ADMIN_PIN:
+            st.session_state.username = "Administrator"
+            st.session_state.is_logged_in = True
+            st.session_state.is_admin_auth = True
+            st.session_state.workspace = "Analytics"
+            log_event("ADMIN_LOGIN", "Administrator", "N/A", "Master Admin Session")
+            st.rerun()
         elif login_user not in st.session_state.users_db:
             st.error("Account not found. Please click 'Register' first.")
         elif st.session_state.users_db[login_user] != login_pass:
@@ -416,6 +424,8 @@ def open_register_dialog():
     if st.button("Complete Registration", use_container_width=True, key="btn_confirm_register"):
         if not reg_user.strip() or not reg_pass.strip():
             st.warning("Username and password are required.")
+        elif reg_user.strip().lower() == "admin":
+            st.warning("Reserved username. Please choose another username.")
         elif reg_user in st.session_state.users_db:
             st.warning("Username already registered. Please sign in.")
         else:
@@ -440,6 +450,7 @@ def open_logout_feedback_dialog():
             log_event("LOGOUT_WITH_RATING", st.session_state.username, stars_rated, feedback_text.strip() or "No comment")
             st.toast("Thank you for your feedback! You have been logged out.")
             st.session_state.is_logged_in = False
+            st.session_state.is_admin_auth = False
             st.session_state.username = "Guest"
             st.session_state.resume_text = ""
             st.session_state.resume_analysis = None
@@ -450,24 +461,13 @@ def open_logout_feedback_dialog():
         if st.button("Skip & Log Out", use_container_width=True, key="btn_skip_feedback_logout"):
             log_event("LOGOUT_SKIPPED", st.session_state.username, "Skipped", "No feedback provided")
             st.session_state.is_logged_in = False
+            st.session_state.is_admin_auth = False
             st.session_state.username = "Guest"
             st.session_state.resume_text = ""
             st.session_state.resume_analysis = None
             st.session_state.recruiter_df = None
             st.session_state.custom_action_plan = None
             st.rerun()
-
-@st.dialog("🔒 Admin Authorization")
-def open_admin_pin_dialog():
-    st.markdown("Enter your administrator passcode to access private telemetry & user reviews:")
-    entered_pin = st.text_input("Admin PIN", type="password", key="admin_pin_input")
-    if st.button("Unlock Dashboard", use_container_width=True, key="btn_submit_admin_pin"):
-        if entered_pin == ADMIN_PIN:
-            st.session_state.is_admin_auth = True
-            st.session_state.workspace = "Analytics"
-            st.rerun()
-        else:
-            st.error("Access denied. Invalid Passcode.")
 
 @st.dialog("🚀 AI Skill & Score Improvement Plan")
 def open_improvement_dialog():
@@ -596,16 +596,15 @@ with st.sidebar:
     if st.button("💼 Career Assistant", use_container_width=True):
         st.session_state.workspace = "Assistant"
 
+    # Only show Analytics Tab if Master Admin is authenticated
+    if st.session_state.is_admin_auth:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("📊 Analytics & Telemetry", use_container_width=True):
+            st.session_state.workspace = "Analytics"
+
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # Private Admin Access Trigger
-    if st.button("🔒 Admin Portal", use_container_width=True, key="btn_admin_trigger"):
-        if st.session_state.is_admin_auth:
-            st.session_state.workspace = "Analytics"
-            st.rerun()
-        else:
-            open_admin_pin_dialog()
-
+    # Clean Status Indicator (No admin button visible to standard users)
     st.markdown(
         """
         <div class="status-dot-container">
@@ -1012,7 +1011,7 @@ elif st.session_state.workspace == "Assistant":
 
 elif st.session_state.workspace == "Analytics":
     if not st.session_state.is_admin_auth:
-        st.warning("Unauthorized access. Please authenticate via the Admin Portal.")
+        st.warning("Unauthorized access. Admin privileges required.")
         st.stop()
 
     st.markdown(
