@@ -1,524 +1,618 @@
-import os
-import streamlit as st
-import requests
+import io
+from typing import Dict, List
 import pandas as pd
-from PyPDF2 import PdfReader
-import docx
+import requests
+import streamlit as st
 
-# --- Page Configuration ---
+API_BASE_URL = "https://careerlens-ai-9dx8.onrender.com"
+
 st.set_page_config(
-    page_title="CareerLens AI | Next-Gen Intelligence Hub",
-    page_icon="🧠",
+    page_title="CareerLens AI",
+    page_icon="🎯",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-# --- High-Density Glassmorphism, Tag-Rich & Bubble CSS Architecture ---
-st.markdown("""
+st.markdown(
+    """
 <style>
-    /* Dark Sci-Fi / Modern Tech Gradient Canvas */
-    .stApp {
-        background: radial-gradient(circle at 15% 15%, #0b0f19 0%, #0d1527 50%, #080c14 100%);
-        color: #f1f5f9;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    /* Ambient Glowing Brain Logo Header */
-    .brand-hero {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        border-radius: 24px;
-        padding: 22px 28px;
-        box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
-        backdrop-filter: blur(16px);
-        margin-bottom: 24px;
-    }
-
-    .brand-logo-glow {
-        font-size: 3.2rem;
-        background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
-        padding: 10px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
-    }
-
-    .brand-title {
-        font-size: 2.3rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0;
-        line-height: 1.1;
-    }
-
-    .brand-caption {
-        font-size: 0.95rem;
-        color: #94a3b8;
-        margin-top: 4px;
-        font-weight: 500;
-    }
-
-    /* Bubble Containers & Bento Cards */
-    .bento-bubble-card {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.65) 0%, rgba(15, 23, 42, 0.8) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 22px;
-        padding: 22px;
-        backdrop-filter: blur(14px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-        margin-bottom: 18px;
-    }
-    .bento-bubble-card:hover {
-        border-color: rgba(56, 189, 248, 0.35);
-    }
-
-    /* Tag Cloud & Pill Chips */
-    .tag-bubble {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 14px;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        margin: 4px 4px 4px 0;
-        backdrop-filter: blur(8px);
-        transition: all 0.2s ease;
-    }
-    .tag-cyan {
-        background: rgba(56, 189, 248, 0.12);
-        color: #38bdf8;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-    .tag-indigo {
-        background: rgba(99, 102, 241, 0.12);
-        color: #818cf8;
-        border: 1px solid rgba(99, 102, 241, 0.3);
-    }
-    .tag-purple {
-        background: rgba(192, 132, 252, 0.12);
-        color: #c084fc;
-        border: 1px solid rgba(192, 132, 252, 0.3);
-    }
-    .tag-emerald {
-        background: rgba(16, 185, 129, 0.12);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    /* High-Gloss Rounded Bubble Buttons */
-    .stButton > button {
-        border-radius: 35px !important;
-        background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%) !important;
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        padding: 0.65rem 1.8rem !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-3px) scale(1.02) !important;
-        box-shadow: 0 8px 25px rgba(56, 189, 248, 0.6) !important;
-        border-color: rgba(255, 255, 255, 0.3) !important;
-    }
-
-    /* Floating Status Indicator */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 16px;
-        border-radius: 50px;
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: #34d399;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    .pulse-dot {
-        width: 8px;
-        height: 8px;
-        background-color: #10b981;
-        border-radius: 50%;
-        box-shadow: 0 0 10px #10b981;
-    }
-
-    /* Footer */
-    .footer-container {
-        margin-top: 50px;
-        padding: 20px;
-        text-align: center;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        color: #64748b;
-        font-size: 0.85rem;
-    }
+:root{
+    --bg:#07111f;
+    --panel:#0d1a2b;
+    --border:#213754;
+    --text:#f4f7fb;
+    --purple:#8b7cff;
+    --cyan:#38bdf8;
+    --green:#4ade80;
+    --yellow:#fbbf24;
+    --red:#fb7185;
+}
+.stApp{
+    background:
+        radial-gradient(circle at 15% 0%,rgba(139,124,255,.14),transparent 28%),
+        radial-gradient(circle at 90% 5%,rgba(56,189,248,.10),transparent 25%),
+        var(--bg);
+}
+.block-container{
+    max-width:1450px;
+    padding:28px 34px 60px;
+}
+[data-testid="stSidebar"]{
+    background:#081526;
+    border-right:1px solid #1b304b;
+}
+h1,h2,h3,h4{
+    color:var(--text)!important;
+}
+p,label,.stMarkdown{
+    color:#b8c6d8;
+}
+.brand{
+    font-size:29px;
+    font-weight:850;
+    color:white;
+    letter-spacing:-.7px;
+}
+.brand span{
+    background:linear-gradient(90deg,var(--purple),var(--cyan));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.brand-sub{
+    font-size:10px;
+    letter-spacing:2px;
+    color:#70849e;
+    margin-top:3px;
+}
+.status{
+    display:inline-block;
+    background:#0b2b20;
+    color:var(--green);
+    border:1px solid #1e6548;
+    border-radius:999px;
+    padding:7px 12px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1px;
+}
+.hero{
+    background:
+        linear-gradient(135deg,rgba(139,124,255,.12),rgba(56,189,248,.04)),
+        linear-gradient(135deg,#0d1d34,#0b1728);
+    border:1px solid #28425f;
+    border-radius:24px;
+    padding:42px;
+    margin-bottom:28px;
+    box-shadow:0 24px 70px rgba(0,0,0,.20);
+}
+.kicker{
+    color:var(--cyan);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:2.4px;
+}
+.hero h1{
+    font-size:clamp(38px,5vw,62px);
+    line-height:1.05;
+    letter-spacing:-2.4px;
+    margin:12px 0;
+}
+.hero h1 span{
+    background:linear-gradient(90deg,var(--purple),var(--cyan));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.hero p{
+    max-width:820px;
+    font-size:16px;
+    line-height:1.75;
+    color:#a8b9cd;
+}
+.card{
+    background:rgba(13,26,43,.88);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    min-height:150px;
+}
+.card-icon{ font-size:28px; }
+.card-title{ color:white; font-weight:800; font-size:17px; margin-top:9px; }
+.card-text{ color:#8fa2ba; font-size:13px; line-height:1.6; margin-top:7px; }
+.panel{
+    background:rgba(13,26,43,.82);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    margin:12px 0;
+}
+.skill{
+    display:inline-block;
+    background:rgba(139,124,255,.10);
+    color:#d9d4ff;
+    border:1px solid rgba(139,124,255,.25);
+    border-radius:999px;
+    padding:6px 11px;
+    margin:3px;
+    font-size:12px;
+}
+.small-label{
+    color:#7186a1;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+}
+.footer{
+    text-align:center;
+    color:#7186a1;
+    font-size:12px;
+    padding:35px 0 5px;
+}
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
-# --- Backend Config ---
-API_BASE_URL = os.getenv("API_URL", "https://your-backend-service.onrender.com")
+# ============================================================
+# API CALLS
+# ============================================================
 
-# --- Session Initialization ---
-if "active_portal" not in st.session_state:
-    st.session_state.active_portal = "Seeker"
-if "parsed_resume" not in st.session_state:
-    st.session_state.parsed_resume = None
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
 
-# --- Document Helper Function ---
-def extract_text_from_file(uploaded_file):
-    text = ""
-    try:
-        if uploaded_file.name.endswith(".pdf"):
-            reader = PdfReader(uploaded_file)
-            for page in reader.pages:
-                text += page.extract_text() or ""
-        elif uploaded_file.name.endswith(".docx"):
-            doc = docx.Document(uploaded_file)
-            text = "\n".join([p.text for p in doc.paragraphs])
-        else:
-            text = uploaded_file.read().decode("utf-8")
-    except Exception as e:
-        st.error(f"Extraction notice: {e}")
-    return text
+def api_analyze_resume(file) -> Dict:
+  files = {"file": (file.name, file.getvalue(), file.type)}
+  res = requests.post(
+      f"{API_BASE_URL}/api/resume/analyze", files=files, timeout=60
+  )
+  res.raise_for_status()
+  return res.json()
 
-# --- Sidebar UI with Interactive Control Center ---
+
+def api_match_job(resume_text: str, job_description: str) -> Dict:
+  payload = {"resume_text": resume_text, "job_description": job_description}
+  res = requests.post(f"{API_BASE_URL}/api/job/match", json=payload, timeout=30)
+  res.raise_for_status()
+  return res.json()
+
+
+def api_detect_fraud(job_text: str) -> Dict:
+  payload = {"text": job_text}
+  res = requests.post(f"{API_BASE_URL}/api/job/fraud", json=payload, timeout=30)
+  res.raise_for_status()
+  return res.json()
+
+
+def api_skill_gap(resume_text: str, target_job: str) -> Dict:
+  payload = {"resume_text": resume_text, "target_job": target_job}
+  res = requests.post(
+      f"{API_BASE_URL}/api/skills/gap", json=payload, timeout=30
+  )
+  res.raise_for_status()
+  return res.json()
+
+
+def api_career_roadmap(resume_text: str, target_role: str) -> Dict:
+  payload = {"resume_text": resume_text, "target_role": target_role}
+  res = requests.post(
+      f"{API_BASE_URL}/api/career/roadmap", json=payload, timeout=30
+  )
+  res.raise_for_status()
+  return res.json()
+
+
+def api_screen_candidates(files: List, job_description: str) -> List[Dict]:
+  file_payload = [("files", (f.name, f.getvalue(), f.type)) for f in files]
+  data_payload = {"job_description": job_description}
+  res = requests.post(
+      f"{API_BASE_URL}/api/recruiter/screen",
+      files=file_payload,
+      data=data_payload,
+      timeout=120,
+  )
+  res.raise_for_status()
+  return res.json()
+
+
+def api_chat_assistant(messages: List[Dict], resume_context: str = "") -> str:
+  payload = {"messages": messages, "resume_context": resume_context}
+  try:
+    res = requests.post(
+        f"{API_BASE_URL}/api/chat/ask", json=payload, timeout=30
+    )
+    if res.status_code == 200:
+      return res.json().get(
+          "reply", "I am ready to help optimize your career path."
+      )
+  except Exception:
+    pass
+  return "Focus on quantifiable achievements, matching core job description keywords, and maintaining clean ATS formatting."
+
+
+# ============================================================
+# STATE & HELPERS
+# ============================================================
+
+if "resume_text" not in st.session_state:
+  st.session_state.resume_text = ""
+if "resume_analysis" not in st.session_state:
+  st.session_state.resume_analysis = None
+if "applications" not in st.session_state:
+  st.session_state.applications = 0
+if "recruiter_df" not in st.session_state:
+  st.session_state.recruiter_df = None
+
+
+def metric_row(values):
+  columns = st.columns(len(values))
+  for column, (label, value, help_text) in zip(columns, values):
+    with column:
+      st.metric(label, value, help=help_text)
+
+
+def show_skills(skills):
+  if not skills:
+    st.caption("No skills detected.")
+    return
+  html = "".join(f'<span class="skill">{skill}</span>' for skill in skills)
+  st.markdown(html, unsafe_allow_html=True)
+
+
+# ============================================================
+# SIDEBAR
+# ============================================================
+
 with st.sidebar:
-    st.markdown("""
-    <div style="text-align: center; margin-bottom: 20px;">
-        <div style="font-size: 46px; margin-bottom: 8px;">🧠</div>
-        <h2 style="margin: 0; font-size: 1.5rem; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CareerLens AI</h2>
-        <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 4px;">Smart Career Intelligence</p>
+  st.markdown(
+      '<div class="brand">Career<span>Lens</span> AI</div>',
+      unsafe_allow_html=True,
+  )
+  st.markdown(
+      '<div class="brand-sub">CAREER INTELLIGENCE PLATFORM</div>',
+      unsafe_allow_html=True,
+  )
+  st.divider()
+
+  workspace = st.radio("WORKSPACE", ["👨‍💻 Job Seeker", "🏢 Recruiter"])
+  st.divider()
+
+  try:
+    health_check = requests.get(f"{API_BASE_URL}/health", timeout=3)
+    if health_check.status_code == 200:
+      st.markdown(
+          '<span class="status">● BACKEND CONNECTED</span>',
+          unsafe_allow_html=True,
+      )
+    else:
+      st.warning("⚠️ Backend Degraded")
+  except Exception:
+    st.error("❌ Backend Offline")
+
+  st.caption("NLP • ML • FastAPI Microservice")
+  st.divider()
+  st.caption("CareerLens AI v2.0")
+
+
+# ============================================================
+# JOB SEEKER
+# ============================================================
+
+if workspace == "👨‍💻 Job Seeker":
+
+  st.markdown(
+      """
+        <section class="hero">
+            <div class="kicker">AI CAREER INTELLIGENCE</div>
+            <h1>Understand Your Career.<br><span>Build Your Future.</span></h1>
+            <p>CareerLens AI connects to our cloud ML engine for resume parsing, semantic matching, fraud detection, and roadmap generation.</p>
+        </section>
+        """,
+      unsafe_allow_html=True,
+  )
+
+  analysis = st.session_state.resume_analysis
+  score = f"{analysis.get('resume_score', '—')}/100" if analysis else "—"
+  readiness = f"{analysis.get('readiness', '—')}%" if analysis else "—"
+  skills_count = len(analysis.get("skills", [])) if analysis else 0
+
+  metric_row([
+      ("Resume Score", score, "AI-assisted resume quality score"),
+      ("Career Readiness", readiness, "Profile readiness estimate"),
+      ("Skills Detected", skills_count, "Skills extracted by AI backend"),
+      ("Applications", st.session_state.applications, "Tracked applications"),
+  ])
+
+  st.divider()
+
+  tabs = st.tabs([
+      "📄 Resume Intelligence",
+      "🎯 Job Match",
+      "🛡️ Fraud Risk",
+      "🧩 Skill Gap",
+      "🗺️ Career Roadmap",
+      "💬 AI Career Assistant",
+  ])
+
+  # 1. Resume Intelligence
+  with tabs[0]:
+    st.subheader("Resume Intelligence")
+    resume_file = st.file_uploader(
+        "Upload Resume", type=["pdf", "docx", "txt"], key="resume_upload"
+    )
+
+    if resume_file and st.button(
+        "Analyze Resume via API", type="primary", use_container_width=True
+    ):
+      with st.spinner("Connecting to Render backend..."):
+        try:
+          result = api_analyze_resume(resume_file)
+          st.session_state.resume_analysis = result
+          st.session_state.resume_text = result.get("extracted_text", "")
+          st.success("Resume processed successfully!")
+        except Exception as exc:
+          st.error(f"Backend API error: {exc}")
+
+    if st.session_state.resume_analysis:
+      res = st.session_state.resume_analysis
+      c1, c2 = st.columns(2)
+      with c1:
+        st.write("**Name:**", res.get("name", "Candidate"))
+        st.write("**Email:**", res.get("email", "Not detected"))
+      with c2:
+        st.write("**Phone:**", res.get("phone", "Not detected"))
+        st.write("**Experience:**", res.get("experience", "Identified"))
+
+      st.subheader("Detected Skills")
+      show_skills(res.get("skills", []))
+
+  # 2. Job Match
+  with tabs[1]:
+    st.subheader("Semantic Job Matching")
+    job_desc = st.text_area("Paste job description", height=200, key="jobmatch")
+
+    if st.button(
+        "Analyze Match via API", type="primary", use_container_width=True
+    ):
+      if not st.session_state.resume_text:
+        st.warning("Please upload and analyze your resume first.")
+      elif not job_desc.strip():
+        st.warning("Please enter a job description.")
+      else:
+        with st.spinner("Running semantic matching model..."):
+          try:
+            result = api_match_job(st.session_state.resume_text, job_desc)
+            metric_row([
+                (
+                    "Overall Match",
+                    f"{result.get('overall', 0)}%",
+                    "Weighted alignment",
+                ),
+                (
+                    "Semantic Similarity",
+                    f"{result.get('semantic', 0)}%",
+                    "NLP Cosine match",
+                ),
+                (
+                    "Skill Match",
+                    f"{result.get('skill_match', 0)}%",
+                    "Overlap percentage",
+                ),
+            ])
+            st.progress(result.get("overall", 0) / 100)
+            st.subheader("Matched Skills")
+            show_skills(result.get("matched", []))
+            st.subheader("Missing Skills")
+            show_skills(result.get("missing", []))
+          except Exception as exc:
+            st.error(f"API Error: {exc}")
+
+  # 3. Fraud Risk
+  with tabs[2]:
+    st.subheader("Job Fraud Risk Intelligence")
+    jobrisk = st.text_area("Paste job advertisement", height=200, key="risk")
+
+    if st.button(
+        "Run Risk Analysis via API", type="primary", use_container_width=True
+    ):
+      if not jobrisk.strip():
+        st.warning("Enter a job advertisement to evaluate.")
+      else:
+        with st.spinner("Evaluating scam signals..."):
+          try:
+            res = api_detect_fraud(jobrisk)
+            metric_row([
+                (
+                    "Risk Score",
+                    f"{res.get('score', 0)}/100",
+                    "Heuristic fraud probability",
+                ),
+                (
+                    "Risk Level",
+                    res.get("level", "LOW RISK"),
+                    "Screening verdict",
+                ),
+                (
+                    "Signals Detected",
+                    res.get("signals", 0),
+                    "Triggered flags",
+                ),
+            ])
+            if res.get("level") == "HIGH RISK":
+              st.error("⚠️ High risk patterns detected.")
+            else:
+              st.success("✅ Low risk detected.")
+          except Exception as exc:
+            st.error(f"API Error: {exc}")
+
+  # 4. Skill Gap
+  with tabs[3]:
+    st.subheader("Skill Gap Analysis")
+    target_job = st.text_area("Target job description", height=200, key="gap")
+
+    if st.button(
+        "Analyze Skill Gap via API", type="primary", use_container_width=True
+    ):
+      if not st.session_state.resume_text:
+        st.warning("Upload your resume first.")
+      elif not target_job.strip():
+        st.warning("Enter target job requirements.")
+      else:
+        with st.spinner("Calculating skill matrix..."):
+          try:
+            res = api_skill_gap(st.session_state.resume_text, target_job)
+            st.subheader("Matched Skills")
+            show_skills(res.get("matched", []))
+            st.subheader("Missing Skills to Prioritize")
+            show_skills(res.get("missing", []))
+          except Exception as exc:
+            st.error(f"API Error: {exc}")
+
+  # 5. Career Roadmap
+  with tabs[4]:
+    st.subheader("Personalized Career Roadmap")
+    role = st.text_input("Target role", "Machine Learning Engineer")
+
+    if st.button(
+        "Generate Roadmap via API", type="primary", use_container_width=True
+    ):
+      with st.spinner("Generating personalized development plan..."):
+        try:
+          res = api_career_roadmap(st.session_state.resume_text, role)
+          steps = res.get("steps", [])
+          for idx, step in enumerate(steps, 1):
+            st.markdown(
+                f"""
+                            <div class="panel">
+                                <div class="small-label">STEP {idx:02d}</div>
+                                <div class="card-title">{step}</div>
+                            </div>
+                            """,
+                unsafe_allow_html=True,
+            )
+        except Exception as exc:
+          st.error(f"API Error: {exc}")
+
+  # 6. Chatbot
+  with tabs[5]:
+    st.subheader("CareerLens AI Assistant")
+
+    if "chat_messages" not in st.session_state:
+      st.session_state.chat_messages = [{
+          "role": "assistant",
+          "content": (
+              "Hello! Ask me anything about resume optimization, ATS keywords,"
+              " interview preparation, or skill roadmaps."
+          ),
+      }]
+
+    st.caption("Quick Questions:")
+    q_cols = st.columns(3)
+    faqs = [
+        "How do I optimize my resume for ATS?",
+        "How do I present my technical skills?",
+        "What makes a project stand out?",
+    ]
+
+    chosen_faq = None
+    for i, faq in enumerate(faqs):
+      if q_cols[i].button(faq, key=f"btn_faq_{i}", use_container_width=True):
+        chosen_faq = faq
+
+    for msg in st.session_state.chat_messages:
+      with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+
+    user_input = st.chat_input("Ask a question about your resume or career...")
+    active_prompt = chosen_faq or user_input
+
+    if active_prompt:
+      st.session_state.chat_messages.append(
+          {"role": "user", "content": active_prompt}
+      )
+      with st.chat_message("user"):
+        st.write(active_prompt)
+
+      with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+          ans = api_chat_assistant(
+              st.session_state.chat_messages,
+              resume_context=st.session_state.resume_text,
+          )
+          st.write(ans)
+      st.session_state.chat_messages.append(
+          {"role": "assistant", "content": ans}
+      )
+      st.rerun()
+
+# ============================================================
+# RECRUITER WORKSPACE
+# ============================================================
+
+else:
+  st.markdown(
+      """
+        <section class="hero">
+            <div class="kicker">RECRUITMENT INTELLIGENCE</div>
+            <h1>Screen Smarter.<br><span>Hire with Evidence.</span></h1>
+            <p>Bulk upload candidate resumes to rank them through the Render ML backend.</p>
+        </section>
+        """,
+      unsafe_allow_html=True,
+  )
+
+  recruiter_job = st.text_area(
+      "Job Description", height=200, key="recruiter_job"
+  )
+  recruiter_files = st.file_uploader(
+      "Candidate Resumes",
+      type=["pdf", "docx", "txt"],
+      accept_multiple_files=True,
+      key="candidate_files",
+  )
+  top_n = st.number_input(
+      "Shortlist Size", min_value=1, max_value=100, value=10
+  )
+
+  if st.button(
+      "🚀 Screen Candidates via Backend API",
+      type="primary",
+      use_container_width=True,
+  ):
+    if not recruiter_job.strip() or not recruiter_files:
+      st.warning("Please provide a job description and candidate resumes.")
+    else:
+      with st.spinner("Backend is ranking candidate pool..."):
+        try:
+          candidates_data = api_screen_candidates(
+              recruiter_files, recruiter_job
+          )
+          st.session_state.recruiter_df = pd.DataFrame(candidates_data)
+          st.success(f"Successfully ranked {len(candidates_data)} candidates!")
+        except Exception as exc:
+          st.error(f"Screening failed: {exc}")
+
+  if (
+      st.session_state.recruiter_df is not None
+      and not st.session_state.recruiter_df.empty
+  ):
+    df = st.session_state.recruiter_df.head(int(top_n))
+    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.download_button(
+        "⬇️ Download CSV",
+        df.to_csv(index=False).encode("utf-8"),
+        file_name="shortlist.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+
+# ============================================================
+# FOOTER
+# ============================================================
+st.divider()
+st.markdown(
+    """
+    <div class="footer">
+        <b>🎯 CareerLens AI</b><br>
+        Connected to Render Backend (Python/FastAPI)
     </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="text-align: center; margin-bottom: 18px;">
-        <span class="status-badge"><span class="pulse-dot"></span> Neural Engine Active</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    col_nav1, col_nav2 = st.columns(2)
-    with col_nav1:
-        if st.button("🚀 Candidate", use_container_width=True):
-            st.session_state.active_portal = "Seeker"
-    with col_nav2:
-        if st.button("🏢 Recruiter", use_container_width=True):
-            st.session_state.active_portal = "Recruiter"
-            
-    st.markdown("---")
-    if st.button("💬 Launch Assistant", use_container_width=True):
-        st.session_state.active_portal = "Assistant"
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Sidebar Micro Bubble Stats
-    st.markdown("""
-    <div class="bento-bubble-card" style="padding: 14px;">
-        <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px;">Live Ecosystem</div>
-        <div>
-            <span class="tag-bubble tag-cyan">⚡ 98.4% Accuracy</span>
-            <span class="tag-bubble tag-indigo">🌐 50+ Frameworks</span>
-            <span class="tag-bubble tag-purple">🔮 Trajectory AI</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- Top Main Visual Banner ---
-st.markdown("""
-<div class="brand-hero">
-    <div class="brand-logo-glow">🧠</div>
-    <div>
-        <h1 class="brand-title">CareerLens AI</h1>
-        <div class="brand-caption">Understand Your Career • Build Your Future • Optimize Matching • Maximize Growth</div>
-        <div style="margin-top: 10px;">
-            <span class="tag-bubble tag-cyan">✦ Predictive Skill Gap</span>
-            <span class="tag-bubble tag-indigo">✦ Smart Profile Scoring</span>
-            <span class="tag-bubble tag-purple">✦ Career Path Modeling</span>
-            <span class="tag-bubble tag-emerald">✦ Recruiter Command</span>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ==========================================
-# 1. CANDIDATE PORTAL
-# ==========================================
-if st.session_state.active_portal == "Seeker":
-    st.markdown("""
-    <div class="bento-bubble-card">
-        <h3 style="margin-top: 0; color: #38bdf8;">📂 Candidate Intelligence Gateway</h3>
-        <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 12px;">
-            Upload your resume to instantly generate multidimensional fit scores, uncover missing competencies, and chart your promotion roadmap.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    uploaded_file = st.file_uploader("Upload Resume Document", type=["pdf", "docx", "txt"])
-    
-    if uploaded_file:
-        resume_text = extract_text_from_file(uploaded_file)
-        if st.button("✨ Parse Profile", use_container_width=False):
-            with st.spinner("Decoding skill profile and career trajectory..."):
-                try:
-                    res = requests.post(f"{API_BASE_URL}/parse_resume", json={"text": resume_text}, timeout=15)
-                    if res.status_code == 200:
-                        st.session_state.parsed_resume = res.json()
-                    else:
-                        st.session_state.parsed_resume = {
-                            "name": "Alex Mercer",
-                            "email": "alex.mercer@innovate.dev",
-                            "phone": "+1 (555) 019-2834",
-                            "skills": ["Python", "FastAPI", "React", "Docker", "PostgreSQL", "Kubernetes", "Redis", "System Design"],
-                            "experience_years": 5.2
-                        }
-                except Exception:
-                    st.session_state.parsed_resume = {
-                        "name": "Alex Mercer",
-                        "email": "alex.mercer@innovate.dev",
-                        "phone": "+1 (555) 019-2834",
-                        "skills": ["Python", "FastAPI", "React", "Docker", "PostgreSQL", "Kubernetes", "Redis", "System Design"],
-                        "experience_years": 5.2
-                    }
-
-    if st.session_state.parsed_resume:
-        data = st.session_state.parsed_resume
-        
-        # Profile Overview Card
-        st.markdown(f"""
-        <div class="bento-bubble-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <h2 style="margin: 0; color: #38bdf8; font-weight: 800;">{data.get('name', 'Alex Mercer')}</h2>
-                    <p style="margin: 4px 0 10px 0; color: #94a3b8; font-size: 0.95rem;">
-                        📧 {data.get('email', 'N/A')} &nbsp;|&nbsp; 📱 {data.get('phone', 'N/A')}
-                    </p>
-                    <div>
-                        {''.join([f'<span class="tag-bubble tag-cyan">{s}</span>' for s in data.get('skills', [])])}
-                    </div>
-                </div>
-                <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 18px; padding: 16px 24px; text-align: center;">
-                    <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Experience</span><br>
-                    <b style="font-size: 1.8rem; color: #818cf8;">{data.get('experience_years', '5+')} Yrs</b>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        tab_match, tab_gaps, tab_roadmap, tab_fraud = st.tabs([
-            "🎯 Match Analysis", 
-            "⚡ Skill Gap Analysis", 
-            "🗺️ Career Roadmap", 
-            "🛡️ Credibility Score"
-        ])
-        
-        with tab_match:
-            st.text_input("Target Role or Industry Specification", "Lead Full-Stack AI Engineer")
-            if st.button("Evaluate Match", key="btn_eval_match"):
-                col_m1, col_m2 = st.columns([1, 2])
-                with col_m1:
-                    st.markdown("""
-                    <div class="bento-bubble-card" style="text-align: center; padding: 28px;">
-                        <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Match Index</span><br>
-                        <b style="font-size: 3rem; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">91%</b>
-                        <div style="margin-top: 10px;">
-                            <span class="tag-bubble tag-emerald">High Alignment</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.progress(0.91)
-                with col_m2:
-                    st.markdown("""
-                    <div class="bento-bubble-card">
-                        <h4 style="margin-top: 0; color: #38bdf8;">Role Fit Analysis</h4>
-                        <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 8px;">
-                            • <b>Domain Knowledge:</b> Candidate's backend microservices and async patterns exceed criteria.<br>
-                            • <b>System Scalability:</b> Demonstrated capability in containerized infrastructure.<br>
-                            • <b>Strategic Tip:</b> Add explicit mentions of event-driven message brokers (Kafka/RabbitMQ) for 98%+ match index.
-                        </p>
-                        <div>
-                            <span class="tag-bubble tag-cyan">Async Processing</span>
-                            <span class="tag-bubble tag-indigo">API Scalability</span>
-                            <span class="tag-bubble tag-purple">Cloud Native</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-        with tab_gaps:
-            if st.button("Analyze Skill Gap", key="btn_skill_gaps"):
-                col_g1, col_g2 = st.columns(2)
-                with col_g1:
-                    st.markdown("""
-                    <div class="bento-bubble-card">
-                        <h4 style="color: #38bdf8; margin-top: 0;">Verified Core Strengths</h4>
-                        <p style="color: #94a3b8; font-size: 0.85rem;">Skills matching standard production benchmarks:</p>
-                        <div>
-                            <span class="tag-bubble tag-cyan">Python 3.11+</span>
-                            <span class="tag-bubble tag-cyan">FastAPI Architecture</span>
-                            <span class="tag-bubble tag-cyan">Docker Orchestration</span>
-                            <span class="tag-bubble tag-cyan">PostgreSQL Optimization</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col_g2:
-                    st.markdown("""
-                    <div class="bento-bubble-card">
-                        <h4 style="color: #c084fc; margin-top: 0;">Priority Upgrades</h4>
-                        <p style="color: #94a3b8; font-size: 0.85rem;">Target competencies for next tier advancement:</p>
-                        <div>
-                            <span class="tag-bubble tag-purple">Distributed Tracing</span>
-                            <span class="tag-bubble tag-purple">Apache Kafka</span>
-                            <span class="tag-bubble tag-purple">Terraform IaC</span>
-                            <span class="tag-bubble tag-purple">gRPC Protocol</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-        with tab_roadmap:
-            if st.button("Generate Roadmap", key="btn_gen_roadmap"):
-                st.markdown("""
-                <div class="bento-bubble-card">
-                    <h4 style="color: #818cf8; margin-top: 0;">Target Trajectory: Staff Engineer / Lead Architect</h4>
-                    <div style="margin-bottom: 14px;">
-                        <span class="tag-bubble tag-cyan">Phase 1: 0-3 Months</span>
-                        <p style="color: #cbd5e1; font-size: 0.9rem; margin: 4px 0 0 8px;">Master high-throughput event streaming with Kafka & gRPC communication protocols.</p>
-                    </div>
-                    <div style="margin-bottom: 14px;">
-                        <span class="tag-bubble tag-indigo">Phase 2: 3-6 Months</span>
-                        <p style="color: #cbd5e1; font-size: 0.9rem; margin: 4px 0 0 8px;">Lead multi-cluster Kubernetes deployment & Infrastructure as Code (IaC) architectures.</p>
-                    </div>
-                    <div>
-                        <span class="tag-bubble tag-purple">Phase 3: 6-12 Months</span>
-                        <p style="color: #cbd5e1; font-size: 0.9rem; margin: 4px 0 0 8px;">Direct cross-functional system engineering and implement zero-trust security postures.</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-        with tab_fraud:
-            if st.button("Run Credibility Check", key="btn_credibility"):
-                st.markdown("""
-                <div class="bento-bubble-card">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.6rem;">🛡️</span>
-                        <h4 style="color: #34d399; margin: 0;">High Credibility Verified (99.2%)</h4>
-                    </div>
-                    <p style="color: #94a3b8; font-size: 0.9rem; margin: 8px 0 12px 0;">
-                        No timeline anomalies, inflated skill matrices, or credential inconsistencies detected.
-                    </p>
-                    <div>
-                        <span class="tag-bubble tag-emerald">Timeline Consistent</span>
-                        <span class="tag-bubble tag-emerald">Density Index Normal</span>
-                        <span class="tag-bubble tag-emerald">Source Verified</span>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-# ==========================================
-# 2. RECRUITER PORTAL
-# ==========================================
-elif st.session_state.active_portal == "Recruiter":
-    st.markdown("""
-    <div class="bento-bubble-card">
-        <h3 style="margin-top: 0; color: #818cf8;">🏢 Executive Recruiter Command Hub</h3>
-        <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 10px;">
-            Scale your talent pipeline with automated ranking, semantic skill verification, and fast candidate comparison.
-        </p>
-        <div>
-            <span class="tag-bubble tag-cyan">Bulk Batch Parser</span>
-            <span class="tag-bubble tag-indigo">Multi-Criteria Match</span>
-            <span class="tag-bubble tag-purple">High Signal Scoring</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col_r1, col_r2 = st.columns([2, 1])
-    with col_r1:
-        job_req = st.text_area("Role Mandate & Technical Requirements", "Lead Software Architect with 5+ years building distributed cloud native backends.", height=90)
-    with col_r2:
-        top_k = st.slider("Top Candidates to Rank", 3, 15, 5)
-        
-    uploaded_resumes = st.file_uploader("Upload Batch Resumes", type=["pdf", "docx"], accept_multiple_files=True)
-    
-    if st.button("⚡ Rank Candidate Pool"):
-        candidate_data = [
-            {"Rank": "01", "Candidate": "Taylor Morgan", "Score": "96%", "Primary Focus": "Go, Distributed Systems", "Status": "Optimal Fit"},
-            {"Rank": "02", "Candidate": "Alex Mercer", "Score": "91%", "Primary Focus": "Python, Cloud ML, FastAPI", "Status": "Strong Match"},
-            {"Rank": "03", "Candidate": "Jordan Hayes", "Score": "84%", "Primary Focus": "React, Node, GraphQL", "Status": "High Potential"},
-            {"Rank": "04", "Candidate": "Casey Lee", "Score": "78%", "Primary Focus": "Java, Spring Boot, AWS", "Status": "Review Required"}
-        ]
-        df = pd.DataFrame(candidate_data[:top_k])
-        
-        st.markdown("#### Candidate Leaderboard")
-        st.dataframe(df, use_container_width=True)
-
-# ==========================================
-# 3. CAREER ASSISTANT
-# ==========================================
-elif st.session_state.active_portal == "Assistant":
-    st.markdown("""
-    <div class="bento-bubble-card">
-        <h3 style="margin-top: 0; color: #c084fc;">💬 Career Intelligence Assistant</h3>
-        <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 10px;">
-            Ask anything regarding market compensation, promotion strategies, or interview frameworks.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col_q1, col_q2, col_q3 = st.columns(3)
-    with col_q1:
-        if st.button("💡 ATS Optimization Tactics"):
-            st.session_state.chat_history.append({"role": "user", "text": "What are the best ATS optimization tactics?"})
-            st.session_state.chat_history.append({"role": "assistant", "text": "Use a clear single-column structure, standard section headers, and quantify accomplishments with direct metrics (e.g., 'Reduced latency by 35%')."})
-    with col_q2:
-        if st.button("📈 High-Demand Tech"):
-            st.session_state.chat_history.append({"role": "user", "text": "What tech skills have peak market demand?"})
-            st.session_state.chat_history.append({"role": "assistant", "text": "Distributed systems, AI systems integration, Kubernetes platform engineering, and high-concurrency microservices."})
-    with col_q3:
-        if st.button("🎯 Executive Interview Prep"):
-            st.session_state.chat_history.append({"role": "user", "text": "How do I frame leadership experience?"})
-            st.session_state.chat_history.append({"role": "assistant", "text": "Highlight system ownership, cross-functional project management, team mentorship, and strategic business impact."})
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            st.markdown(f"""
-            <div style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 18px; padding: 14px 18px; margin-bottom: 12px;">
-                <span class="tag-bubble tag-cyan" style="margin-bottom: 6px;">You</span><br>
-                <span style="color: #f1f5f9;">{msg['text']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 18px; padding: 14px 18px; margin-bottom: 12px;">
-                <span class="tag-bubble tag-indigo" style="margin-bottom: 6px;">🧠 CareerLens Assistant</span><br>
-                <span style="color: #e2e8f0;">{msg['text']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-            
-    user_query = st.chat_input("Ask CareerLens Assistant anything...")
-    if user_query:
-        st.session_state.chat_history.append({"role": "user", "text": user_query})
-        st.session_state.chat_history.append({"role": "assistant", "text": f"Evaluating '{user_query}' against current market frameworks. Prioritize verified technical execution and quantifiable business impact."})
-        st.rerun()
-
-# --- Simplified Modern Footer ---
-st.markdown("""
-<div class="footer-container">
-    CareerLens AI by Batch 2
-</div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
