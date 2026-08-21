@@ -9,12 +9,12 @@ API_BASE_URL = os.getenv("API_URL", "https://careerlens-ai-9dx8.onrender.com")
 
 st.set_page_config(
     page_title="CareerLens AI",
-    page_icon="🧠",
+    page_icon="💼",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# --- Professional, Bubble-Rich, Sci-Fi UI Styling (Zero Red) ---
+# --- Modern, Bubble-Rich, Sci-Fi UI Styling (Zero Red, Briefcase Branding) ---
 st.markdown(
     """
 <style>
@@ -56,7 +56,7 @@ p,label,.stMarkdown{
     color:#b8c6d8;
 }
 
-/* Brain Brand Header */
+/* Briefcase Brand Header */
 .brand-container {
     display: flex;
     align-items: center;
@@ -64,7 +64,7 @@ p,label,.stMarkdown{
     margin-bottom: 8px;
 }
 
-.brand-brain {
+.brand-briefcase {
     font-size: 32px;
     filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
 }
@@ -149,16 +149,52 @@ p,label,.stMarkdown{
     color:#a8b9cd;
 }
 
-/* Bubble Bento Cards */
-.card{
-    background:rgba(13,26,43,.88);
-    border:1px solid var(--border);
-    border-radius:18px;
-    padding:22px;
-    min-height:140px;
-    box-shadow:0 8px 30px rgba(0,0,0,.25);
+/* Bold Metric Highlights */
+.metric-box {
+    background: rgba(13, 26, 43, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
+.metric-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.metric-value-cyan {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #38bdf8;
+    line-height: 1.2;
+    margin: 6px 0;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+}
+
+.metric-value-indigo {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #818cf8;
+    line-height: 1.2;
+    margin: 6px 0;
+    text-shadow: 0 0 15px rgba(129, 140, 248, 0.35);
+}
+
+.metric-value-purple {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #c084fc;
+    line-height: 1.2;
+    margin: 6px 0;
+    text-shadow: 0 0 15px rgba(192, 132, 252, 0.35);
+}
+
+/* Bubble Bento Cards */
 .panel{
     background:rgba(13,26,43,.82);
     border:1px solid var(--border);
@@ -178,7 +214,7 @@ p,label,.stMarkdown{
     padding:6px 14px;
     margin:4px;
     font-size:12px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.02em;
 }
 
@@ -200,22 +236,14 @@ p,label,.stMarkdown{
     border: 1px solid rgba(74, 222, 128, 0.35);
 }
 
-.small-label{
-    color:#7186a1;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:1.2px;
-    text-transform:uppercase;
-}
-
-/* Bubble Buttons (100% Red-Free Theme) */
+/* Bubble Buttons */
 .stButton > button {
     border-radius: 50px !important;
     background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #7c3aed 100%) !important;
     color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: 0.92rem !important;
-    padding: 0.6rem 1.6rem !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    padding: 0.65rem 1.8rem !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     box-shadow: 0 4px 18px rgba(79, 70, 229, 0.35) !important;
     transition: all 0.25s ease-in-out !important;
@@ -245,9 +273,7 @@ p,label,.stMarkdown{
 
 def api_analyze_resume(file) -> Dict:
     files = {"file": (file.name, file.getvalue(), file.type)}
-    res = requests.post(
-        f"{API_BASE_URL}/api/resume/analyze", files=files, timeout=60
-    )
+    res = requests.post(f"{API_BASE_URL}/api/resume/analyze", files=files, timeout=60)
     res.raise_for_status()
     return res.json()
 
@@ -265,17 +291,13 @@ def api_detect_fraud(job_text: str) -> Dict:
 
 def api_skill_gap(resume_text: str, target_job: str) -> Dict:
     payload = {"resume_text": resume_text, "target_job": target_job}
-    res = requests.post(
-        f"{API_BASE_URL}/api/skills/gap", json=payload, timeout=30
-    )
+    res = requests.post(f"{API_BASE_URL}/api/skills/gap", json=payload, timeout=30)
     res.raise_for_status()
     return res.json()
 
 def api_career_roadmap(resume_text: str, target_role: str) -> Dict:
     payload = {"resume_text": resume_text, "target_role": target_role}
-    res = requests.post(
-        f"{API_BASE_URL}/api/career/roadmap", json=payload, timeout=30
-    )
+    res = requests.post(f"{API_BASE_URL}/api/career/roadmap", json=payload, timeout=30)
     res.raise_for_status()
     return res.json()
 
@@ -294,13 +316,9 @@ def api_screen_candidates(files: List, job_description: str) -> List[Dict]:
 def api_chat_assistant(messages: List[Dict], resume_context: str = "") -> str:
     payload = {"messages": messages, "resume_context": resume_context}
     try:
-        res = requests.post(
-            f"{API_BASE_URL}/api/chat/ask", json=payload, timeout=30
-        )
+        res = requests.post(f"{API_BASE_URL}/api/chat/ask", json=payload, timeout=30)
         if res.status_code == 200:
-            return res.json().get(
-                "reply", "I am ready to help optimize your career path."
-            )
+            return res.json().get("reply", "I am ready to help optimize your career path.")
     except Exception:
         pass
     return "Focus on quantifiable achievements, matching core job description keywords, and maintaining clean ATS formatting."
@@ -315,16 +333,8 @@ if "resume_text" not in st.session_state:
     st.session_state.resume_text = ""
 if "resume_analysis" not in st.session_state:
     st.session_state.resume_analysis = None
-if "applications" not in st.session_state:
-    st.session_state.applications = 0
 if "recruiter_df" not in st.session_state:
     st.session_state.recruiter_df = None
-
-def metric_row(values):
-    columns = st.columns(len(values))
-    for column, (label, value, help_text) in zip(columns, values):
-        with column:
-            st.metric(label, value, help=help_text)
 
 def show_skills(skills, tag_style="tag-cyan"):
     if not skills:
@@ -334,14 +344,14 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# SIDEBAR (CLEAN, BUBBLE BUTTON NAVIGATION & NO TECH JARGON)
+# SIDEBAR
 # ============================================================
 
 with st.sidebar:
     st.markdown(
         """
         <div class="brand-container">
-            <span class="brand-brain">🧠</span>
+            <span class="brand-briefcase">💼</span>
             <div>
                 <div class="brand">Career<span>Lens</span> AI</div>
                 <div class="brand-sub">CAREER INTELLIGENCE PLATFORM</div>
@@ -364,7 +374,7 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     
     # Career Assistant Launcher Button
-    if st.button("🧠 Career Assistant", use_container_width=True):
+    if st.button("💼 Career Assistant", use_container_width=True):
         st.session_state.workspace = "Assistant"
 
     st.markdown("<br><br>", unsafe_allow_html=True)
@@ -380,7 +390,7 @@ with st.sidebar:
     )
 
 # ============================================================
-# 1. CANDIDATE / JOB SEEKER WORKSPACE
+# 1. CANDIDATE WORKSPACE
 # ============================================================
 
 if st.session_state.workspace == "Job Seeker":
@@ -402,16 +412,35 @@ if st.session_state.workspace == "Job Seeker":
     )
 
     analysis = st.session_state.resume_analysis
-    score = f"{analysis.get('resume_score', '—')}/100" if analysis else "—"
-    readiness = f"{analysis.get('readiness', '—')}%" if analysis else "—"
-    skills_count = len(analysis.get("skills", [])) if analysis else 0
+    score_val = f"{analysis.get('resume_score', '—')}/100" if analysis else "—"
+    readiness_val = f"{analysis.get('readiness', '—')}%" if analysis else "—"
+    skills_count = f"{len(analysis.get('skills', []))}" if analysis else "0"
 
-    metric_row([
-        ("Resume Score", score, "AI-assisted resume quality score"),
-        ("Career Readiness", readiness, "Profile readiness estimate"),
-        ("Skills Detected", skills_count, "Skills extracted by AI engine"),
-        ("Applications", st.session_state.applications, "Tracked applications"),
-    ])
+    col_m1, col_m2, col_m3 = st.columns(3)
+    with col_m1:
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-label">Resume Score</div>
+            <div class="metric-value-cyan"><b>{score_val}</b></div>
+            <span class="tag-bubble tag-cyan">AI Assessment</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_m2:
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-label">Career Readiness</div>
+            <div class="metric-value-indigo"><b>{readiness_val}</b></div>
+            <span class="tag-bubble tag-indigo">Profile Strength</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_m3:
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-label">Skills Detected</div>
+            <div class="metric-value-purple"><b>{skills_count}</b></div>
+            <span class="tag-bubble tag-purple">Extracted Stack</span>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.divider()
 
@@ -446,11 +475,11 @@ if st.session_state.workspace == "Job Seeker":
             st.markdown(
                 f"""
                 <div class="panel">
-                    <h3 style="margin: 0; color: #38bdf8;">{res.get('name', 'Candidate Profile')}</h3>
+                    <h3 style="margin: 0; color: #38bdf8; font-weight: 800;">{res.get('name', 'Candidate Profile')}</h3>
                     <p style="margin: 6px 0 0 0; color: #b8c6d8;">
                         📧 <b>Email:</b> {res.get('email', 'Not detected')} &nbsp;|&nbsp; 
                         📱 <b>Phone:</b> {res.get('phone', 'Not detected')} &nbsp;|&nbsp; 
-                        ⏳ <b>Experience:</b> {res.get('experience', 'Identified')}
+                        ⏳ <b>Experience:</b> <b>{res.get('experience', 'Identified')}</b>
                     </p>
                 </div>
                 """,
@@ -474,12 +503,32 @@ if st.session_state.workspace == "Job Seeker":
                 with st.spinner("Evaluating semantic role alignment..."):
                     try:
                         result = api_match_job(st.session_state.resume_text, job_desc)
-                        metric_row([
-                            ("Overall Match", f"{result.get('overall', 0)}%", "Weighted alignment"),
-                            ("Semantic Similarity", f"{result.get('semantic', 0)}%", "NLP Cosine match"),
-                            ("Skill Match", f"{result.get('skill_match', 0)}%", "Overlap percentage"),
-                        ])
-                        st.progress(result.get("overall", 0) / 100)
+                        overall_score = result.get("overall", 0)
+                        
+                        col_s1, col_s2, col_s3 = st.columns(3)
+                        with col_s1:
+                            st.markdown(f"""
+                            <div class="metric-box">
+                                <div class="metric-label">Overall Match</div>
+                                <div class="metric-value-cyan"><b>{overall_score}%</b></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        with col_s2:
+                            st.markdown(f"""
+                            <div class="metric-box">
+                                <div class="metric-label">Semantic Alignment</div>
+                                <div class="metric-value-indigo"><b>{result.get('semantic', 0)}%</b></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        with col_s3:
+                            st.markdown(f"""
+                            <div class="metric-box">
+                                <div class="metric-label">Skill Overlap</div>
+                                <div class="metric-value-purple"><b>{result.get('skill_match', 0)}%</b></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                        st.progress(overall_score / 100)
                         
                         st.markdown("#### Matched Skills")
                         show_skills(result.get("matched", []), "tag-cyan")
@@ -501,11 +550,29 @@ if st.session_state.workspace == "Job Seeker":
                 with st.spinner("Evaluating scam signals & offer credibility..."):
                     try:
                         res = api_detect_fraud(jobrisk)
-                        metric_row([
-                            ("Risk Score", f"{res.get('score', 0)}/100", "Heuristic fraud probability"),
-                            ("Risk Level", res.get("level", "LOW RISK"), "Screening verdict"),
-                            ("Signals Detected", res.get("signals", 0), "Triggered flags"),
-                        ])
+                        col_f1, col_f2, col_f3 = st.columns(3)
+                        with col_f1:
+                            st.markdown(f"""
+                            <div class="metric-box">
+                                <div class="metric-label">Risk Score</div>
+                                <div class="metric-value-cyan"><b>{res.get('score', 0)}/100</b></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        with col_f2:
+                            st.markdown(f"""
+                            <div class="metric-box">
+                                <div class="metric-label">Risk Level</div>
+                                <div class="metric-value-indigo"><b>{res.get('level', 'LOW RISK')}</b></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        with col_f3:
+                            st.markdown(f"""
+                            <div class="metric-box">
+                                <div class="metric-label">Signals Detected</div>
+                                <div class="metric-value-purple"><b>{res.get('signals', 0)}</b></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
                         if res.get("level") == "HIGH RISK":
                             st.warning("⚠️ High risk patterns detected in this job posting.")
                         else:
@@ -527,7 +594,6 @@ if st.session_state.workspace == "Job Seeker":
                 with st.spinner("Calculating skill gap matrix..."):
                     try:
                         res = api_skill_gap(st.session_state.resume_text, target_job)
-                        
                         col_g1, col_g2 = st.columns(2)
                         with col_g1:
                             st.markdown("#### Verified Strengths")
@@ -553,7 +619,7 @@ if st.session_state.workspace == "Job Seeker":
                             f"""
                             <div class="panel">
                                 <span class="tag-bubble tag-cyan">STEP {idx:02d}</span>
-                                <div style="font-size: 1.05rem; font-weight: 700; color: #f4f7fb; margin-top: 8px;">{step}</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: #f4f7fb; margin-top: 8px;">{step}</div>
                             </div>
                             """,
                             unsafe_allow_html=True,
