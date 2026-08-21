@@ -327,6 +327,10 @@ def api_chat_assistant(messages: List[Dict], resume_context: str = "") -> str:
 # STATE & HELPERS
 # ============================================================
 
+if "is_logged_in" not in st.session_state:
+    st.session_state.is_logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = "Guest"
 if "workspace" not in st.session_state:
     st.session_state.workspace = "Job Seeker"
 if "resume_text" not in st.session_state:
@@ -342,6 +346,80 @@ def show_skills(skills, tag_style="tag-cyan"):
         return
     html = "".join(f'<span class="tag-bubble {tag_style}">{skill}</span>' for skill in skills)
     st.markdown(html, unsafe_allow_html=True)
+
+# ============================================================
+# AUTHENTICATION SCREEN (LOGIN & GUEST ACCESS)
+# ============================================================
+
+if not st.session_state.is_logged_in:
+    st.markdown(
+        """
+        <div style="text-align:center; padding: 30px 0 10px;">
+            <div style="font-size: 55px; filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.6));">💼</div>
+            <h1 style="font-size: 2.8rem; margin: 10px 0 0 0; background: linear-gradient(90deg, #8b7cff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CareerLens AI</h1>
+            <p style="color: #94a3b8; font-size: 1.05rem; margin-top: 4px;">Next-Gen Career Intelligence Platform</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col_l1, col_l2, col_l3 = st.columns([1, 1.4, 1])
+    with col_l2:
+        st.markdown(
+            """
+            <div class="panel" style="padding: 28px;">
+                <h3 style="margin-top: 0; color: #38bdf8; text-align: center;">Welcome Portal</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">
+                    Sign in to access advanced AI models or continue instantly as Guest.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        login_tab, guest_tab = st.tabs(["🔐 Sign In", "🚀 Guest Access"])
+
+        with login_tab:
+            user_input = st.text_input("Username or Email", placeholder="alex.mercer@innovate.dev")
+            pass_input = st.text_input("Password", type="password", placeholder="••••••••")
+
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("Sign In", use_container_width=True):
+                    if user_input.strip():
+                        st.session_state.username = user_input.split("@")[0].capitalize()
+                        st.session_state.is_logged_in = True
+                        st.rerun()
+                    else:
+                        st.warning("Please enter your username.")
+            with col_btn2:
+                if st.button("Demo Account", use_container_width=True):
+                    st.session_state.username = "Alex Mercer"
+                    st.session_state.is_logged_in = True
+                    st.rerun()
+
+        with guest_tab:
+            st.markdown(
+                """
+                <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 14px; padding: 14px; margin: 10px 0 16px 0;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
+                        Explore all candidate, recruiter, and assistant tools with full API access. No sign-up required.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button("Continue as Guest ⚡", use_container_width=True):
+                st.session_state.username = "Guest Explorer"
+                st.session_state.is_logged_in = True
+                st.rerun()
+
+    st.markdown("""
+    <div class="footer">
+        <b>CareerLens AI by Batch 2</b>
+    </div>
+    """, unsafe_allow_html=True)
+    st.stop()
 
 # ============================================================
 # SIDEBAR
@@ -360,6 +438,29 @@ with st.sidebar:
         """,
         unsafe_allow_html=True,
     )
+    
+    # User Profile Pill & Logout
+    st.markdown(
+        f"""
+        <div style="background: rgba(139, 124, 255, 0.12); border: 1px solid rgba(139, 124, 255, 0.3); border-radius: 14px; padding: 10px 14px; margin: 10px 0 14px 0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Active User</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #38bdf8;">{st.session_state.username}</div>
+            </div>
+            <span class="tag-bubble tag-emerald" style="margin: 0; font-size: 0.7rem; padding: 4px 10px;">Online</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if st.button("Log Out", use_container_width=True):
+        st.session_state.is_logged_in = False
+        st.session_state.username = "Guest"
+        st.session_state.resume_text = ""
+        st.session_state.resume_analysis = None
+        st.session_state.recruiter_df = None
+        st.rerun()
+
     st.divider()
 
     # Workspace Switcher via Bubble Buttons
