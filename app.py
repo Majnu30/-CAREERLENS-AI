@@ -1,11 +1,14 @@
 import io
 import os
+import csv
+from datetime import datetime
 from typing import Dict, List
 import pandas as pd
 import requests
 import streamlit as st
 
 API_BASE_URL = os.getenv("API_URL", "https://careerlens-ai-9dx8.onrender.com")
+ANALYTICS_FILE = "analytics.csv"
 
 st.set_page_config(
     page_title="CareerLens AI",
@@ -13,6 +16,21 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# --- Persistent Event Logger ---
+def log_event(event_type: str, username: str, rating: str = "N/A", details: str = ""):
+    file_exists = os.path.isfile(ANALYTICS_FILE)
+    with open(ANALYTICS_FILE, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["Timestamp", "Event", "Username", "Rating", "Details"])
+        writer.writerow([
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            event_type,
+            username,
+            rating,
+            details
+        ])
 
 # --- Modern, Bubble-Rich, Sci-Fi UI Styling (Zero Red, Briefcase Branding) ---
 st.markdown(
@@ -381,6 +399,7 @@ def open_signin_dialog():
         else:
             st.session_state.username = login_user.split("@")[0].capitalize()
             st.session_state.is_logged_in = True
+            log_event("LOGIN", st.session_state.username, "N/A", "Successful Login")
             st.success("Signed in successfully!")
             st.rerun()
 
@@ -400,6 +419,7 @@ def open_register_dialog():
             st.session_state.users_db[reg_user] = reg_pass
             st.session_state.username = reg_name.strip() if reg_name.strip() else reg_user.split("@")[0].capitalize()
             st.session_state.is_logged_in = True
+            log_event("REGISTER", st.session_state.username, "N/A", f"Registered account: {reg_user}")
             st.success("Account created successfully!")
             st.rerun()
 
@@ -413,6 +433,8 @@ def open_logout_feedback_dialog():
     col_out1, col_out2 = st.columns(2)
     with col_out1:
         if st.button("Submit & Log Out 🚪", use_container_width=True, key="btn_submit_feedback_logout"):
+            stars_rated = f"{rating + 1} Stars" if rating is not None else "No Rating"
+            log_event("LOGOUT_WITH_RATING", st.session_state.username, stars_rated, feedback_text.strip() or "No comment")
             st.toast("Thank you for your feedback! You have been logged out.")
             st.session_state.is_logged_in = False
             st.session_state.username = "Guest"
@@ -423,6 +445,7 @@ def open_logout_feedback_dialog():
             st.rerun()
     with col_out2:
         if st.button("Skip & Log Out", use_container_width=True, key="btn_skip_feedback_logout"):
+            log_event("LOGOUT_SKIPPED", st.session_state.username, "Skipped", "No feedback provided")
             st.session_state.is_logged_in = False
             st.session_state.username = "Guest"
             st.session_state.resume_text = ""
@@ -497,6 +520,7 @@ if not st.session_state.is_logged_in:
             if st.button("🚀 Guest", use_container_width=True, key="btn_direct_guest"):
                 st.session_state.username = "Guest Explorer"
                 st.session_state.is_logged_in = True
+                log_event("GUEST_ACCESS", "Guest Explorer", "N/A", "Direct Guest Entry")
                 st.rerun()
 
     st.markdown("""
@@ -538,7 +562,6 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # Standard Log Out Button that triggers the ratings popup
     if st.button("Log Out", use_container_width=True, key="btn_logout_sidebar"):
         open_logout_feedback_dialog()
 
@@ -555,13 +578,14 @@ with st.sidebar:
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Career Assistant Launcher Button
     if st.button("💼 Career Assistant", use_container_width=True):
         st.session_state.workspace = "Assistant"
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    if st.button("📊 Analytics & Ratings", use_container_width=True):
+        st.session_state.workspace = "Analytics"
+
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    # Minimalist Green Status Dot
     st.markdown(
         """
         <div class="status-dot-container">
@@ -625,7 +649,7 @@ if st.session_state.workspace == "Job Seeker":
         </div>
         """, unsafe_allow_html=True)
 
-    # --- Low Score / Low Skills AI Improvement Trigger Banner ---
+    # Low Score / Low Skills AI Improvement Trigger Banner
     is_low_score = analysis and isinstance(score_raw, (int, float)) and score_raw < 75
     is_low_skills = analysis and skills_count < 5
     
@@ -652,7 +676,6 @@ if st.session_state.workspace == "Job Seeker":
         if st.button("🚀 Upgrade My Resume & Skill Score", key="btn_open_upgrade_dialog"):
             open_improvement_dialog()
 
-    # Display Active Custom Plan if generated
     if st.session_state.custom_action_plan:
         plan = st.session_state.custom_action_plan
         st.markdown(f"""
@@ -688,6 +711,7 @@ if st.session_state.workspace == "Job Seeker":
                     result = api_analyze_resume(resume_file)
                     st.session_state.resume_analysis = result
                     st.session_state.resume_text = result.get("extracted_text", "")
+                    log_event("RESUME_ANALYZED", st.session_state.username, "N/A", f"Skills Extracted: {len(result.get('skills', []))}")
                     st.success("Resume processed successfully!")
                     st.rerun()
                 except Exception as exc:
@@ -888,6 +912,7 @@ elif st.session_state.workspace == "Recruiter":
                 try:
                     candidates_data = api_screen_candidates(recruiter_files, recruiter_job)
                     st.session_state.recruiter_df = pd.DataFrame(candidates_data)
+                    log_event("RECRUITER_SCREEN", st.session_state.username, "N/A", f"Screened {len(candidates_data)} candidates")
                     st.success(f"Successfully ranked {len(candidates_data)} candidates!")
                 except Exception as exc:
                     st.error(f"Screening error: {exc}")
@@ -960,6 +985,79 @@ elif st.session_state.workspace == "Assistant":
                 st.write(ans)
         st.session_state.chat_messages.append({"role": "assistant", "content": ans})
         st.rerun()
+
+# ============================================================
+# 4. ANALYTICS & RATINGS WORKSPACE (ADMIN OVERVIEW)
+# ============================================================
+
+elif st.session_state.workspace == "Analytics":
+    st.markdown(
+        """
+        <section class="hero">
+            <div class="kicker">SYSTEM AUDIT & ENGAGEMENT</div>
+            <h1>Platform Analytics.<br><span>User Feedback & Logs.</span></h1>
+            <p>Real-time audit log of user logins, registrations, exit star ratings, and tool usage across the CareerLens ecosystem.</p>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if os.path.exists(ANALYTICS_FILE):
+        logs_df = pd.read_csv(ANALYTICS_FILE)
+        
+        col_a1, col_a2, col_a3 = st.columns(3)
+        total_logins = len(logs_df[logs_df["Event"].isin(["LOGIN", "GUEST_ACCESS"])])
+        total_regs = len(logs_df[logs_df["Event"] == "REGISTER"])
+        rated_entries = logs_df[logs_df["Event"] == "LOGOUT_WITH_RATING"]
+        
+        with col_a1:
+            st.markdown(f"""
+            <div class="metric-box">
+                <div class="metric-label">Total Logins & Visits</div>
+                <div class="metric-value-cyan"><b>{total_logins}</b></div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_a2:
+            st.markdown(f"""
+            <div class="metric-box">
+                <div class="metric-label">New Registrations</div>
+                <div class="metric-value-indigo"><b>{total_regs}</b></div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_a3:
+            st.markdown(f"""
+            <div class="metric-box">
+                <div class="metric-label">Ratings Submitted</div>
+                <div class="metric-value-purple"><b>{len(rated_entries)}</b></div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Ratings and Feedback Table
+        st.markdown("#### ⭐ User Exit Ratings & Comments")
+        if not rated_entries.empty:
+            st.dataframe(
+                rated_entries[["Timestamp", "Username", "Rating", "Details"]].rename(columns={"Details": "Feedback"}),
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.info("No ratings submitted yet.")
+
+        # Full System Log
+        st.markdown("#### 📜 Complete Activity Audit Log")
+        st.dataframe(logs_df.sort_values(by="Timestamp", ascending=False), use_container_width=True, hide_index=True)
+
+        st.download_button(
+            "⬇️ Export Analytics Log (CSV)",
+            logs_df.to_csv(index=False).encode("utf-8"),
+            file_name="platform_analytics.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    else:
+        st.info("No activity logs or ratings recorded yet.")
 
 # ============================================================
 # FOOTER
