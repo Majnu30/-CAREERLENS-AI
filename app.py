@@ -350,85 +350,87 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# AUTHENTICATION SCREEN (LOGIN, REGISTER, & GUEST ACCESS)
+# AUTHENTICATION DIALOGS (STRICT REGISTRATION & POPUPS)
+# ============================================================
+
+@st.dialog("🔐 Sign In to CareerLens")
+def open_signin_dialog():
+    st.markdown("Enter your registered credentials to access your saved profile and workspace.")
+    login_user = st.text_input("Username / Email", key="popup_login_user")
+    login_pass = st.text_input("Password", type="password", key="popup_login_pass")
+
+    if st.button("Sign In", use_container_width=True, key="btn_confirm_signin"):
+        if not login_user.strip() or not login_pass.strip():
+            st.warning("Please fill in both fields.")
+        elif login_user not in st.session_state.users_db:
+            st.error("Account not found. Please click 'Register' first.")
+        elif st.session_state.users_db[login_user] != login_pass:
+            st.error("Incorrect password. Please try again.")
+        else:
+            st.session_state.username = login_user.split("@")[0].capitalize()
+            st.session_state.is_logged_in = True
+            st.success("Signed in successfully!")
+            st.rerun()
+
+@st.dialog("📝 Create Your Account")
+def open_register_dialog():
+    st.markdown("Register your details to save your skills, career roadmaps, and profile metrics.")
+    reg_name = st.text_input("Full Name", placeholder="e.g. Alex Mercer", key="popup_reg_name")
+    reg_user = st.text_input("Username or Email", placeholder="e.g. alex.mercer", key="popup_reg_user")
+    reg_pass = st.text_input("Create Password", type="password", placeholder="••••••••", key="popup_reg_pass")
+
+    if st.button("Complete Registration", use_container_width=True, key="btn_confirm_register"):
+        if not reg_user.strip() or not reg_pass.strip():
+            st.warning("Username and password are required.")
+        elif reg_user in st.session_state.users_db:
+            st.warning("Username already registered. Please sign in.")
+        else:
+            st.session_state.users_db[reg_user] = reg_pass
+            st.session_state.username = reg_name.strip() if reg_name.strip() else reg_user.split("@")[0].capitalize()
+            st.session_state.is_logged_in = True
+            st.success("Account created successfully!")
+            st.rerun()
+
+# ============================================================
+# GATEWAY SCREEN (TRENDY WELCOME TAG & POPUP ACTION BUTTONS)
 # ============================================================
 
 if not st.session_state.is_logged_in:
     st.markdown(
         """
-        <div style="text-align:center; padding: 30px 0 10px;">
-            <div style="font-size: 55px; filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.6));">💼</div>
-            <h1 style="font-size: 2.8rem; margin: 10px 0 0 0; background: linear-gradient(90deg, #8b7cff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CareerLens AI</h1>
+        <div style="text-align:center; padding: 35px 0 15px;">
+            <div style="font-size: 58px; filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.6));">💼</div>
+            <h1 style="font-size: 3rem; margin: 10px 0 0 0; background: linear-gradient(90deg, #8b7cff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900;">CareerLens AI</h1>
             <p style="color: #94a3b8; font-size: 1.05rem; margin-top: 4px;">Next-Gen Career Intelligence Platform</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col_l1, col_l2, col_l3 = st.columns([1, 1.4, 1])
+    col_l1, col_l2, col_l3 = st.columns([1, 1.6, 1])
     with col_l2:
         st.markdown(
             """
-            <div class="panel" style="padding: 24px;">
-                <h3 style="margin-top: 0; color: #38bdf8; text-align: center;">Welcome Portal</h3>
-                <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; margin-bottom: 15px;">
-                    Sign in, register a new account, or explore instantly as a Guest.
+            <div class="panel" style="padding: 30px; text-align: center;">
+                <span class="tag-bubble tag-cyan" style="font-size: 0.85rem; padding: 6px 18px; margin-bottom: 12px;">✦ YOUR CAREER LAUNCHPAD ✦</span>
+                <h3 style="margin: 8px 0 0 0; color: #f4f7fb;">Build Your Future With Evidence</h3>
+                <p style="color: #94a3b8; font-size: 0.92rem; margin-top: 6px; margin-bottom: 22px;">
+                    Select an entry method below to begin evaluating your credentials, role alignment, and growth trajectory.
                 </p>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        login_tab, register_tab, guest_tab = st.tabs(["🔐 Sign In", "📝 Register", "🚀 Guest Access"])
-
-        with login_tab:
-            login_user = st.text_input("Username or Email", key="login_user", placeholder="Enter username")
-            login_pass = st.text_input("Password", type="password", key="login_pass", placeholder="••••••••")
-
-            if st.button("Sign In", use_container_width=True, key="btn_signin"):
-                if login_user.strip() and login_pass.strip():
-                    if login_user in st.session_state.users_db and st.session_state.users_db[login_user] == login_pass:
-                        st.session_state.username = login_user
-                        st.session_state.is_logged_in = True
-                        st.rerun()
-                    elif login_user not in st.session_state.users_db:
-                        # Allow flexible first-time entry if not yet saved
-                        st.session_state.users_db[login_user] = login_pass
-                        st.session_state.username = login_user.split("@")[0].capitalize()
-                        st.session_state.is_logged_in = True
-                        st.rerun()
-                    else:
-                        st.error("Invalid password for this account.")
-                else:
-                    st.warning("Please fill in both fields.")
-
-        with register_tab:
-            reg_name = st.text_input("Full Name", placeholder="e.g. Alex Mercer", key="reg_name")
-            reg_user = st.text_input("Choose Username / Email", placeholder="alex.mercer", key="reg_user")
-            reg_pass = st.text_input("Create Password", type="password", placeholder="••••••••", key="reg_pass")
-
-            if st.button("Create Account & Continue", use_container_width=True, key="btn_register"):
-                if reg_user.strip() and reg_pass.strip():
-                    st.session_state.users_db[reg_user] = reg_pass
-                    st.session_state.username = reg_name if reg_name.strip() else reg_user
-                    st.session_state.is_logged_in = True
-                    st.success("Account created successfully!")
-                    st.rerun()
-                else:
-                    st.warning("Please provide a username and password to register.")
-
-        with guest_tab:
-            st.markdown(
-                """
-                <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 14px; padding: 14px; margin: 10px 0 16px 0;">
-                    <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
-                        Instant access to resume parsing, job match models, and candidate ranking. No registration required.
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            if st.button("Continue as Guest ⚡", use_container_width=True, key="btn_guest"):
+        col_b1, col_b2, col_b3 = st.columns(3)
+        with col_b1:
+            if st.button("🔐 Sign In", use_container_width=True, key="btn_open_signin"):
+                open_signin_dialog()
+        with col_b2:
+            if st.button("📝 Register", use_container_width=True, key="btn_open_register"):
+                open_register_dialog()
+        with col_b3:
+            if st.button("🚀 Guest", use_container_width=True, key="btn_direct_guest"):
                 st.session_state.username = "Guest Explorer"
                 st.session_state.is_logged_in = True
                 st.rerun()
