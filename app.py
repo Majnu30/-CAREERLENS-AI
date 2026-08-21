@@ -362,7 +362,7 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# DIALOGS (SIGNIN, REGISTER, EXIT RATINGS & SKILL UPGRADE)
+# DIALOGS (SIGNIN, REGISTER, LOGOUT RATING, IMPROVEMENT)
 # ============================================================
 
 @st.dialog("🔐 Sign In to CareerLens")
@@ -403,16 +403,17 @@ def open_register_dialog():
             st.success("Account created successfully!")
             st.rerun()
 
-@st.dialog("⭐ Rate Your Experience & Exit")
-def open_rating_exit_dialog():
-    st.markdown("We'd love your feedback before you wrap up your session!")
+@st.dialog("⭐ Session Feedback & Logout")
+def open_logout_feedback_dialog():
+    st.markdown("### How was your experience today?")
+    st.markdown("Please leave a rating before exiting.")
     rating = st.feedback("stars")
-    feedback_text = st.text_area("What did you like best or what should we improve?", placeholder="Write your thoughts...")
+    feedback_text = st.text_area("Share your feedback or suggestions (optional):", placeholder="Your comments help us improve...")
     
-    col_e1, col_e2 = st.columns(2)
-    with col_e1:
-        if st.button("Submit & Exit 🚪", use_container_width=True, key="btn_submit_exit"):
-            st.toast("Thank you for your rating! Logging out...")
+    col_out1, col_out2 = st.columns(2)
+    with col_out1:
+        if st.button("Submit & Log Out 🚪", use_container_width=True, key="btn_submit_feedback_logout"):
+            st.toast("Thank you for your feedback! You have been logged out.")
             st.session_state.is_logged_in = False
             st.session_state.username = "Guest"
             st.session_state.resume_text = ""
@@ -420,8 +421,8 @@ def open_rating_exit_dialog():
             st.session_state.recruiter_df = None
             st.session_state.custom_action_plan = None
             st.rerun()
-    with col_e2:
-        if st.button("Exit Without Rating", use_container_width=True, key="btn_quick_exit"):
+    with col_out2:
+        if st.button("Skip & Log Out", use_container_width=True, key="btn_skip_feedback_logout"):
             st.session_state.is_logged_in = False
             st.session_state.username = "Guest"
             st.session_state.resume_text = ""
@@ -523,7 +524,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     
-    # User Profile Pill & Logout / Rating Trigger
+    # User Profile Pill
     st.markdown(
         f"""
         <div style="background: rgba(139, 124, 255, 0.12); border: 1px solid rgba(139, 124, 255, 0.3); border-radius: 14px; padding: 10px 14px; margin: 10px 0 14px 0; display: flex; justify-content: space-between; align-items: center;">
@@ -537,8 +538,9 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    if st.button("🚪 Rate & Log Out", use_container_width=True):
-        open_rating_exit_dialog()
+    # Standard Log Out Button that triggers the ratings popup
+    if st.button("Log Out", use_container_width=True, key="btn_logout_sidebar"):
+        open_logout_feedback_dialog()
 
     st.divider()
 
