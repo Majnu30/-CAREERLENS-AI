@@ -2,8 +2,6 @@ import os
 import streamlit as st
 import requests
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 from PyPDF2 import PdfReader
 import docx
 
@@ -41,7 +39,7 @@ st.markdown("""
         margin-bottom: 1.5rem;
     }
 
-    /* Bubble Cards */
+    /* Bubble Cards & Frames */
     .bubble-card {
         background: rgba(30, 41, 59, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -52,7 +50,7 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* Bubble Buttons */
+    /* Trendy Bubble Buttons */
     .stButton > button {
         border-radius: 30px !important;
         background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%) !important;
@@ -86,6 +84,28 @@ st.markdown("""
         border-radius: 16px;
         padding: 16px;
         text-align: center;
+    }
+
+    /* Skill Badge Chips */
+    .skill-badge-verified {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin: 4px;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .skill-badge-target {
+        background: rgba(192, 132, 252, 0.15);
+        color: #c084fc;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin: 4px;
+        border: 1px solid rgba(192, 132, 252, 0.3);
     }
 
     /* Footer */
@@ -133,13 +153,12 @@ with st.sidebar:
     <div style="text-align: center; margin-bottom: 20px;">
         <span style="font-size: 50px;">🧠</span>
         <h3 style="margin: 0; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CareerLens AI</h3>
-        <p style="color: #64748b; font-size: 0.8rem; margin: 0;">Next-Gen Career Intelligence</p>
+        <p style="color: #64748b; font-size: 0.8rem; margin: 0;">Understand Your Career. Build Your Future.</p>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Hub Switcher via Bubble-Styled Visual Buttons
     col_nav1, col_nav2 = st.columns(2)
     with col_nav1:
         if st.button("🚀 Candidate", use_container_width=True):
@@ -150,13 +169,11 @@ with st.sidebar:
             
     st.markdown("---")
     
-    # Quick Launch Career Assistant
     if st.button("💬 Launch Assistant", use_container_width=True):
         st.session_state.active_portal = "Assistant"
         
     st.markdown("<br><br>", unsafe_allow_html=True)
     
-    # Status Indicator
     st.markdown("""
     <div style="display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #94a3b8;">
         <span class="status-dot"></span> System Live
@@ -164,23 +181,22 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # --- Main Interface Header ---
-st.markdown('<div class="hero-title">CareerLens AI Platform</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-title">CareerLens AI</div>', unsafe_allow_html=True)
 st.markdown('<div class="hero-subtitle">Optimize Resumes • Analyze Skill Gaps • Uncover Career Roadmaps • Accelerate Hiring</div>', unsafe_allow_html=True)
 
 # ==========================================
 # 1. CANDIDATE / JOB SEEKER PORTAL
 # ==========================================
 if st.session_state.active_portal == "Job Seeker":
-    st.markdown("### 🎯 Smart Career Hub")
+    st.markdown("### 🎯 Career Hub")
     
     uploaded_file = st.file_uploader("Upload Your Resume (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"])
     
     if uploaded_file:
         resume_text = extract_text_from_file(uploaded_file)
         
-        # Primary Action Trigger
-        if st.button("✨ Parse & Extract Profile", use_container_width=False):
-            with st.spinner("Extracting credentials and analyzing core competencies..."):
+        if st.button("✨ Parse Profile", use_container_width=False):
+            with st.spinner("Analyzing credentials and skills..."):
                 try:
                     res = requests.post(f"{API_BASE_URL}/parse_resume", json={"text": resume_text}, timeout=15)
                     if res.status_code == 200:
@@ -202,7 +218,6 @@ if st.session_state.active_portal == "Job Seeker":
                         "experience_years": 4.5
                     }
 
-    # Display Parsed Details & Functional Tabs
     if st.session_state.parsed_resume:
         data = st.session_state.parsed_resume
         
@@ -221,7 +236,6 @@ if st.session_state.active_portal == "Job Seeker":
         </div>
         """, unsafe_allow_html=True)
         
-        # Interactive Feature Tabs
         tab_match, tab_gaps, tab_roadmap, tab_fraud = st.tabs([
             "🎯 Match Analysis", 
             "⚡ Skill Gap Analysis", 
@@ -231,24 +245,17 @@ if st.session_state.active_portal == "Job Seeker":
         
         with tab_match:
             st.markdown("#### Discover Job Fit")
-            target_role = st.text_input("Target Role or Paste Job Description", "Senior Full-Stack Engineer")
+            target_role = st.text_input("Target Role or Job Description", "Senior Full-Stack Engineer")
             if st.button("Evaluate Match", key="btn_eval_match"):
                 col_m1, col_m2 = st.columns([1, 2])
                 with col_m1:
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number",
-                        value=88,
-                        title={'text': "Match Index", 'font': {'color': "#e6edf3"}},
-                        number={'suffix': "%", 'font': {'color': "#38bdf8"}},
-                        gauge={
-                            'axis': {'range': [0, 100], 'tickcolor': "#94a3b8"},
-                            'bar': {'color': "#6366f1"},
-                            'bgcolor': "rgba(255,255,255,0.05)",
-                            'bordercolor': "rgba(255,255,255,0.1)"
-                        }
-                    ))
-                    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", height=240, margin=dict(l=20, r=20, t=30, b=20))
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("""
+                    <div class="metric-bubble" style="padding: 24px;">
+                        <span style="font-size: 0.9rem; color: #94a3b8;">Match Index</span><br>
+                        <b style="font-size: 2.4rem; color: #38bdf8;">88%</b>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.progress(0.88)
                 with col_m2:
                     st.markdown("""
                     **Role Alignment Breakdown:**
@@ -259,25 +266,25 @@ if st.session_state.active_portal == "Job Seeker":
 
         with tab_gaps:
             st.markdown("#### Skill Gap Insights")
-            if st.button("Identify Skill Gaps", key="btn_skill_gaps"):
+            if st.button("Analyze Skill Gap", key="btn_skill_gaps"):
                 col_g1, col_g2 = st.columns(2)
                 with col_g1:
                     st.markdown("""
                     <div class="bubble-card">
                         <h4 style="color: #38bdf8; margin-top: 0;">Verified Strengths</h4>
-                        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; margin-right: 6px;">Python</span>
-                        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; margin-right: 6px;">FastAPI</span>
-                        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; margin-right: 6px;">Docker</span>
-                        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem;">PostgreSQL</span>
+                        <span class="skill-badge-verified">Python</span>
+                        <span class="skill-badge-verified">FastAPI</span>
+                        <span class="skill-badge-verified">Docker</span>
+                        <span class="skill-badge-verified">PostgreSQL</span>
                     </div>
                     """, unsafe_allow_html=True)
                 with col_g2:
                     st.markdown("""
                     <div class="bubble-card">
                         <h4 style="color: #c084fc; margin-top: 0;">High-Impact Targets</h4>
-                        <span style="background: rgba(192, 132, 252, 0.15); color: #c084fc; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; margin-right: 6px;">Kubernetes</span>
-                        <span style="background: rgba(192, 132, 252, 0.15); color: #c084fc; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; margin-right: 6px;">System Design</span>
-                        <span style="background: rgba(192, 132, 252, 0.15); color: #c084fc; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem;">GraphQL</span>
+                        <span class="skill-badge-target">Kubernetes</span>
+                        <span class="skill-badge-target">System Design</span>
+                        <span class="skill-badge-target">GraphQL</span>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -307,7 +314,7 @@ if st.session_state.active_portal == "Job Seeker":
 # ==========================================
 elif st.session_state.active_portal == "Recruiter":
     st.markdown("### 🏢 Executive Hiring Command")
-    st.markdown("Streamline talent discovery, evaluate bulk candidate pools, and rank matches accurately.")
+    st.markdown("Identify top talent, evaluate batch applicants, and optimize hiring pipelines.")
     
     col_r1, col_r2 = st.columns([2, 1])
     with col_r1:
@@ -317,7 +324,7 @@ elif st.session_state.active_portal == "Recruiter":
         
     uploaded_resumes = st.file_uploader("Upload Batch Resumes", type=["pdf", "docx"], accept_multiple_files=True)
     
-    if st.button("⚡ Rank Candidate Pool"):
+    if st.button("⚡ Rank Candidates"):
         candidate_data = [
             {"Rank": 1, "Candidate": "Taylor Morgan", "Score": 96, "Core Skill": "Go, Distributed Systems", "Status": "Optimal Fit"},
             {"Rank": 2, "Candidate": "Alex Mercer", "Score": 88, "Core Skill": "Python, Cloud ML", "Status": "Strong Match"},
@@ -333,27 +340,25 @@ elif st.session_state.active_portal == "Recruiter":
 # 3. AI CAREER ASSISTANT
 # ==========================================
 elif st.session_state.active_portal == "Assistant":
-    st.markdown("### 💬 AI Career Intelligence Assistant")
-    st.markdown("Ask anything about market salary expectations, resume optimization strategies, or interview preparation.")
+    st.markdown("### 💬 Career Assistant")
+    st.markdown("Ask anything about salary trends, resume positioning, or interview tactics.")
     
-    # Quick Prompt Bubbles
     col_q1, col_q2, col_q3 = st.columns(3)
     with col_q1:
         if st.button("💡 How do I format for ATS?"):
             st.session_state.chat_history.append({"role": "user", "text": "How do I format for ATS?"})
-            st.session_state.chat_history.append({"role": "assistant", "text": "Keep layout simple: single-column format, standard headings (Experience, Skills, Education), and avoid complex tables or image assets."})
+            st.session_state.chat_history.append({"role": "assistant", "text": "Keep layout clean: single-column format, standard headings (Experience, Skills, Education), and avoid complex tables or image assets."})
     with col_q2:
-        if st.button("📈 What are high-demand skills in 2026?"):
-            st.session_state.chat_history.append({"role": "user", "text": "What are high-demand skills in 2026?"})
-            st.session_state.chat_history.append({"role": "assistant", "text": "AI engineering, distributed systems, platform security, and cloud data architecture currently hold peak hiring demand."})
+        if st.button("📈 High-demand skills?"):
+            st.session_state.chat_history.append({"role": "user", "text": "What are high-demand skills?"})
+            st.session_state.chat_history.append({"role": "assistant", "text": "AI engineering, distributed systems, platform security, and cloud architecture currently hold peak hiring demand."})
     with col_q3:
-        if st.button("🎯 How do I highlight leadership?"):
+        if st.button("🎯 Highlight leadership?"):
             st.session_state.chat_history.append({"role": "user", "text": "How do I highlight leadership?"})
             st.session_state.chat_history.append({"role": "assistant", "text": "Quantify outcomes: mention team size mentored, architectural ownership, cross-functional delivery, and impact on team velocity."})
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Chat History
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
             st.markdown(f"""
@@ -368,7 +373,6 @@ elif st.session_state.active_portal == "Assistant":
             </div>
             """, unsafe_allow_html=True)
             
-    # Input Area
     user_query = st.chat_input("Type your question here...")
     if user_query:
         st.session_state.chat_history.append({"role": "user", "text": user_query})
