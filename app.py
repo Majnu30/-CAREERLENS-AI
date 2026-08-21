@@ -9,6 +9,7 @@ import streamlit as st
 
 API_BASE_URL = os.getenv("API_URL", "https://careerlens-ai-9dx8.onrender.com")
 ANALYTICS_FILE = "analytics.csv"
+ADMIN_PIN = "1234"  # <-- Change your Secret Admin PIN here
 
 st.set_page_config(
     page_title="CareerLens AI",
@@ -359,6 +360,8 @@ if "users_db" not in st.session_state:
     st.session_state.users_db = {}
 if "is_logged_in" not in st.session_state:
     st.session_state.is_logged_in = False
+if "is_admin_auth" not in st.session_state:
+    st.session_state.is_admin_auth = False
 if "username" not in st.session_state:
     st.session_state.username = "Guest"
 if "workspace" not in st.session_state:
@@ -380,7 +383,7 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# DIALOGS (SIGNIN, REGISTER, LOGOUT RATING, IMPROVEMENT)
+# DIALOGS (SIGNIN, REGISTER, LOGOUT RATING, ADMIN ACCESS)
 # ============================================================
 
 @st.dialog("🔐 Sign In to CareerLens")
@@ -453,6 +456,18 @@ def open_logout_feedback_dialog():
             st.session_state.recruiter_df = None
             st.session_state.custom_action_plan = None
             st.rerun()
+
+@st.dialog("🔒 Admin Authorization")
+def open_admin_pin_dialog():
+    st.markdown("Enter your administrator passcode to access private telemetry & user reviews:")
+    entered_pin = st.text_input("Admin PIN", type="password", key="admin_pin_input")
+    if st.button("Unlock Dashboard", use_container_width=True, key="btn_submit_admin_pin"):
+        if entered_pin == ADMIN_PIN:
+            st.session_state.is_admin_auth = True
+            st.session_state.workspace = "Analytics"
+            st.rerun()
+        else:
+            st.error("Access denied. Invalid Passcode.")
 
 @st.dialog("🚀 AI Skill & Score Improvement Plan")
 def open_improvement_dialog():
@@ -581,11 +596,16 @@ with st.sidebar:
     if st.button("💼 Career Assistant", use_container_width=True):
         st.session_state.workspace = "Assistant"
 
-    if st.button("📊 Analytics & Ratings", use_container_width=True):
-        st.session_state.workspace = "Analytics"
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    
+    # Private Admin Access Trigger
+    if st.button("🔒 Admin Portal", use_container_width=True, key="btn_admin_trigger"):
+        if st.session_state.is_admin_auth:
+            st.session_state.workspace = "Analytics"
+            st.rerun()
+        else:
+            open_admin_pin_dialog()
+
     st.markdown(
         """
         <div class="status-dot-container">
@@ -987,16 +1007,20 @@ elif st.session_state.workspace == "Assistant":
         st.rerun()
 
 # ============================================================
-# 4. ANALYTICS & RATINGS WORKSPACE (ADMIN OVERVIEW)
+# 4. PRIVATE ADMIN & ANALYTICS DASHBOARD
 # ============================================================
 
 elif st.session_state.workspace == "Analytics":
+    if not st.session_state.is_admin_auth:
+        st.warning("Unauthorized access. Please authenticate via the Admin Portal.")
+        st.stop()
+
     st.markdown(
         """
         <section class="hero">
-            <div class="kicker">SYSTEM AUDIT & ENGAGEMENT</div>
-            <h1>Platform Analytics.<br><span>User Feedback & Logs.</span></h1>
-            <p>Real-time audit log of user logins, registrations, exit star ratings, and tool usage across the CareerLens ecosystem.</p>
+            <div class="kicker">RESTRICTED ADMIN ACCESS</div>
+            <h1>Platform Telemetry.<br><span>User Audit & Ratings.</span></h1>
+            <p>Admin telemetry: view user registrations, login volume, exit ratings, and download analytics logs.</p>
         </section>
         """,
         unsafe_allow_html=True,
@@ -1027,14 +1051,14 @@ elif st.session_state.workspace == "Analytics":
         with col_a3:
             st.markdown(f"""
             <div class="metric-box">
-                <div class="metric-label">Ratings Submitted</div>
+                <div class="metric-label">Exit Reviews</div>
                 <div class="metric-value-purple"><b>{len(rated_entries)}</b></div>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Ratings and Feedback Table
+        # User Feedback and Ratings
         st.markdown("#### ⭐ User Exit Ratings & Comments")
         if not rated_entries.empty:
             st.dataframe(
@@ -1043,14 +1067,14 @@ elif st.session_state.workspace == "Analytics":
                 hide_index=True
             )
         else:
-            st.info("No ratings submitted yet.")
+            st.info("No ratings recorded yet.")
 
         # Full System Log
-        st.markdown("#### 📜 Complete Activity Audit Log")
+        st.markdown("#### 📜 Full System Audit Log")
         st.dataframe(logs_df.sort_values(by="Timestamp", ascending=False), use_container_width=True, hide_index=True)
 
         st.download_button(
-            "⬇️ Export Analytics Log (CSV)",
+            "⬇️ Export Full Telemetry Log (CSV)",
             logs_df.to_csv(index=False).encode("utf-8"),
             file_name="platform_analytics.csv",
             mime="text/csv",
