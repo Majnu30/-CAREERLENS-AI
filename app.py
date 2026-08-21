@@ -203,6 +203,16 @@ p,label,.stMarkdown{
     margin:12px 0;
 }
 
+/* Optimization Banner Card */
+.improve-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(56, 189, 248, 0.15) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    padding: 22px;
+    margin-top: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
 /* Bubble Badges & Tags */
 .skill, .tag-bubble{
     display:inline-flex;
@@ -341,6 +351,8 @@ if "resume_analysis" not in st.session_state:
     st.session_state.resume_analysis = None
 if "recruiter_df" not in st.session_state:
     st.session_state.recruiter_df = None
+if "custom_action_plan" not in st.session_state:
+    st.session_state.custom_action_plan = None
 
 def show_skills(skills, tag_style="tag-cyan"):
     if not skills:
@@ -350,7 +362,7 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# AUTHENTICATION DIALOGS (STRICT REGISTRATION & POPUPS)
+# DIALOGS (SIGNIN, REGISTER, EXIT RATINGS & SKILL UPGRADE)
 # ============================================================
 
 @st.dialog("🔐 Sign In to CareerLens")
@@ -390,6 +402,57 @@ def open_register_dialog():
             st.session_state.is_logged_in = True
             st.success("Account created successfully!")
             st.rerun()
+
+@st.dialog("⭐ Rate Your Experience & Exit")
+def open_rating_exit_dialog():
+    st.markdown("We'd love your feedback before you wrap up your session!")
+    rating = st.feedback("stars")
+    feedback_text = st.text_area("What did you like best or what should we improve?", placeholder="Write your thoughts...")
+    
+    col_e1, col_e2 = st.columns(2)
+    with col_e1:
+        if st.button("Submit & Exit 🚪", use_container_width=True, key="btn_submit_exit"):
+            st.toast("Thank you for your rating! Logging out...")
+            st.session_state.is_logged_in = False
+            st.session_state.username = "Guest"
+            st.session_state.resume_text = ""
+            st.session_state.resume_analysis = None
+            st.session_state.recruiter_df = None
+            st.session_state.custom_action_plan = None
+            st.rerun()
+    with col_e2:
+        if st.button("Exit Without Rating", use_container_width=True, key="btn_quick_exit"):
+            st.session_state.is_logged_in = False
+            st.session_state.username = "Guest"
+            st.session_state.resume_text = ""
+            st.session_state.resume_analysis = None
+            st.session_state.recruiter_df = None
+            st.session_state.custom_action_plan = None
+            st.rerun()
+
+@st.dialog("🚀 AI Skill & Score Improvement Plan")
+def open_improvement_dialog():
+    st.markdown("Our intelligence model synthesizes an accelerated recovery and enhancement plan based on your current score and detected gap.")
+    target_role_goal = st.text_input("What is your dream role or target position?", "Senior AI / Backend Engineer", key="dialog_target_role")
+    weekly_hours = st.select_slider("Weekly study & project commitment:", options=["3-5 hrs", "5-10 hrs", "10-15 hrs", "15+ hrs"], value="5-10 hrs")
+    
+    if st.button("Generate Custom Action Plan ⚡", use_container_width=True, key="btn_gen_custom_plan"):
+        with st.spinner("Synthesizing strategic improvement roadmap..."):
+            try:
+                res = api_career_roadmap(st.session_state.resume_text, target_role_goal)
+                st.session_state.custom_action_plan = {
+                    "role": target_role_goal,
+                    "commitment": weekly_hours,
+                    "steps": res.get("steps", [
+                        "Stage 1: Re-architect resume bullet points using the Google XYZ formula (Accomplished [X], measured by [Y], by doing [Z]).",
+                        "Stage 2: Close critical skill gaps by building a public production-ready GitHub project.",
+                        "Stage 3: Integrate targeted ATS keywords and add verified measurable impact metrics."
+                    ])
+                }
+                st.success("Custom plan generated!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Could not generate plan: {e}")
 
 # ============================================================
 # GATEWAY SCREEN (TRENDY WELCOME TAG & POPUP ACTION BUTTONS)
@@ -460,7 +523,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     
-    # User Profile Pill & Logout
+    # User Profile Pill & Logout / Rating Trigger
     st.markdown(
         f"""
         <div style="background: rgba(139, 124, 255, 0.12); border: 1px solid rgba(139, 124, 255, 0.3); border-radius: 14px; padding: 10px 14px; margin: 10px 0 14px 0; display: flex; justify-content: space-between; align-items: center;">
@@ -474,13 +537,8 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    if st.button("Log Out", use_container_width=True):
-        st.session_state.is_logged_in = False
-        st.session_state.username = "Guest"
-        st.session_state.resume_text = ""
-        st.session_state.resume_analysis = None
-        st.session_state.recruiter_df = None
-        st.rerun()
+    if st.button("🚪 Rate & Log Out", use_container_width=True):
+        open_rating_exit_dialog()
 
     st.divider()
 
@@ -534,9 +592,10 @@ if st.session_state.workspace == "Job Seeker":
     )
 
     analysis = st.session_state.resume_analysis
-    score_val = f"{analysis.get('resume_score', '—')}/100" if analysis else "—"
+    score_raw = analysis.get("resume_score", 0) if analysis else None
+    score_val = f"{score_raw}/100" if analysis and score_raw else "—"
     readiness_val = f"{analysis.get('readiness', '—')}%" if analysis else "—"
-    skills_count = f"{len(analysis.get('skills', []))}" if analysis else "0"
+    skills_count = len(analysis.get("skills", [])) if analysis else 0
 
     col_m1, col_m2, col_m3 = st.columns(3)
     with col_m1:
@@ -561,6 +620,46 @@ if st.session_state.workspace == "Job Seeker":
             <div class="metric-label">Skills Detected</div>
             <div class="metric-value-purple"><b>{skills_count}</b></div>
             <span class="tag-bubble tag-purple">Extracted Stack</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # --- Low Score / Low Skills AI Improvement Trigger Banner ---
+    is_low_score = analysis and isinstance(score_raw, (int, float)) and score_raw < 75
+    is_low_skills = analysis and skills_count < 5
+    
+    if is_low_score or is_low_skills or (analysis is not None):
+        st.markdown(
+            f"""
+            <div class="improve-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.4rem;">⚡</span>
+                            <h3 style="margin: 0; color: #38bdf8; font-weight: 800;">Targeted Score & Skill Elevation Plan</h3>
+                        </div>
+                        <p style="margin: 6px 0 0 0; color: #cbd5e1; font-size: 0.92rem;">
+                            {'Your resume score or detected skills have high room for growth.' if (is_low_score or is_low_skills) else 'Ready to accelerate your profile to a 95%+ match index?'}
+                            Generate a customized strategic action plan to boost your benchmark results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("🚀 Upgrade My Resume & Skill Score", key="btn_open_upgrade_dialog"):
+            open_improvement_dialog()
+
+    # Display Active Custom Plan if generated
+    if st.session_state.custom_action_plan:
+        plan = st.session_state.custom_action_plan
+        st.markdown(f"""
+        <div class="panel" style="border-color: rgba(56, 189, 248, 0.4); margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0; color: #38bdf8;">📋 Active Plan: {plan.get('role')}</h4>
+                <span class="tag-bubble tag-purple">Pace: {plan.get('commitment')}</span>
+            </div>
+            {''.join([f'<div style="margin: 8px 0; color: #f4f7fb; font-size: 0.95rem;">• {step}</div>' for step in plan.get('steps', [])])}
         </div>
         """, unsafe_allow_html=True)
 
