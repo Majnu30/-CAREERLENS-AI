@@ -327,6 +327,8 @@ def api_chat_assistant(messages: List[Dict], resume_context: str = "") -> str:
 # STATE & HELPERS
 # ============================================================
 
+if "users_db" not in st.session_state:
+    st.session_state.users_db = {}
 if "is_logged_in" not in st.session_state:
     st.session_state.is_logged_in = False
 if "username" not in st.session_state:
@@ -348,7 +350,7 @@ def show_skills(skills, tag_style="tag-cyan"):
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
-# AUTHENTICATION SCREEN (LOGIN & GUEST ACCESS)
+# AUTHENTICATION SCREEN (LOGIN, REGISTER, & GUEST ACCESS)
 # ============================================================
 
 if not st.session_state.is_logged_in:
@@ -367,49 +369,66 @@ if not st.session_state.is_logged_in:
     with col_l2:
         st.markdown(
             """
-            <div class="panel" style="padding: 28px;">
+            <div class="panel" style="padding: 24px;">
                 <h3 style="margin-top: 0; color: #38bdf8; text-align: center;">Welcome Portal</h3>
-                <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">
-                    Sign in to access advanced AI models or continue instantly as Guest.
+                <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; margin-bottom: 15px;">
+                    Sign in, register a new account, or explore instantly as a Guest.
                 </p>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        login_tab, guest_tab = st.tabs(["🔐 Sign In", "🚀 Guest Access"])
+        login_tab, register_tab, guest_tab = st.tabs(["🔐 Sign In", "📝 Register", "🚀 Guest Access"])
 
         with login_tab:
-            user_input = st.text_input("Username or Email", placeholder="alex.mercer@innovate.dev")
-            pass_input = st.text_input("Password", type="password", placeholder="••••••••")
+            login_user = st.text_input("Username or Email", key="login_user", placeholder="Enter username")
+            login_pass = st.text_input("Password", type="password", key="login_pass", placeholder="••••••••")
 
-            col_btn1, col_btn2 = st.columns(2)
-            with col_btn1:
-                if st.button("Sign In", use_container_width=True):
-                    if user_input.strip():
-                        st.session_state.username = user_input.split("@")[0].capitalize()
+            if st.button("Sign In", use_container_width=True, key="btn_signin"):
+                if login_user.strip() and login_pass.strip():
+                    if login_user in st.session_state.users_db and st.session_state.users_db[login_user] == login_pass:
+                        st.session_state.username = login_user
+                        st.session_state.is_logged_in = True
+                        st.rerun()
+                    elif login_user not in st.session_state.users_db:
+                        # Allow flexible first-time entry if not yet saved
+                        st.session_state.users_db[login_user] = login_pass
+                        st.session_state.username = login_user.split("@")[0].capitalize()
                         st.session_state.is_logged_in = True
                         st.rerun()
                     else:
-                        st.warning("Please enter your username.")
-            with col_btn2:
-                if st.button("Demo Account", use_container_width=True):
-                    st.session_state.username = "Alex Mercer"
+                        st.error("Invalid password for this account.")
+                else:
+                    st.warning("Please fill in both fields.")
+
+        with register_tab:
+            reg_name = st.text_input("Full Name", placeholder="e.g. Alex Mercer", key="reg_name")
+            reg_user = st.text_input("Choose Username / Email", placeholder="alex.mercer", key="reg_user")
+            reg_pass = st.text_input("Create Password", type="password", placeholder="••••••••", key="reg_pass")
+
+            if st.button("Create Account & Continue", use_container_width=True, key="btn_register"):
+                if reg_user.strip() and reg_pass.strip():
+                    st.session_state.users_db[reg_user] = reg_pass
+                    st.session_state.username = reg_name if reg_name.strip() else reg_user
                     st.session_state.is_logged_in = True
+                    st.success("Account created successfully!")
                     st.rerun()
+                else:
+                    st.warning("Please provide a username and password to register.")
 
         with guest_tab:
             st.markdown(
                 """
                 <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 14px; padding: 14px; margin: 10px 0 16px 0;">
                     <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
-                        Explore all candidate, recruiter, and assistant tools with full API access. No sign-up required.
+                        Instant access to resume parsing, job match models, and candidate ranking. No registration required.
                     </p>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button("Continue as Guest ⚡", use_container_width=True):
+            if st.button("Continue as Guest ⚡", use_container_width=True, key="btn_guest"):
                 st.session_state.username = "Guest Explorer"
                 st.session_state.is_logged_in = True
                 st.rerun()
