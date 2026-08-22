@@ -9,7 +9,7 @@ import streamlit as st
 
 API_BASE_URL = os.getenv("API_URL", "https://careerlens-ai-9dx8.onrender.com")
 ANALYTICS_FILE = "analytics.csv"
-ADMIN_PIN = "1234"  # <-- Change your Secret Admin PIN here
+ADMIN_PIN = "1234"  # Secret Admin PIN
 
 st.set_page_config(
     page_title="CareerLens AI",
@@ -46,6 +46,7 @@ st.markdown(
     --cyan:#38bdf8;
     --green:#4ade80;
     --indigo:#6366f1;
+    --amber:#fbbf24;
 }
 
 .stApp{
@@ -168,49 +169,27 @@ p,label,.stMarkdown{
     color:#a8b9cd;
 }
 
-/* Bold Metric Highlights */
-.metric-box {
+/* SVG Circular Gauge Cards */
+.gauge-box {
     background: rgba(13, 26, 43, 0.9);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 22px;
+    padding: 20px;
     text-align: center;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.metric-label {
-    font-size: 0.85rem;
+.gauge-label {
+    font-size: 0.82rem;
     color: #94a3b8;
     text-transform: uppercase;
     font-weight: 800;
     letter-spacing: 1.2px;
-}
-
-.metric-value-cyan {
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: #38bdf8;
-    line-height: 1.2;
-    margin: 6px 0;
-    text-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
-}
-
-.metric-value-indigo {
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: #818cf8;
-    line-height: 1.2;
-    margin: 6px 0;
-    text-shadow: 0 0 15px rgba(129, 140, 248, 0.35);
-}
-
-.metric-value-purple {
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: #c084fc;
-    line-height: 1.2;
-    margin: 6px 0;
-    text-shadow: 0 0 15px rgba(192, 132, 252, 0.35);
+    margin-bottom: 6px;
 }
 
 /* Bubble Bento Cards */
@@ -222,7 +201,6 @@ p,label,.stMarkdown{
     margin:12px 0;
 }
 
-/* Optimization Banner Card */
 .improve-card {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(56, 189, 248, 0.15) 100%);
     border: 1px solid rgba(56, 189, 248, 0.35);
@@ -284,7 +262,6 @@ p,label,.stMarkdown{
     border-color: rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Clean Professional Footer */
 .footer{
     text-align:center;
     color:#7186a1;
@@ -374,12 +351,38 @@ if "recruiter_df" not in st.session_state:
     st.session_state.recruiter_df = None
 if "custom_action_plan" not in st.session_state:
     st.session_state.custom_action_plan = None
+if "ats_generated_bullets" not in st.session_state:
+    st.session_state.ats_generated_bullets = None
 
 def show_skills(skills, tag_style="tag-cyan"):
     if not skills:
         st.caption("No skills detected.")
         return
     html = "".join(f'<span class="tag-bubble {tag_style}">{skill}</span>' for skill in skills)
+    st.markdown(html, unsafe_allow_html=True)
+
+def render_radial_gauge(percentage: int, label: str, badge_text: str, color_hex: str = "#38bdf8"):
+    val = max(0, min(100, int(percentage)))
+    circumference = 2 * 3.14159 * 42
+    offset = circumference - (val / 100) * circumference
+    
+    html = f"""
+    <div class="gauge-box">
+        <div class="gauge-label">{label}</div>
+        <svg width="105" height="105" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" stroke="#16273e" stroke-width="8" fill="transparent" />
+            <circle cx="50" cy="50" r="42" stroke="{color_hex}" stroke-width="8" fill="transparent"
+                stroke-dasharray="{circumference}" stroke-dashoffset="{offset}" stroke-linecap="round"
+                transform="rotate(-90 50 50)" style="filter: drop-shadow(0 0 6px {color_hex}88);" />
+            <text x="50" y="55" fill="#f4f7fb" font-size="18" font-weight="900" text-anchor="middle" dominant-baseline="middle">
+                {val}%
+            </text>
+        </svg>
+        <span class="tag-bubble" style="color: {color_hex}; border-color: {color_hex}55; background: {color_hex}15; margin-top: 8px;">
+            {badge_text}
+        </span>
+    </div>
+    """
     st.markdown(html, unsafe_allow_html=True)
 
 # ============================================================
@@ -604,7 +607,7 @@ with st.sidebar:
 
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # Clean Status Indicator (No admin button visible to standard users)
+    # Clean Status Indicator
     st.markdown(
         """
         <div class="status-dot-container">
@@ -637,39 +640,27 @@ if st.session_state.workspace == "Job Seeker":
     )
 
     analysis = st.session_state.resume_analysis
-    score_raw = analysis.get("resume_score", 0) if analysis else None
-    score_val = f"{score_raw}/100" if analysis and score_raw else "—"
-    readiness_val = f"{analysis.get('readiness', '—')}%" if analysis else "—"
+    score_raw = int(analysis.get("resume_score", 0)) if analysis and analysis.get("resume_score") else 0
+    readiness_raw = int(analysis.get("readiness", 0)) if analysis and analysis.get("readiness") else 0
     skills_count = len(analysis.get("skills", [])) if analysis else 0
 
     col_m1, col_m2, col_m3 = st.columns(3)
     with col_m1:
-        st.markdown(f"""
-        <div class="metric-box">
-            <div class="metric-label">Resume Score</div>
-            <div class="metric-value-cyan"><b>{score_val}</b></div>
-            <span class="tag-bubble tag-cyan">AI Assessment</span>
-        </div>
-        """, unsafe_allow_html=True)
+        gauge_color = "#38bdf8" if score_raw >= 75 else "#fbbf24"
+        render_radial_gauge(score_raw if analysis else 0, "Resume Score", "AI Evaluated", gauge_color)
     with col_m2:
-        st.markdown(f"""
-        <div class="metric-box">
-            <div class="metric-label">Career Readiness</div>
-            <div class="metric-value-indigo"><b>{readiness_val}</b></div>
-            <span class="tag-bubble tag-indigo">Profile Strength</span>
-        </div>
-        """, unsafe_allow_html=True)
+        render_radial_gauge(readiness_raw if analysis else 0, "Readiness Index", "Market Match", "#818cf8")
     with col_m3:
         st.markdown(f"""
-        <div class="metric-box">
-            <div class="metric-label">Skills Detected</div>
-            <div class="metric-value-purple"><b>{skills_count}</b></div>
+        <div class="gauge-box" style="height: 100%; justify-content: center;">
+            <div class="gauge-label">Detected Skills</div>
+            <div style="font-size: 2.8rem; font-weight: 900; color: #c084fc; margin: 12px 0;">{skills_count}</div>
             <span class="tag-bubble tag-purple">Extracted Stack</span>
         </div>
         """, unsafe_allow_html=True)
 
     # Low Score / Low Skills AI Improvement Trigger Banner
-    is_low_score = analysis and isinstance(score_raw, (int, float)) and score_raw < 75
+    is_low_score = analysis and score_raw < 75
     is_low_skills = analysis and skills_count < 5
     
     if is_low_score or is_low_skills or (analysis is not None):
@@ -755,7 +746,7 @@ if st.session_state.workspace == "Job Seeker":
             st.markdown("#### Extracted Competencies")
             show_skills(res.get("skills", []), "tag-cyan")
 
-    # 2. Job Match
+    # 2. Job Match (with 1-Click ATS Bullet Rewriter)
     with tabs[1]:
         st.subheader("Semantic Job Matching")
         job_desc = st.text_area("Paste Target Job Description", height=180, key="jobmatch")
@@ -769,40 +760,45 @@ if st.session_state.workspace == "Job Seeker":
                 with st.spinner("Evaluating semantic role alignment..."):
                     try:
                         result = api_match_job(st.session_state.resume_text, job_desc)
+                        st.session_state.current_job_match = result
                         overall_score = result.get("overall", 0)
                         
-                        col_s1, col_s2, col_s3 = st.columns(3)
+                        col_s1, col_s2 = st.columns([1, 2])
                         with col_s1:
-                            st.markdown(f"""
-                            <div class="metric-box">
-                                <div class="metric-label">Overall Match</div>
-                                <div class="metric-value-cyan"><b>{overall_score}%</b></div>
-                            </div>
-                            """, unsafe_allow_html=True)
+                            render_radial_gauge(overall_score, "Overall Fit", "Weighted Align", "#38bdf8")
                         with col_s2:
-                            st.markdown(f"""
-                            <div class="metric-box">
-                                <div class="metric-label">Semantic Alignment</div>
-                                <div class="metric-value-indigo"><b>{result.get('semantic', 0)}%</b></div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        with col_s3:
-                            st.markdown(f"""
-                            <div class="metric-box">
-                                <div class="metric-label">Skill Overlap</div>
-                                <div class="metric-value-purple"><b>{result.get('skill_match', 0)}%</b></div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
-                        st.progress(overall_score / 100)
-                        
-                        st.markdown("#### Matched Skills")
-                        show_skills(result.get("matched", []), "tag-cyan")
-                        
-                        st.markdown("#### Missing Skills")
-                        show_skills(result.get("missing", []), "tag-purple")
+                            st.markdown("#### Matched Skills")
+                            show_skills(result.get("matched", []), "tag-cyan")
+                            st.markdown("#### Missing Skills")
+                            show_skills(result.get("missing", []), "tag-purple")
                     except Exception as exc:
                         st.error(f"Matching error: {exc}")
+
+        # Live ATS Bullet Point Generator
+        if "current_job_match" in st.session_state:
+            match_res = st.session_state.current_job_match
+            missing_skills = match_res.get("missing", [])
+            
+            st.markdown("---")
+            st.markdown("#### ⚡ 1-Click AI Resume Bullet Optimizer")
+            st.caption("Generate Google XYZ formatted impact bullet points (*Accomplished [X], measured by [Y], by doing [Z]*) incorporating your missing keywords.")
+            
+            if st.button("✨ Rewrite My Bullet Points for this Job", use_container_width=True):
+                with st.spinner("Synthesizing tailored ATS bullet points..."):
+                    prompt = [
+                        {"role": "system", "content": "You are an expert executive resume writer. Write 3 high-impact resume bullet points using the Google XYZ formula (Accomplished [X], as measured by [Y], by doing [Z]). Incorporate the following missing target skills naturally based on candidate experience."},
+                        {"role": "user", "content": f"Candidate Skills: {st.session_state.resume_analysis.get('skills', []) if st.session_state.resume_analysis else ''}\nMissing Target Skills to Incorporate: {missing_skills}\nTarget Job: {job_desc}"}
+                    ]
+                    rewritten = api_chat_assistant(prompt, resume_context=st.session_state.resume_text)
+                    st.session_state.ats_generated_bullets = rewritten
+
+            if st.session_state.ats_generated_bullets:
+                st.markdown("""
+                <div class="panel" style="border: 1px solid rgba(56, 189, 248, 0.4);">
+                    <div style="font-weight: 800; color: #38bdf8; margin-bottom: 8px;">🚀 Ready-to-Copy ATS Bullets:</div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.code(st.session_state.ats_generated_bullets, language="markdown")
 
     # 3. Fraud Risk
     with tabs[2]:
@@ -816,33 +812,23 @@ if st.session_state.workspace == "Job Seeker":
                 with st.spinner("Evaluating scam signals & offer credibility..."):
                     try:
                         res = api_detect_fraud(jobrisk)
-                        col_f1, col_f2, col_f3 = st.columns(3)
+                        score_risk = res.get('score', 0)
+                        level_risk = res.get('level', 'LOW RISK')
+                        
+                        col_f1, col_f2 = st.columns([1, 2])
                         with col_f1:
-                            st.markdown(f"""
-                            <div class="metric-box">
-                                <div class="metric-label">Risk Score</div>
-                                <div class="metric-value-cyan"><b>{res.get('score', 0)}/100</b></div>
-                            </div>
-                            """, unsafe_allow_html=True)
+                            render_radial_gauge(score_risk, "Risk Index", level_risk, "#fbbf24" if level_risk == "HIGH RISK" else "#4ade80")
                         with col_f2:
                             st.markdown(f"""
-                            <div class="metric-box">
-                                <div class="metric-label">Risk Level</div>
-                                <div class="metric-value-indigo"><b>{res.get('level', 'LOW RISK')}</b></div>
+                            <div class="panel">
+                                <h4 style="margin: 0; color: {'#fbbf24' if level_risk == 'HIGH RISK' else '#4ade80'};">Verification Verdict: {level_risk}</h4>
+                                <p style="margin: 6px 0 0 0; color: #cbd5e1;">Signals Identified: <b>{res.get('signals', 0)}</b></p>
                             </div>
                             """, unsafe_allow_html=True)
-                        with col_f3:
-                            st.markdown(f"""
-                            <div class="metric-box">
-                                <div class="metric-label">Signals Detected</div>
-                                <div class="metric-value-purple"><b>{res.get('signals', 0)}</b></div>
-                            </div>
-                            """, unsafe_allow_html=True)
-
-                        if res.get("level") == "HIGH RISK":
-                            st.warning("⚠️ High risk patterns detected in this job posting.")
-                        else:
-                            st.success("✅ Low risk detected. Posting appears legitimate.")
+                            if level_risk == "HIGH RISK":
+                                st.warning("⚠️ High risk patterns detected in this job advertisement.")
+                            else:
+                                st.success("✅ Low risk detected. Posting appears legitimate.")
                     except Exception as exc:
                         st.error(f"Risk evaluation error: {exc}")
 
@@ -894,7 +880,7 @@ if st.session_state.workspace == "Job Seeker":
                     st.error(f"Roadmap error: {exc}")
 
 # ============================================================
-# 2. RECRUITER WORKSPACE
+# 2. RECRUITER WORKSPACE (WITH CANDIDATE INSPECTOR DRAWER)
 # ============================================================
 
 elif st.session_state.workspace == "Recruiter":
@@ -903,11 +889,11 @@ elif st.session_state.workspace == "Recruiter":
         <section class="hero">
             <div class="kicker">RECRUITMENT INTELLIGENCE</div>
             <h1>Screen Smarter.<br><span>Hire with Evidence.</span></h1>
-            <p>Accelerate talent acquisition with automated semantic screening, candidate ranking, and instant qualification benchmarking.</p>
+            <p>Accelerate talent acquisition with automated semantic screening, candidate ranking, and deep candidate inspection.</p>
             <div style="margin-top: 14px;">
                 <span class="tag-bubble tag-cyan">✦ Bulk Parsing</span>
                 <span class="tag-bubble tag-purple">✦ Candidate Ranking</span>
-                <span class="tag-bubble tag-emerald">✦ Precision Fit</span>
+                <span class="tag-bubble tag-emerald">✦ Candidate Deep Dive</span>
             </div>
         </section>
         """,
@@ -938,8 +924,41 @@ elif st.session_state.workspace == "Recruiter":
 
     if st.session_state.recruiter_df is not None and not st.session_state.recruiter_df.empty:
         df = st.session_state.recruiter_df.head(int(top_n))
+        
         st.markdown("#### Candidate Shortlist")
         st.dataframe(df, use_container_width=True, hide_index=True)
+        
+        # Interactive Candidate Deep-Dive Inspector
+        st.markdown("---")
+        st.markdown("#### 🔍 Candidate Deep-Dive Inspector")
+        
+        candidate_names = df["name"].tolist() if "name" in df.columns else [f"Candidate #{i+1}" for i in range(len(df))]
+        selected_candidate_name = st.selectbox("Select a candidate to inspect qualifications:", candidate_names)
+        
+        if selected_candidate_name:
+            cand_row = df[df["name"] == selected_candidate_name].iloc[0] if "name" in df.columns else df.iloc[0]
+            cand_score = int(cand_row.get("score", cand_row.get("match_score", 85)))
+            
+            col_d1, col_d2 = st.columns([1, 2])
+            with col_d1:
+                render_radial_gauge(cand_score, "Match Fit", "Top Cohort", "#38bdf8")
+            with col_d2:
+                st.markdown(f"""
+                <div class="panel">
+                    <h3 style="margin: 0; color: #38bdf8;">{selected_candidate_name}</h3>
+                    <p style="margin: 6px 0; color: #b8c6d8;">
+                        📧 <b>Email:</b> {cand_row.get('email', 'Available in full document')} &nbsp;|&nbsp; 
+                        📱 <b>Phone:</b> {cand_row.get('phone', 'Available in full document')}
+                    </p>
+                    <p style="margin: 4px 0; color: #cbd5e1;"><b>Experience & Match Breakdown:</b> {cand_row.get('summary', 'Strong semantic overlap across core requirements.')}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if "skills" in cand_row:
+                    skills_val = cand_row["skills"] if isinstance(cand_row["skills"], list) else str(cand_row["skills"]).split(",")
+                    show_skills(skills_val, "tag-cyan")
+
+        st.markdown("<br>", unsafe_allow_html=True)
         st.download_button(
             "⬇️ Download Shortlist (CSV)",
             df.to_csv(index=False).encode("utf-8"),
@@ -1034,26 +1053,11 @@ elif st.session_state.workspace == "Analytics":
         rated_entries = logs_df[logs_df["Event"] == "LOGOUT_WITH_RATING"]
         
         with col_a1:
-            st.markdown(f"""
-            <div class="metric-box">
-                <div class="metric-label">Total Logins & Visits</div>
-                <div class="metric-value-cyan"><b>{total_logins}</b></div>
-            </div>
-            """, unsafe_allow_html=True)
+            render_radial_gauge(total_logins, "Total Visits", "Traffic", "#38bdf8")
         with col_a2:
-            st.markdown(f"""
-            <div class="metric-box">
-                <div class="metric-label">New Registrations</div>
-                <div class="metric-value-indigo"><b>{total_regs}</b></div>
-            </div>
-            """, unsafe_allow_html=True)
+            render_radial_gauge(total_regs, "Sign-ups", "Conversions", "#818cf8")
         with col_a3:
-            st.markdown(f"""
-            <div class="metric-box">
-                <div class="metric-label">Exit Reviews</div>
-                <div class="metric-value-purple"><b>{len(rated_entries)}</b></div>
-            </div>
-            """, unsafe_allow_html=True)
+            render_radial_gauge(len(rated_entries), "Exit Reviews", "Feedback", "#c084fc")
 
         st.markdown("<br>", unsafe_allow_html=True)
         
